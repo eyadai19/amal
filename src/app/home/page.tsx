@@ -12,7 +12,7 @@ export default function home() {
 	return (
 		<div>
 			{/* <HomeComponent />; */}
-			<button onClick={handleClick}>click</button>
+			<button onClick={handleClick}>Click here</button>
 		</div>
 	);
 }
