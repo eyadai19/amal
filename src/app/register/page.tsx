@@ -10,13 +10,6 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-export const metadata: Metadata = {
-	title: "SQLMentor - Register",
-	icons: {
-		icon: "/logo.ico",
-		apple: "/logo.png",
-	},
-};
 
 export default function RegisterPage() {
 	return <RegisterForm registerAction={RegisterAction} />;
@@ -66,7 +59,7 @@ export async function RegisterAction(
 			sessionCookie.attributes,
 		);
 
-		redirect("/Profile");
+		redirect("/home");
 	} catch (e) {
 		console.error("Unexpected error:", e);
 		return {
