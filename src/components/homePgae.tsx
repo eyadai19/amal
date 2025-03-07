@@ -18,7 +18,6 @@ export function HomeComponent() {
 					<p className="mt-4 max-w-md text-sm leading-7 text-gray-700">
 						This is the new way to learn SQL
 					</p>
-
 					{/* Buttons */}
 					<div className="mt-6 flex justify-center space-x-4 md:justify-start">
 						<Link href="/basic/dataType">
@@ -33,7 +32,6 @@ export function HomeComponent() {
 						</button>
 					</div>
 				</div>
-
 				{/* Image */}
 				<div className="mt-8 w-full md:mt-0 md:w-[50%]">
 					<img
