@@ -58,7 +58,7 @@ export async function RegisterAction(
 			sessionCookie.attributes,
 		);
 
-		redirect("/Profile");
+		redirect("/home");
 	} catch (e) {
 		console.error("Unexpected error:", e);
 		return {

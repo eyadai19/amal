@@ -42,5 +42,5 @@ async function LoginAction(
 		};
 	}
 
-	redirect("/basic/dataType");
+	redirect("/home");
 }
