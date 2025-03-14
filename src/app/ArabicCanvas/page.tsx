@@ -1,4 +1,4 @@
-import { ArabicCanvasCom } from "../../components/ArabicCanvasCom";
+import ArabicCanvasCom from "../../components/ArabicCanvasCom";
 export default function ArabicCanvas() {
 	return (
 		<div>

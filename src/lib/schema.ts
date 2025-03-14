@@ -31,3 +31,8 @@ export const TB_session = pgTable("session", {
 		mode: "date",
 	}).notNull(),
 });
+
+export const TB_ = pgTable("user", {
+	id: text("id").primaryKey(),
+	username: text("username").notNull().unique(),
+});

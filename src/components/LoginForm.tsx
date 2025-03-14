@@ -35,7 +35,7 @@ export function LoginForm({
 				const data = await response.json();
 
 				if (data.isLoggedIn) {
-					router.push("/Profile");
+					router.push("/Home");
 				} else {
 					setIsLoading(false);
 				}
