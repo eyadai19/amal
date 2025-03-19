@@ -23,7 +23,6 @@ export default function LiteracyPage() {
           className="h-17 w-28 object-contain"
         />
         
-        {/* Hamburger button (only visible on mobile) */}
         <button
           onClick={toggleMenu}
           className="block focus:outline-none sm:hidden"
@@ -45,7 +44,6 @@ export default function LiteracyPage() {
           </svg>
         </button>
 
-        {/* Navigation menu */}
         <ul
           className={`${
             isMenuOpen ? "block" : "hidden"
