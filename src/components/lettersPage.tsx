@@ -23,8 +23,7 @@ export default function LettersPage() {
             alt="أمل Logo"
             className="h-17 w-28 object-contain"
           />
-          
-          {/* Hamburger button (only visible on mobile) */}
+
           <button
             onClick={toggleMenu}
             className="block focus:outline-none sm:hidden"
@@ -45,8 +44,7 @@ export default function LettersPage() {
               ></path>
             </svg>
           </button>
-  
-          {/* Navigation menu */}
+
           <ul
             className={`${
               isMenuOpen ? "block" : "hidden"
@@ -97,8 +95,7 @@ export default function LettersPage() {
       >
         الأحرف العربية
       </motion.h1>
-
-      {/* Arabic Letters Grid */}
+      
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-6 w-full max-w-4xl">
         {arabicLetters.map((letter, index) => (
           <motion.div
