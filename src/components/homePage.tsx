@@ -42,7 +42,6 @@ export default function HomePage() {
 
 	return (
 		<div className="flex h-670 flex-col scroll-smooth bg-[#E1D9D1]">
-			{/* النافبار */}
 			<nav className="fixed z-50 w-full bg-[#234330] py-1 text-white shadow-md">
 				<div className="container mx-auto flex items-center justify-between px-6">
 					<img
@@ -50,7 +49,6 @@ export default function HomePage() {
 						alt="أمل Logo"
 						className="h-17 w-28 object-contain"
 					/>
-					{/* زر الهامبرجر (يظهر فقط على الأجهزة المحمولة) */}
 					<button
 						onClick={toggleMenu}
 						className="block focus:outline-none sm:hidden"
@@ -71,7 +69,6 @@ export default function HomePage() {
 							></path>
 						</svg>
 					</button>
-					{/* القائمة (تظهر بشكل أفقي على الأجهزة الكبيرة وعمودي على الأجهزة المحمولة عند الفتح) */}
 					<ul
 						className={`${
 							isMenuOpen ? "block" : "hidden"
@@ -115,7 +112,6 @@ export default function HomePage() {
 				</div>
 			</nav>
 
-			{/* القسم الرئيسي */}
 			<div
 				id="home"
 				className="flex flex-1 items-center justify-center p-10 pt-20"
@@ -158,7 +154,6 @@ export default function HomePage() {
 				</div>
 			</div>
 
-			{/* قسم "من نحن" */}
 			<section id="about" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
@@ -191,7 +186,6 @@ export default function HomePage() {
 				</motion.div>
 			</section>
 
-			{/* قسم "خدماتنا" */}
 			<section id="services" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
@@ -261,7 +255,6 @@ export default function HomePage() {
 				</motion.div>
 			</section>
 
-			{/* قسم "تواصل معنا" */}
 			<section id="contact" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
