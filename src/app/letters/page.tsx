@@ -1,9 +1,9 @@
-import LettersPage from "@/components/lettersPage";
+import LettersPage from "@/components/letter/lettersPage";
 
 export default function lettersPage() {
-    return (
-        <div>
-            <LettersPage />
-        </div>
-    );
+	return (
+		<div>
+			<LettersPage />
+		</div>
+	);
 }

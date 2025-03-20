@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import AmalNavbar from "./amalNavbar";
 
 export default function HomePage() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,76 +43,7 @@ export default function HomePage() {
 
 	return (
 		<div className="flex h-670 flex-col scroll-smooth bg-[#E1D9D1]">
-			<nav className="fixed z-50 w-full bg-[#234330] py-1 text-white shadow-md">
-				<div className="container mx-auto flex items-center justify-between px-6">
-					<img
-						src="../image/authImage/LOGO.png"
-						alt="أمل Logo"
-						className="h-17 w-28 object-contain"
-					/>
-					<button
-						onClick={toggleMenu}
-						className="block focus:outline-none sm:hidden"
-						aria-label="فتح القائمة"
-					>
-						<svg
-							className="h-6 w-6"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-								d="M4 6h16M4 12h16m-7 6h7"
-							></path>
-						</svg>
-					</button>
-					<ul
-						className={`${
-							isMenuOpen ? "block" : "hidden"
-						} absolute top-16 right-0 left-0 z-10 space-y-4 bg-[#234330] p-4 sm:static sm:flex sm:space-y-0 sm:bg-transparent sm:p-0 ${
-							isMenuOpen ? "flex-col" : "sm:flex-row"
-						} sm:flex sm:w-full sm:max-w-2xl sm:items-center sm:justify-around`}
-					>
-						<li className="text-center">
-							<a
-								href="#home"
-								className="block w-full text-lg font-semibold transition duration-300 hover:text-[#C7BA9F]"
-							>
-								الصفحة الرئيسية
-							</a>
-						</li>
-						<li className="text-center">
-							<a
-								href="#about"
-								className="block w-full text-lg font-semibold transition duration-300 hover:text-[#C7BA9F]"
-							>
-								من نحن
-							</a>
-						</li>
-						<li className="text-center">
-							<a
-								href="#services"
-								className="block w-full text-lg font-semibold transition duration-300 hover:text-[#C7BA9F]"
-							>
-								خدماتنا
-							</a>
-						</li>
-						<li className="text-center">
-							<a
-								href="#contact"
-								className="block w-full text-lg font-semibold transition duration-300 hover:text-[#C7BA9F]"
-							>
-								تواصل معنا
-							</a>
-						</li>
-					</ul>
-				</div>
-			</nav>
-
+			<AmalNavbar backgroundColor="#234330" />
 			<div
 				id="home"
 				className="flex flex-1 items-center justify-center p-10 pt-20"
@@ -153,7 +85,6 @@ export default function HomePage() {
 					</div>
 				</div>
 			</div>
-
 			<section id="about" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
@@ -185,7 +116,6 @@ export default function HomePage() {
 					</div>
 				</motion.div>
 			</section>
-
 			<section id="services" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
@@ -254,7 +184,6 @@ export default function HomePage() {
 					</div>
 				</motion.div>
 			</section>
-
 			<section id="contact" className="bg-[#E1D9D1] px-10 py-20 text-center">
 				<motion.div
 					initial={{ opacity: 0, y: 50 }}
