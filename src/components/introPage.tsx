@@ -12,7 +12,7 @@ export default function IntroPage() {
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#E1D9D1] overflow-hidden">
       {!showIntro && (
         <motion.img
-          src="../image/authImage/LOGO.png"
+          src="../image/logo/LOGO.png"
           alt="أمل Logo"
           className="w-64 cursor-pointer"
           initial={{ opacity: 0, scale: 0.5 }}
@@ -36,7 +36,7 @@ export default function IntroPage() {
           >
             <div className="w-1/2 flex flex-col items-center justify-center">
               <motion.img
-                src="../image/authImage/LOGO.png"
+                src="../image/logo/LOGO.png"
                 alt="أمل Logo"
                 className="w-64"
                 initial={{ opacity: 0, scale: 0.5 }}

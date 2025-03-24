@@ -1,10 +1,15 @@
 "use client";
+import AmalNavbar from "./amalNavbar";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import AmalNavbar from "./amalNavbar";
+import { FaVolumeUp } from "react-icons/fa";
 
 export default function HomePage() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const playAudio = (audioPath: string) => {
+		const audio = new Audio(audioPath);
+		audio.play();
+	  };
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -17,6 +22,7 @@ export default function HomePage() {
 			bgColor: "bg-[#D8E5F0]",
 			textColor: "text-[#1E3A6E]",
 			href: "/literacy",
+			audio: "../audio/home/1.mp3",
 		},
 		{
 			title: "القسم المهني",
@@ -24,6 +30,7 @@ export default function HomePage() {
 			bgColor: "bg-[#E49B97]",
 			textColor: "text-[#B84941]",
 			href: "/career",
+			audio: "../audio/home/2.mp3",
 		},
 		{
 			title: "القسم النفسي",
@@ -31,6 +38,7 @@ export default function HomePage() {
 			bgColor: "bg-[#E2C8D3]",
 			textColor: "text-[#582C5E]",
 			href: "/psychological",
+			audio: "../audio/home/3.mp3",
 		},
 		{
 			title: "القسم القانوني",
@@ -38,6 +46,7 @@ export default function HomePage() {
 			bgColor: "bg-[#FFCB99]",
 			textColor: "text-[#D78448]",
 			href: "/legal",
+			audio: "../audio/home/4.mp3",
 		},
 	];
 
@@ -48,9 +57,10 @@ export default function HomePage() {
 				id="home"
 				className="flex flex-1 items-center justify-center p-10 pt-20"
 			>
+				
 				<div className="grid w-full max-w-6xl grid-cols-1 gap-10 pt-15 md:grid-cols-2">
 					<motion.img
-						src="../image/authImage/LOGO.png"
+						src="../image/logo/LOGO.png"
 						alt="أمل Logo"
 						className="m-9 w-70"
 						initial={{ opacity: 0, scale: 0.8, y: -20 }}
@@ -58,29 +68,35 @@ export default function HomePage() {
 						transition={{ duration: 1, ease: "easeOut" }}
 						whileHover={{ scale: 1.1 }}
 					/>
-					<div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+					<div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 relative">
 						{categories.map((category, index) => (
-							<motion.a
-								key={index}
-								href={category.href}
-								initial={{ opacity: 0, y: 20 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: index * 0.2 }}
-								viewport={{ once: true }}
-							>
-								<div
-									className={`transform cursor-pointer rounded-xl p-6 shadow-lg transition-transform duration-300 hover:scale-105 ${category.bgColor} ${category.textColor} w-full`}
+							<div key={index} className="relative">
+								<FaVolumeUp
+									className={`absolute -top-6 right-6 translate-x-1/2 text-2xl cursor-pointer ${category.textColor}`}
+									onClick={() => playAudio(category.audio)}
+								/>
+
+								<motion.a
+									href={category.href}
+									initial={{ opacity: 0, y: 20 }}
+									whileInView={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.5, delay: index * 0.2 }}
+									viewport={{ once: true }}
 								>
-									<div className="flex h-full flex-col items-center justify-center">
-										<h2 className="text-center text-2xl font-bold md:text-3xl">
-											{category.title}
-										</h2>
-										<p className="mt-2 text-center text-lg md:mt-4 md:text-xl">
-											{category.description}
-										</p>
+									<div
+										className={`transform cursor-pointer rounded-xl p-6 shadow-lg transition-transform duration-300 hover:scale-105 ${category.bgColor} ${category.textColor} w-full`}
+									>
+										<div className="flex h-full flex-col items-center justify-center">
+											<h2 className="text-center text-2xl font-bold md:text-3xl">
+												{category.title}
+											</h2>
+											<p className="mt-2 text-center text-lg md:mt-4 md:text-xl">
+												{category.description}
+											</p>
+										</div>
 									</div>
-								</div>
-							</motion.a>
+								</motion.a>
+							</div>
 						))}
 					</div>
 				</div>
@@ -93,6 +109,10 @@ export default function HomePage() {
 					viewport={{ once: true }}
 				>
 					<h2 className="text-4xl font-bold text-[#234330]">من نحن</h2>
+					<FaVolumeUp 
+						className="inline-block ml-2 cursor-pointer " 
+						onClick={() => playAudio("../audio/home/16.mp3")} 
+					/>
 					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
 						<p>
 							نحن <strong>أمل</strong> منصة رقمية ذكية تعتمد على تقنيات الذكاء
@@ -124,6 +144,10 @@ export default function HomePage() {
 					viewport={{ once: true }}
 				>
 					<h2 className="text-4xl font-bold text-[#234330]">خدماتنا</h2>
+					<FaVolumeUp 
+						className="inline-block ml-2 cursor-pointer" 
+						onClick={() => playAudio("../audio/home/18.mp3")} 
+					/>
 					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
 						<p>
 							في أمل، نقدم مجموعة متكاملة من الخدمات المصممة خصيصًا لدعم المفرج

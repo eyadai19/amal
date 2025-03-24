@@ -15,7 +15,7 @@ export interface LetterData {
 export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	alif: {
 		title: "حرف الألف",
-		image: "/letters/A.png",
+		image: "../image/letters/A.png",
 		description:
 			"حرف الألف هو أول حرف في اللغة العربية، وهو من الحروف الأساسية التي تُستخدم في تكوين العديد من الكلمات. يمكن أن يأتي في بداية الكلمة أو وسطها أو نهايتها كما يلي",
 		examples: {
@@ -26,7 +26,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	baa: {
 		title: "حرف الباء",
-		image: "/letters/B.png",
+		image: "../image/letters/B.png",
 		description: "حرف الباء هو ثاني حروف العربية...",
 		examples: {
 			start: ["باب", "بحر", "بيت"],
@@ -36,7 +36,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	taa: {
 		title: "حرف التاء",
-		image: "/letters/T.png",
+		image: "../image/letters/T.png",
 		description: "حرف التاء هو ثالث حروف العربية...",
 		examples: {
 			start: ["تفاح", "تمر", "تاج"],
@@ -44,5 +44,4 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			end: ["بيت", "حياة", "خطأ"],
 		},
 	},
-	// يمكنك إضافة بقية الحروف لاحقًا
 };

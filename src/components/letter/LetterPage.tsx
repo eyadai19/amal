@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ArabicLettersKeys } from "@/utils/arabicLetters";
 import { lettersData } from "@/utils/letterData";
 import { useEffect, useRef, useState } from "react";
+import { FaPencilAlt, FaEraser, FaTimes } from "react-icons/fa";
+import AmalNavbar from "../amalNavbar";
 
 export default function LetterPage({
 	params,
@@ -77,6 +79,8 @@ export default function LetterPage({
 	}
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-10">
+			<AmalNavbar backgroundColor="#283a5c" />
+
 			<h1 className="mr-10 mb-20 self-end text-5xl font-bold text-[#1E3A6E] underline">
 				:{currentLetter.title}
 			</h1>
@@ -129,13 +133,39 @@ export default function LetterPage({
 					</Button>
 				</div>
 			</div>
-
-			{/* لوحة الرسم (تبقى كما هي) */}
 			{showPad && (
-				<div className="fixed bottom-10 left-1/2 flex h-[240px] w-[320px] -translate-x-1/2 transform flex-col items-center justify-center rounded-lg border border-gray-300 bg-white p-4 shadow-xl">
-					{/* ... */}
+				<div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-xl w-[320px] h-[240px] flex flex-col items-center justify-center border border-gray-300">
+				<div className="flex justify-between w-full px-4 mb-2">
+					<FaPencilAlt 
+					className={`text-2xl cursor-pointer ${!isErasing ? "text-[#1E3A6E]" : "text-gray-400"}`} 
+					onClick={() => setIsErasing(false)}
+					/>
+					
+					<FaEraser 
+					className={`text-2xl cursor-pointer ${isErasing ? "text-[#C7BA9F]" : "text-gray-400"}`} 
+					onClick={() => setIsErasing(true)}
+					/>
+
+					<FaTimes 
+					className="text-2xl cursor-pointer text-red-500"
+					onClick={() => setShowPad(false)}
+					/>
+				</div>
+
+				<canvas 
+					ref={canvasRef}
+					className="w-full h-full border border-gray-300"
+					onMouseDown={startDrawing}
+					onMouseMove={draw}
+					onMouseUp={stopDrawing}
+					onMouseLeave={stopDrawing}
+					onTouchStart={startDrawing}
+					onTouchMove={draw}
+					onTouchEnd={stopDrawing}
+				/>
 				</div>
 			)}
+
 		</div>
 	);
 }

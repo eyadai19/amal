@@ -18,7 +18,7 @@ export default function AmalNavbar({ backgroundColor }: AmalNavbarProps) {
 		>
 			<div className="container mx-auto flex items-center justify-between px-6">
 				<img
-					src="../image/authImage/LOGO.png"
+					src="../image/logo/LOGO.png"
 					alt="أمل Logo"
 					className="h-17 w-28 object-contain"
 				/>
