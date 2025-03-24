@@ -1,0 +1,27 @@
+export const getArabicNumerals = {
+	zero: "٠",
+	one: "١",
+	two: "٢",
+	three: "٣",
+	four: "٤",
+	five: "٥",
+	six: "٦",
+	seven: "٧",
+	eight: "٨",
+	nine: "٩",
+	ten: "١٠",
+	twenty: "٢٠",
+	thirty: "٣٠",
+	forty: "٤٠",
+	fifty: "٥٠",
+	sixty: "٦٠",
+	seventy: "٧٠",
+	eighty: "٨٠",
+	ninety: "٩٠",
+	hundred: "١٠٠",
+	thousand: "١٠٠٠",
+	million: "١٠٠٠٠٠٠",
+	billion: "١٠٠٠٠٠٠٠٠٠",
+};
+
+export type ArabicNumeralsKeys = keyof typeof getArabicNumerals;
