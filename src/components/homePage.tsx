@@ -43,7 +43,7 @@ export default function HomePage() {
 
 	return (
 		<div className="flex h-670 flex-col scroll-smooth bg-[#E1D9D1]">
-			<AmalNavbar backgroundColor="#234330" />
+			<AmalNavbar backgroundColor="#234330" activeSection={null} />
 			<div
 				id="home"
 				className="flex flex-1 items-center justify-center p-10 pt-20"
