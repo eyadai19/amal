@@ -35,7 +35,7 @@ export function LoginForm({
 				const data = await response.json();
 
 				if (data.isLoggedIn) {
-					router.push("/Home");
+					router.push("/home");
 				} else {
 					setIsLoading(false);
 				}
@@ -69,14 +69,13 @@ export function LoginForm({
 		}
 	}
 	if (isLoading) {
-	
-			return (
-				<div className="flex h-screen items-center justify-center">
-					<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#ADF0D1]"></div>
-				</div>
-			);
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="h-16 w-16 animate-spin rounded-full border-t-4 border-b-4 border-[#ADF0D1]"></div>
+			</div>
+		);
 	}
-	
+
 	return (
 		<div
 			className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#00203F] to-[#00001a]"

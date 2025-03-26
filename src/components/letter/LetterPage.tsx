@@ -5,6 +5,7 @@ import { lettersData } from "@/utils/letterData";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+import AmalNavbar from "../amalNavbar";
 
 export default function LetterPage({
 	params,
@@ -114,7 +115,8 @@ export default function LetterPage({
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-8 md:p-6 md:pt-10">
+		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
+			<AmalNavbar backgroundColor="#1E3A6E" activeSection={"literacy"} />
 			<div className="container mx-auto max-w-6xl">
 				{/* Header with back button */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">
@@ -126,7 +128,7 @@ export default function LetterPage({
 						<span className="text-sm md:text-base">العودة إلى الحروف</span>
 					</Link>
 					<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
-						حرف {currentLetter.title}
+						{currentLetter.title}
 					</h1>
 					<div className="hidden md:block md:w-8"></div>
 				</div>

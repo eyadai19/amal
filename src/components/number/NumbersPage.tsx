@@ -26,7 +26,7 @@ export default function NumbersPage() {
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" />
+			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 
 			<motion.h1
 				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"

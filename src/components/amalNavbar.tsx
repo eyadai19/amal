@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type SectionType = "literacy" | "career" | "psychological" | "legal" | null;
@@ -19,28 +19,28 @@ const sectionColors: Record<
 	// psychological: { bg: "#9C27B0", text: "#ffffff", light: "#CE93D8" },
 	// legal: { bg: "#FF9800", text: "#ffffff", light: "#FFCC80" },
 	literacy: {
-		bg: "#2A5C9A", // أزرق غني وجذاب
+		bg: "#2A5C9A",
 		text: "#FFFFFF",
-		light: "#A7C7F2", // أزرق فاتح مشع
-		hover: "#3D7BC8", // أزرق أكثر إشراقاً عند التحويم
+		light: "#A7C7F2",
+		hover: "#3D7BC8",
 	},
 	career: {
-		bg: "#D6453D", // أحمر مرجاني حيوي
+		bg: "#D6453D",
 		text: "#FFFFFF",
-		light: "#FFB8B3", // أحمر وردي فاتح
-		hover: "#E85C54", // أحمر أكثر حيوية
+		light: "#FFB8B3",
+		hover: "#E85C54",
 	},
 	psychological: {
-		bg: "#7D3C98", // بنفسجي غامق غني
+		bg: "#7D3C98",
 		text: "#FFFFFF",
-		light: "#D9B3E6", // بنفسجي لافندر فاتح
-		hover: "#9257AD", // بنفسجي أكثر إشراقاً
+		light: "#D9B3E6",
+		hover: "#9257AD",
 	},
 	legal: {
-		bg: "#FF8C42", // برتقالي مشع
+		bg: "#FF8C42",
 		text: "#FFFFFF",
-		light: "#FFD1A8", // برتقالي كريمي فاتح
-		hover: "#FF9E5E", // برتقالي أكثر دفئاً
+		light: "#FFD1A8",
+		hover: "#FF9E5E",
 	},
 };
 
@@ -52,6 +52,8 @@ export default function AmalNavbar({
 	const [userLoggedIn, setUserLoggedIn] = useState(true);
 	const pathname = usePathname();
 	const isHomePage = pathname === "/home" || pathname === "/";
+	const [isLoading, setIsLoading] = useState(false);
+	const router = useRouter();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -76,7 +78,25 @@ export default function AmalNavbar({
 	}, []);
 
 	const handleLogout = async () => {
-		// await logoutAction();
+		setIsLoading(true);
+		try {
+			const response = await fetch("/api/logout", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			if (response.redirected) {
+				window.location.href = response.url;
+			} else {
+				router.push("/login");
+			}
+		} catch (error) {
+			console.error("Logout failed:", error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -88,7 +108,7 @@ export default function AmalNavbar({
 				{/* الشعار */}
 				<Link href="/home" className="flex items-center">
 					<img
-						src="../image/authImage/LOGO.png"
+						src="/image/logo/LOGO.png"
 						alt="أمل Logo"
 						className="h-16 w-28 object-contain"
 					/>
@@ -256,7 +276,7 @@ export default function AmalNavbar({
 									className="cursor-pointer text-lg font-medium transition hover:text-[#D8E5F0]"
 									onClick={handleLogout}
 								>
-									تسجيل الخروج
+									{isLoading ? "جاري تسجيل الخروج..." : "تسجيل الخروج"}
 								</button>
 							</>
 						) : (
@@ -530,7 +550,7 @@ export default function AmalNavbar({
 									className="block cursor-pointer py-2 text-lg font-medium hover:text-[#D8E5F0]"
 									onClick={handleLogout}
 								>
-									تسجيل الخروج
+									{isLoading ? "جاري تسجيل الخروج..." : "تسجيل الخروج"}
 								</button>
 							</>
 						) : (
