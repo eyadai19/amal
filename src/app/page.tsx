@@ -1,10 +1,15 @@
-import { Button } from "@/components/ui/button";
+"use client";
+import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Home() {
+export default function HomePage() {
+	useEffect(() => {
+		redirect("/Intro");
+	}, []);
+
 	return (
-		<div>
-			<Button>eyad</Button>
-			<div className="font-bold p-6 m-2 border w-fit">test</div>
+		<div className="flex h-screen items-center justify-center">
+			<div className="h-16 w-16 animate-spin rounded-full border-t-4 border-b-4 border-[#ADF0D1]"></div>
 		</div>
 	);
 }
