@@ -26,10 +26,10 @@ export interface LetterData {
 export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	alif: {
 		title: "حرف الألف",
-		image: "../image/letters/A.png",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/alif/ALIF.png",
+		end_image: "../image/letters/alif/alif-last.png",
+		middle_image: "../image/letters/alif/alif-mid.png",
+		start_image: "../image/letters/alif/alif-first.png",
 		description:
 			"حرف الألف هو أول حرف في اللغة العربية، وهو من الحروف الأساسية التي تُستخدم في تكوين العديد من الكلمات. يمكن أن يأتي في بداية الكلمة أو وسطها أو نهايتها كما يلي",
 		forms: {
@@ -52,10 +52,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	baa: {
 		title: "حرف الباء",
-		image: "../image/letters/B.png",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/baa/BAA.png",
+		end_image: "../image/letters/baa/baa-last.png",
+		middle_image: "../image/letters/baa/baa-mid.png",
+		start_image: "../image/letters/baa/baa-first.png",
 		description:
 			"حرف الباء هو ثاني حروف الهجاء العربية، ينطق عند اتصاله بحركة أو سكون، وهو من الحروف الشفوية التي تخرج من بين الشفتين.",
 		forms: {
@@ -78,10 +78,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	taa: {
 		title: "حرف التاء",
-		image: "../image/letters/T.png",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/taa/TAA.png",
+		end_image: "../image/letters/taa/taa-last.png",
+		middle_image: "../image/letters/taa/taa-mid.png",
+		start_image: "../image/letters/taa/taa-first.png",
 		description:
 			"حرف التاء هو ثالث حروف الهجاء العربية، ينطق بوضع طرف اللسان على الثنايا العليا، وهو من الحروف الأسلية.",
 		forms: {
@@ -104,10 +104,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	thaa: {
 		title: "حرف الثاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/thaa/THAA.png",
+		end_image: "../image/letters/thaa/thaa-last.png",
+		middle_image: "../image/letters/thaa/thaa-mid.png",
+		start_image: "../image/letters/thaa/thaa-first.png",
 		description:
 			"حرف الثاء هو رابع حروف الهجاء العربية، ينطق بوضع طرف اللسان بين الثنايا العليا والسفلى مع خروج صوت حاد.",
 		forms: {
@@ -130,10 +130,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	jeem: {
 		title: "حرف الجيم",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/jeem/JEEM.png",
+		end_image: "../image/letters/jeem/jeem-last.png",
+		middle_image: "../image/letters/jeem/jeem-mid.png",
+		start_image: "../image/letters/jeem/jeem-first.png",
 		description:
 			"حرف الجيم هو خامس حروف الهجاء العربية، ينطق برفع وسط اللسان إلى الحنك الأعلى مع انحباس الصوت ثم إطلاقه.",
 		forms: {
@@ -156,10 +156,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	haa: {
 		title: "حرف الحاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/haa/HAA.png",
+		end_image: "../image/letters/haa/haa-last.png",
+		middle_image: "../image/letters/haa/haa-mid.png",
+		start_image: "../image/letters/haa/haa-first.png",
 		description:
 			"حرف الحاء هو سادس حروف الهجاء العربية، ينطق من وسط الحلق مع انحباس النفس ثم إطلاقه.",
 		forms: {
@@ -182,10 +182,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	khaa: {
 		title: "حرف الخاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/khaa/KHAA.png",
+		end_image: "../image/letters/khaa/khaa-last.png",
+		middle_image: "../image/letters/khaa/khaa-mid.png",
+		start_image: "../image/letters/khaa/khaa-first.png",
 		description:
 			"حرف الخاء هو سابع حروف الهجاء العربية، ينطق من أقصى الحلق مع خروج صوت خشن.",
 		forms: {
@@ -208,10 +208,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	dal: {
 		title: "حرف الدال",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/dal/DAL.png",
+		end_image: "../image/letters/dal/dal-last.png",
+		middle_image: "../image/letters/dal/dal-mid.png",
+		start_image: "../image/letters/dal/dal-first.png",
 		description:
 			"حرف الدال هو ثامن حروف الهجاء العربية، ينطق بوضع طرف اللسان على الثنايا العليا مع خروج صوت واضح.",
 		forms: {
@@ -234,10 +234,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	thal: {
 		title: "حرف الذال",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/thal/THAL.png",
+		end_image: "../image/letters/thal/thal-last.png",
+		middle_image: "../image/letters/thal/thal-mid.png",
+		start_image: "../image/letters/thal/thal-first.png",
 		description:
 			"حرف الذال هو تاسع حروف الهجاء العربية، ينطق مثل الدال لكن مع خروج صوت أكثر حدة.",
 		forms: {
@@ -260,10 +260,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	raa: {
 		title: "حرف الراء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/raa/RAA.png",
+		end_image: "../image/letters/raa/raa-last.png",
+		middle_image: "../image/letters/raa/raa-mid.png",
+		start_image: "../image/letters/raa/raa-first.png",
 		description:
 			"حرف الراء هو عاشر حروف الهجاء العربية، ينطق برفع طرف اللسان نحو الحنك الأعلى مع اهتزازه.",
 		forms: {
@@ -286,10 +286,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	zay: {
 		title: "حرف الزاي",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/zay/ZAY.png",
+		end_image: "../image/letters/zay/zay-last.png",
+		middle_image: "../image/letters/zay/zay-mid.png",
+		start_image: "../image/letters/zay/zay-first.png",
 		description:
 			"حرف الزاي هو حادي عشر حروف الهجاء العربية، ينطق مثل السين لكن مع خروج صوت أكثر حدة.",
 		forms: {
@@ -312,10 +312,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	seen: {
 		title: "حرف السين",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/seen/SEEN.png",
+		end_image: "../image/letters/seen/seen-last.png",
+		middle_image: "../image/letters/seen/seen-mid.png",
+		start_image: "../image/letters/seen/seen-first.png",
 		description:
 			"حرف السين هو ثاني عشر حروف الهجاء العربية، ينطق بوضع طرف اللسان خلف الأسنان السفلى مع خروج صوت ساكن.",
 		forms: {
@@ -338,10 +338,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	sheen: {
 		title: "حرف الشين",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/sheen/SHEEN.png",
+		end_image: "../image/letters/sheen/sheen-last.png",
+		middle_image: "../image/letters/sheen/sheen-mid.png",
+		start_image: "../image/letters/sheen/sheen-first.png",
 		description:
 			"حرف الشين هو ثالث عشر حروف الهجاء العربية، ينطق مثل السين لكن مع خروج صوت أكثر حدة.",
 		forms: {
@@ -364,10 +364,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	sad: {
 		title: "حرف الصاد",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/sad/sad.png",
+		end_image: "../image/letters/sad/sad-last.png",
+		middle_image: "../image/letters/sad/sad-mid.png",
+		start_image: "../image/letters/sad/sad-first.png",
 		description:
 			"حرف الصاد هو رابع عشر حروف الهجاء العربية، ينطق بإطباق اللسان على الحنك الأعلى مع خروج صوت مفخم.",
 		forms: {
@@ -390,10 +390,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	dad: {
 		title: "حرف الضاد",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/dad/DAD.png",
+		end_image: "../image/letters/dad/dad-last.png",
+		middle_image: "../image/letters/dad/dad-mid.png",
+		start_image: "../image/letters/dad/dad-first.png",
 		description:
 			"حرف الضاد هو خامس عشر حروف الهجاء العربية، وهو الحرف الذي تتميز به اللغة العربية عن غيرها.",
 		forms: {
@@ -416,10 +416,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	tah: {
 		title: "حرف الطاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/tah/TAH.png",
+		end_image: "../image/letters/tah/tah-last.png",
+		middle_image: "../image/letters/tah/tah-mid.png",
+		start_image: "../image/letters/tah/tah-first.png",
 		description:
 			"حرف الطاء هو سادس عشر حروف الهجاء العربية، ينطق بإطباق اللسان على الحنك الأعلى مع خروج صوت مفخم.",
 		forms: {
@@ -442,10 +442,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	zah: {
 		title: "حرف الظاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/zah/ZAH.png",
+		end_image: "../image/letters/zah/zah-last.png",
+		middle_image: "../image/letters/zah/zah-mid.png",
+		start_image: "../image/letters/zah/zah-first.png",
 		description:
 			"حرف الظاء هو سابع عشر حروف الهجاء العربية، ينطق مثل الطاء لكن مع خروج صوت أكثر حدة.",
 		forms: {
@@ -468,10 +468,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	ayn: {
 		title: "حرف العين",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/ayn/AYN.png",
+		end_image: "../image/letters/ayn/ayn-last.png",
+		middle_image: "../image/letters/ayn/ayn-mid.png",
+		start_image: "../image/letters/ayn/ayn-first.png",
 		description:
 			"حرف العين هو ثامن عشر حروف الهجاء العربية، ينطق من أقصى الحلق مع انحباس الصوت ثم إطلاقه.",
 		forms: {
@@ -494,10 +494,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	ghayn: {
 		title: "حرف الغين",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/ghayn/GHAYN.png",
+		end_image: "../image/letters/ghayn/ghayn-last.png",
+		middle_image: "../image/letters/ghayn/ghayn-mid.png",
+		start_image: "../image/letters/ghayn/ghayn-first.png",
 		description:
 			"حرف الغين هو تاسع عشر حروف الهجاء العربية، ينطق من أقصى الحلق مع خروج صوت غليظ.",
 		forms: {
@@ -520,10 +520,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	faa: {
 		title: "حرف الفاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/faa/FAA.png",
+		end_image: "../image/letters/faa/faa-last.png",
+		middle_image: "../image/letters/faa/faa-mid.png",
+		start_image: "../image/letters/faa/faa-first.png",
 		description:
 			"حرف الفاء هو العشرون في ترتيب الحروف الهجائية العربية، ينطق بوضع الشفة السفلى على الأسنان العليا.",
 		forms: {
@@ -546,10 +546,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	qaf: {
 		title: "حرف القاف",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/qaf/QAF.png",
+		end_image: "../image/letters/qaf/qaf-last.png",
+		middle_image: "../image/letters/qaf/qaf-mid.png",
+		start_image: "../image/letters/qaf/qaf-first.png",
 		description:
 			"حرف القاف هو الحادي والعشرون في ترتيب الحروف الهجائية العربية، ينطق من أقصى اللسان مع الحنك الأعلى.",
 		forms: {
@@ -572,10 +572,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	kaf: {
 		title: "حرف الكاف",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/kaf/KAF.png",
+		end_image: "../image/letters/kaf/kaf-last.png",
+		middle_image: "../image/letters/kaf/kaf-mid.png",
+		start_image: "../image/letters/kaf/kaf-first.png",
 		description:
 			"حرف الكاف هو الثاني والعشرون في ترتيب الحروف الهجائية العربية، ينطق برفع مؤخرة اللسان نحو الحنك الأعلى.",
 		forms: {
@@ -598,10 +598,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	lam: {
 		title: "حرف اللام",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/lam/LAM.png",
+		end_image: "../image/letters/lam/lam-last.png",
+		middle_image: "../image/letters/lam/lam-mid.png",
+		start_image: "../image/letters/lam/lam-first.png",
 		description:
 			"حرف اللام هو الثالث والعشرون في ترتيب الحروف الهجائية العربية، ينطق بوضع طرف اللسان على الثنايا العليا.",
 		forms: {
@@ -624,10 +624,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	meem: {
 		title: "حرف الميم",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/meem/MEEM.png",
+		end_image: "../image/letters/meem/meem-last.png",
+		middle_image: "../image/letters/meem/meem-mid.png",
+		start_image: "../image/letters/meem/meem-first.png",
 		description:
 			"حرف الميم هو الرابع والعشرون في ترتيب الحروف الهجائية العربية، ينطق بإطباق الشفتين مع خروج صوت أنفي.",
 		forms: {
@@ -650,10 +650,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	noon: {
 		title: "حرف النون",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/noon/NOON.png",
+		end_image: "../image/letters/noon/noon-last.png",
+		middle_image: "../image/letters/noon/noon-mid.png",
+		start_image: "../image/letters/noon/noon-first.png",
 		description:
 			"حرف النون هو الخامس والعشرون في ترتيب الحروف الهجائية العربية، ينطق بوضع طرف اللسان خلف الأسنان العليا مع خروج صوت أنفي.",
 		forms: {
@@ -676,10 +676,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	ha: {
 		title: "حرف الهاء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/ha/HA.png",
+		end_image: "../image/letters/ha/ha-last.png",
+		middle_image: "../image/letters/ha/ha-mid.png",
+		start_image: "../image/letters/ha/ha-first.png",
 		description:
 			"حرف الهاء هو السادس والعشرون في ترتيب الحروف الهجائية العربية، ينطق من وسط الحلق مع خروج صوت خفيف.",
 		forms: {
@@ -702,10 +702,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	waw: {
 		title: "حرف الواو",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/waw/WAW.png",
+		end_image: "../image/letters/waw/waw-last.png",
+		middle_image: "../image/letters/waw/waw-mid.png",
+		start_image: "../image/letters/waw/waw-first.png",
 		description:
 			"حرف الواو هو السابع والعشرون في ترتيب الحروف الهجائية العربية، ينطق بتقريب الشفتين مع خروج صوت مرقق.",
 		forms: {
@@ -728,10 +728,10 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 	},
 	ya: {
 		title: "حرف الياء",
-		image: "",
-		end_image: "",
-		middle_image: "",
-		start_image: "",
+		image: "../image/letters/ya/YA.png",
+		end_image: "../image/letters/ya/ya-last.png",
+		middle_image: "../image/letters/ya/ya-mid.png",
+		start_image: "../image/letters/ya/ya-first.png",
 		description:
 			"حرف الياء هو الثامن والعشرون في ترتيب الحروف الهجائية العربية، ينطق بتقريب وسط اللسان من الحنك الأعلى.",
 		forms: {
