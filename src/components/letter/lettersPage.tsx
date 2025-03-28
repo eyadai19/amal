@@ -3,6 +3,8 @@ import { getArabicLetters } from "@/utils/arabicLetters";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AmalNavbar from "../amalNavbar";
+import Link from "next/link";
+import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
 
 export default function LettersPage() {
 	const router = useRouter();
@@ -11,7 +13,16 @@ export default function LettersPage() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
 			<AmalNavbar backgroundColor="#283a5c" />
-
+			<div className="ml-15 mt-5 mb-6 md:mb-8 flex justify-start items-start gap-4 w-full">
+				<Link
+					href="/literacy"
+					className="flex items-center text-[#1E3A6E] hover:text-[#3f5680]"
+				>
+					<FaArrowLeft className="mr-2" />
+					<span className="text-sm md:text-base ">العودة إلى القسم التعليمي</span>
+				</Link>
+				<div className="hidden md:block md:w-8"></div>
+			</div>
 			<motion.h1
 				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"
 				initial={{ opacity: 0, y: -50 }}

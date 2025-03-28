@@ -5,7 +5,7 @@ import { ArabicNumeralsKeys } from "@/utils/arabicNumerals";
 import { numbersData } from "@/utils/numbersData";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
 
 export default function NumberPage({
 	params,
@@ -22,6 +22,7 @@ export default function NumberPage({
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 	const [isDrawing, setIsDrawing] = useState(false);
+	const [prediction, setPrediction] = useState<string | null>(null);
 
 	const currentNumber = numbersData[params.number];
 
@@ -45,19 +46,52 @@ export default function NumberPage({
 			setAccuracyResult(null);
 		}
 	}, [showPad]);
-
-	// وظائف الرسم (نفس تلك المستخدمة في صفحة الحروف)
+	
 	const startDrawing = (e: React.MouseEvent) => {
-		/*...*/
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		ctx.beginPath();
+		ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+		setIsDrawing(true);
 	};
+
 	const draw = (e: React.MouseEvent) => {
-		/*...*/
+		if (!isDrawing) return;
+
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+		ctx.strokeStyle = "#000000";
+		ctx.lineWidth = 15;
+		ctx.lineCap = "round";
+		ctx.stroke();
 	};
+
 	const stopDrawing = () => {
-		/*...*/
+		if (!ctxRef.current) return;
+		// isDrawing.current = false;
+		setIsDrawing(false);
+		ctxRef.current.closePath();
 	};
+
 	const clearCanvas = () => {
-		/*...*/
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		setPrediction(null);
 	};
 
 	const handleSubmitDrawing = () => {
@@ -112,7 +146,7 @@ export default function NumberPage({
 								className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
 								onClick={() => setShowPad(true)}
 							>
-								جرب كتابة الرقم بنفسك!
+								!جرب كتابة الرقم بنفسك
 							</Button>
 						</div>
 					</div>
@@ -163,39 +197,111 @@ export default function NumberPage({
 				</div>
 
 				{/* Practice Section */}
-				<div className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
-					<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
-						تمرين الكتابة
-					</h2>
-					<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-						{[1, 2, 3].map((size) => (
-							<div key={size} className="flex flex-col items-center">
-								<div className="mb-3 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-[#1E3A6E]/30 bg-[#F5F9FF] md:h-48">
-									<span
-										className={`text-${size * 4}xl text-[#1E3A6E] opacity-50`}
-									>
-										{currentNumber.numeral}
-									</span>
-								</div>
-								<Button
-									variant="outline"
-									className="w-full border-[#1E3A6E] text-[#1E3A6E] transition-all hover:bg-[#1E3A6E] hover:text-white"
-									onClick={() => setShowPad(true)}
-								>
-									اكتب الرقم بحجم {size}
-								</Button>
-							</div>
-						))}
-					</div>
-				</div>
+				
 			</div>
 
-			{/* Drawing Pad Modal (نفس المكون المستخدم في الحروف) */}
 			{showPad && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-					{/* ... نفس محتوى لوحة الرسم ... */}
-				</div>
-			)}
+							<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+								<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-4 shadow-xl md:p-6">
+									<div className="mb-4 flex items-center justify-between">
+										<h3 className="text-2xl font-bold text-[#1E3A6E]">
+											لوحة الكتابة
+										</h3>
+										<div className="flex space-x-4">
+											<button
+												className={`rounded-full p-2 ${!isErasing ? "bg-[#1E3A6E] text-white" : "bg-gray-200"}`}
+												onClick={() => setIsErasing(false)}
+												title="قلم"
+											>
+												<FaPencilAlt />
+											</button>
+											<button
+												className={`rounded-full p-2 ${isErasing ? "bg-[#C7BA9F] text-white" : "bg-gray-200"}`}
+												onClick={() => setIsErasing(true)}
+												title="ممحاة"
+											>
+												<FaEraser />
+											</button>
+											<button
+												className="rounded-full bg-gray-200 p-2 hover:bg-gray-300"
+												onClick={clearCanvas}
+												title="مسح الكل"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													className="h-5 w-5"
+													viewBox="0 0 20 20"
+													fill="currentColor"
+												>
+													<path
+														fillRule="evenodd"
+														d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+														clipRule="evenodd"
+													/>
+												</svg>
+											</button>
+											<button
+												className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600"
+												onClick={() => setShowPad(false)}
+												title="إغلاق"
+											>
+												<FaTimes />
+											</button>
+										</div>
+									</div>
+									<canvas
+										ref={canvasRef}
+										className="h-64 w-full touch-none rounded-lg border-2 border-gray-300"
+										onMouseDown={startDrawing}
+										onMouseMove={draw}
+										onMouseUp={stopDrawing}
+										onMouseLeave={stopDrawing}
+										// onTouchStart={startDrawing}
+										// onTouchMove={draw}
+										onTouchEnd={stopDrawing}
+									/>
+			
+									<div className="mt-4 flex justify-between">
+										<Button
+											variant="outline"
+											className="border-red-500 text-red-500"
+											onClick={clearCanvas}
+										>
+											مسح الكل
+										</Button>
+			
+										<Button
+											className="bg-[#1E3A6E] text-white"
+											onClick={handleSubmitDrawing}
+										>
+											إرسال الرسمة
+										</Button>
+									</div>
+			
+									{accuracyResult && (
+										<div className="mt-4 rounded-lg bg-gray-100 p-3 text-center">
+											<p
+												className={`text-lg font-medium ${accuracyResult.correct ? "text-green-600" : "text-red-600"}`}
+											>
+												{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
+											</p>
+											<p className="text-gray-600">
+												الدقة: {accuracyResult.accuracy}%
+											</p>
+											{accuracyResult.feedback && (
+												<p className="mt-2 text-sm text-gray-500">
+													{accuracyResult.feedback}
+												</p>
+											)}
+										</div>
+									)}
+			
+									<div className="mt-4 text-center text-gray-500">
+										اسحب بإصبعك أو بالفأرة للكتابة
+									</div>
+								</div>
+							</div>
+						)}
 		</div>
 	);
 }

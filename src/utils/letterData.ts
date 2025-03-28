@@ -31,7 +31,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 		middle_image: "../image/letters/alif/alif-mid.png",
 		start_image: "../image/letters/alif/alif-first.png",
 		description:
-			"حرف الألف هو أول حرف في اللغة العربية، وهو من الحروف الأساسية التي تُستخدم في تكوين العديد من الكلمات. يمكن أن يأتي في بداية الكلمة أو وسطها أو نهايتها كما يلي",
+			"حرف الألف هو أول حرف في اللغة العربية، وهو من الحروف الأساسية التي تُستخدم في تكوين العديد من الكلمات. يمكن أن يأتي في بداية الكلمة أو وسطها أو نهايتها",
 		forms: {
 			start: [
 				{ word: "أمل", example: "كان لديه أمل كبير في النجاح" },
@@ -39,14 +39,14 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "أزهار", example: "تفتحت الأزهار في الربيع" },
 			],
 			middle: [
-				{ word: "سماء", example: "الطيور تحلق في السماء الزرقاء" },
-				{ word: "كتاب", example: "قرأت كتابًا مفيدًا اليوم" },
-				{ word: "سؤال", example: "طرح الطالب سؤالاً ذكياً" },
+				{ word: "مأساة", example: "كانت الحرب مأساة" },
+				{ word: "مأمور", example: "كلف المأمور بتنفيذ الأوامر بدقة" },
+				{ word: "مسألة", example: "كانت المسألة صعبة" },
 			],
 			end: [
 				{ word: "دعا", example: "دعا الأب أبناءه إلى العشاء" },
-				{ word: "بقاء", example: "يعتمد بقاء النبات على الماء" },
-				{ word: "خطأ", example: "ارتكب الطفل خطأً بسيطًا" },
+				{ word: "رجا", example: "رجا الأب لابنه مستقبلاً مشرقًا" },
+				{ word: "صفا", example: "صفا الماء في البحيرة بعد هدوء الرياح" },
 			],
 		},
 	},
@@ -65,9 +65,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "بيت", example: "بيتنا الجديد واسع ومريح" },
 			],
 			middle: [
-				{ word: "كتب", example: "كتب التلميذ الواجب بخط جميل" },
+				{ word: "سبب", example: "كان السبب وراء نجاح المشروع هو التخطيط الجيد" },
 				{ word: "شباب", example: "شباب اليوم طموحون ومجتهدون" },
-				{ word: "حب", example: "زرع الطفل حبًا في حديقة المنزل" },
+				{ word: "محبوب", example: "كان دائماً شخصاً محبوباً لدى الجميع" },
 			],
 			end: [
 				{ word: "قلب", example: "يجب أن نحافظ على صحة القلب" },
@@ -92,13 +92,13 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			middle: [
 				{ word: "كتاب", example: "وضعت الكتاب على الرف بعناية" },
-				{ word: "شجرة", example: "أوراق الشجرة خضراء ونضرة" },
-				{ word: "فتاة", example: "الفتاة المجتهدة تحقق أحلامها" },
+				{ word: "مكتبة", example: "تحتوي المكتبة على آلاف الكتب القيمة" },
+				{ word: "مجتهدة", example: "الفتاة المجتهدة تحقق أحلامها" },
 			],
 			end: [
 				{ word: "بيت", example: "عدنا إلى بيتنا بعد رحلة طويلة" },
-				{ word: "حياة", example: "الصحة نعمة في الحياة" },
-				{ word: "خطأ", example: "الاعتراف بالخطأ فضيلة" },
+				{ word: "حسنت", example: "لقد حسنت أدائي بعد التدريب المكثف" },
+				{ word: "حالت", example: "حالت الظروف دون تحقيق المشروع" },
 			],
 		},
 	},
@@ -119,12 +119,12 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			middle: [
 				{ word: "مثل", example: "هذا المثل يعبر عن الحكمة" },
 				{ word: "كثبان", example: "تلال الرمال تسمى كثبان" },
-				{ word: "حقيقة", example: "يجب أن نبحث عن الحقيقة" },
+				{ word: "مثمر", example: "كان الحوار مثمرًا بين الطرفين" },
 			],
 			end: [
-				{ word: "مشهد", example: "كان المشهد مؤثرًا جدًا" },
-				{ word: "فرح", example: "عم الفرح أرجاء المكان" },
-				{ word: "بحر", example: "سبحنا في البحر حتى المساء" },
+				{ word: "بحث", example: "قمتُ بإجراء بحث علمي حول هذا الموضوع" },
+				{ word: "حدث", example: "كان الحدث مهمًا للجميع" },
+				{ word: "نفث", example: "نفث المدخن دخانه في الهواء" },
 			],
 		},
 	},
@@ -149,8 +149,8 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			end: [
 				{ word: "برج", example: "شاهدنا البرج العالي" },
-				{ word: "حاج", example: "عاد الحاج من مكة" },
-				{ word: "خبز", example: "أكلت خبزًا طازجًا" },
+				{ word: "حجاج", example: "عاد الحجاج من مكة" },
+				{ word: "طازج", example: "أكلت الخبز الطازج" },
 			],
 		},
 	},
@@ -169,7 +169,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "حذاء", example: "اشتريت حذاءً جديدًا" },
 			],
 			middle: [
-				{ word: "مدرسة", example: "ذهبت إلى المدرسة باكرًا" },
+				{ word: "محاولة", example: "المحاولة هي الخطوة الأولى نحو النجاح" },
 				{ word: "محبة", example: "المحبة أساس العلاقات" },
 				{ word: "سحاب", example: "غطى السحاب السماء" },
 			],
@@ -200,9 +200,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "سخان", example: "أصلحت السخان المعطوب" },
 			],
 			end: [
-				{ word: "روح", example: "الروح سر الحياة" },
-				{ word: "فلاح", example: "يعمل الفلاح في الحقل" },
-				{ word: "ملح", example: "أضفت قليلًا من الملح للطعام" },
+				{ word: "شيخ", example: "الشيخ معروف بحكمته ورجاحة عقله" },
+				{ word: "صرخ", example: "صرخ الطفل عند رؤية الحشرة" },
+				{ word: "فخ", example: "وقف الصياد على الفخ منتظرًا فريسته" },
 			],
 		},
 	},
@@ -223,7 +223,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			middle: [
 				{ word: "مدينة", example: "زرت مدينة جميلة" },
 				{ word: "حديقة", example: "لعب الأطفال في الحديقة" },
-				{ word: "سدادة", example: "أصلحت السدادة المعطوبة" },
+				{ word: "هدوء", example: "الهدوء ضروري في المكتبات" },
 			],
 			end: [
 				{ word: "عقد", example: "اشترت أمي عقدًا جميلاً" },
@@ -252,9 +252,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "سذاجة", example: "تعجبني سذاجة الأطفال" },
 			],
 			end: [
-				{ word: "عرض", example: "شاهدت عرضًا مسرحيًا" },
-				{ word: "جهد", example: "بذلت جهدًا كبيرًا" },
-				{ word: "وعد", example: "أوفى الرجل بوعده" },
+				{ word: "مآخذ", example: "كان للمشروع عدة مآخذ تحتاج إلى إصلاح" },
+				{ word: "مغذ", example: "الحليب مغذٍ للأطفال" },
+				{ word: "حاذ", example: "حاذَ السائق سيارته بجانب الرصيف" },
 			],
 		},
 	},
@@ -269,7 +269,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 		forms: {
 			start: [
 				{ word: "رجل", example: "رأيت رجلاً طويلاً" },
-				{ word: "ريح", example: "هبت ريح قوية" },
+				{ word: "رياح", example: "هبت رياح قوية" },
 				{ word: "رسالة", example: "كتبت رسالة لصديقي" },
 			],
 			middle: [
@@ -280,7 +280,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			end: [
 				{ word: "بحر", example: "سبحنا في البحر" },
 				{ word: "زهر", example: "تفتح زهر الربيع" },
-				{ word: "فكر", example: "أعجبتني فكرتك" },
+				{ word: "تفكير", example: "أعجبني تفكيرك" },
 			],
 		},
 	},
@@ -301,11 +301,11 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			middle: [
 				{ word: "مزرعة", example: "زرت مزرعة عمي" },
 				{ word: "حزين", example: "بدا الطفل حزينًا" },
-				{ word: "سعادة", example: "عمت السعادة المكان" },
+				{ word: "مزاج", example: "تحسن مزاجي اليوم" },
 			],
 			end: [
 				{ word: "عز", example: "حافظ على عزتك" },
-				{ word: "مزاج", example: "تحسن مزاجي اليوم" },
+				{ word: "كنز", example: "اكتشف العلماء كنزًا أثريًا" },
 				{ word: "جوز", example: "أكلت حبات من الجوز" },
 			],
 		},
@@ -325,14 +325,14 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "ساعة", example: "اشتريت ساعة جديدة" },
 			],
 			middle: [
-				{ word: "كتاب", example: "قرأت كتابًا شيقًا" },
+				{ word: "مسار", example: "سلكت السيارة مسارًا مختلفًا" },
 				{ word: "مسجد", example: "صليت في المسجد" },
 				{ word: "فسحة", example: "خرجنا في فسحة مدرسية" },
 			],
 			end: [
-				{ word: "نور", example: "أضاء نور المصباح" },
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
+				{ word: "نفس", example: "النفس تحتاج إلى راحة" },
+				{ word: "جلس", example: "جلس الطفل بجانب والديه" },
+				{ word: "درس", example: "أكمل الطالب درسه بنجاح" },
 			],
 		},
 	},
@@ -346,9 +346,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			"حرف الشين هو ثالث عشر حروف الهجاء العربية، ينطق مثل السين لكن مع خروج صوت أكثر حدة.",
 		forms: {
 			start: [
-				{ word: "سفينة", example: "أبحرت السفينة في المحيط" },
-				{ word: "سحاب", example: "غطى السحاب السماء" },
-				{ word: "ساعة", example: "اشتريت ساعة جديدة" },
+				{ word: "شروق", example: "شروق الشمس منظر جميل" },
+				{ word: "شركة", example: "الشركة نجحت في السوق المحلي" },
+				{ word: "شباب", example: "الشباب هم أمل المستقبل" },
 			],
 			middle: [
 				{ word: "مشهد", example: "كان المشهد رائعًا" },
@@ -358,7 +358,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			end: [
 				{ word: "فراش", example: "نام الطفل على الفراش" },
 				{ word: "نقاش", example: "جرى نقاش هادئ" },
-				{ word: "وشاح", example: "ارتدت وشاحًا جميلاً" },
+				{ word: "رعش", example: "رعش الطفل من البرد القارس" },
 			],
 		},
 	},
@@ -382,9 +382,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "عصفور", example: "غرد العصفور على الشجرة" },
 			],
 			end: [
-				{ word: "قلب", example: "يجب العناية بصحة القلب" },
-				{ word: "حليب", example: "شربت كوبًا من الحليب" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "حرص", example: "حرص المعلم على توضيح الدرس" },
+				{ word: "خصص", example: "خصصت الشركة موارد إضافية" },
+				{ word: "لص", example: "تم القبض على اللص أثناء محاولته الهروب" },
 			],
 		},
 	},
@@ -408,9 +408,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "قضية", example: "نوقشت القضية بجدية" },
 			],
 			end: [
-				{ word: "حقل", example: "زرع الفلاح الحقل" },
-				{ word: "مفتاح", example: "نسيت المفتاح في المنزل" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "أرض", example: "الأرض مصدر الحياة" },
+				{ word: "بيض", example: "أضفت البيض إلى الكعكة" },
+				{ word: "قرض", example: "حصلت على قرض من البنك" },
 			],
 		},
 	},
@@ -434,8 +434,8 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "عطش", example: "شعرت بالعطش الشديد" },
 			],
 			end: [
-				{ word: "حفط", example: "حفظ الطالب الدرس" },
-				{ word: "فطور", example: "تناولت الفطور صباحًا" },
+				{ word: "ربط", example: "يجب ربط الحزام أثناء القيادة" },
+				{ word: "مخطط", example: "لدي مخطط واضح لأهدافي" },
 				{ word: "قط", example: "لعب الطفل مع القط" },
 			],
 		},
@@ -461,7 +461,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			end: [
 				{ word: "ملحظ", example: "كان الملحظ واضحًا" },
-				{ word: "مزاج", example: "تحسن مزاجي اليوم" },
+				{ word: "حفظ", example: "حفظ الطالب درسه جيدًا" },
 				{ word: "حظ", example: "كان يومي مليئًا بالحظ" },
 			],
 		},
@@ -482,13 +482,13 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			middle: [
 				{ word: "معلم", example: "المعلم يشرح الدرس" },
-				{ word: "حقل", example: "زرع الفلاح الحقل" },
+				{ word: "معرفة", example: "المعرفة تنير العقول" },
 				{ word: "سعادة", example: "عمت السعادة المكان" },
 			],
 			end: [
-				{ word: "سماء", example: "تطلعنا إلى السماء" },
-				{ word: "عناء", example: "تحمل المشقة والعناء" },
-				{ word: "بناء", example: "شاهدت بناء المنزل" },
+				{ word: "منع", example: "منع التدخين في الأماكن العامة" },
+				{ word: "طبع", example: "طبع الكتاب بتصميم أنيق" },
+				{ word: "سمع", example: "سمع الطفل صوت الطيور في الصباح" },
 			],
 		},
 	},
@@ -508,12 +508,12 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			middle: [
 				{ word: "مغامرة", example: "خضنا مغامرة مثيرة" },
-				{ word: "حجرة", example: "جلست في الحجرة" },
-				{ word: "سعادة", example: "عمت السعادة المكان" },
+				{ word: "أغنية", example: "استمعت إلى أغنية جميلة" },
+				{ word: "مغزل", example: "استخدمت الجدة المغزل" },
 			],
 			end: [
-				{ word: "سفرجل", example: "أكلت فاكهة السفرجل" },
-				{ word: "مغزل", example: "استخدمت الجدة المغزل" },
+				{ word: "بلغ", example: "بلغ الخبر الجميع بسرعة" },
+				{ word: "صمغ", example: "استخدمت الصمغ في حصة الرسم" },
 				{ word: "فرغ", example: "فرغ الإناء من الماء" },
 			],
 		},
@@ -540,7 +540,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			end: [
 				{ word: "خوف", example: "شعرت بخوف شديد" },
 				{ word: "صيف", example: "حل فصل الصيف" },
-				{ word: "حف", example: "حف الطفل حول الشجرة" },
+				{ word: "هدف", example: "حقق اللاعب هدفًا رائعًا" },
 			],
 		},
 	},
@@ -566,7 +566,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			end: [
 				{ word: "ورق", example: "كتبت على الورق" },
 				{ word: "حق", example: "ناضل من أجل الحق" },
-				{ word: "شق", example: "شق الطريق في الجبل" },
+				{ word: "سبق", example: "سبق الطالب زملاءه في الإجابة" },
 			],
 		},
 	},
@@ -590,9 +590,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "سكر", example: "أضفت السكر للشاي" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "برك", example: "برك الماء تكونت بعد المطر" },
+				{ word: "هلك", example: "هلك الجنود في المعركة" },
+				{ word: "ملاك", example: "الطفل يملك قلبًا مثل الملاك" },
 			],
 		},
 	},
@@ -606,7 +606,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			"حرف اللام هو الثالث والعشرون في ترتيب الحروف الهجائية العربية، ينطق بوضع طرف اللسان على الثنايا العليا.",
 		forms: {
 			start: [
-				{ word: "ليمون", example: "عصرت ليمونة في العصير" },
+				{ word: "ليمون", example: "عصير الليمون" },
 				{ word: "لوز", example: "أكلت حبات من اللوز" },
 				{ word: "لعبة", example: "اشتريت لعبة جديدة" },
 			],
@@ -617,7 +617,7 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			end: [
 				{ word: "جبل", example: "تسلقنا الجبل الشاهق" },
-				{ word: "أجل", example: "نعم، أجل سأفعل ذلك" },
+				{ word: "الحل", example: "وجد المهندس الحل للمشكلة" },
 				{ word: "خيل", example: "شاهدت الخيل تركض" },
 			],
 		},
@@ -638,13 +638,13 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			middle: [
 				{ word: "كمبيوتر", example: "عملت على الكمبيوتر" },
-				{ word: "حمار", example: "رأيت حمارًا في القرية" },
+				{ word: "جميل", example: "المنظر جميل جدًا" },
 				{ word: "سمكة", example: "اصطدت سمكة كبيرة" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "العلم", example: "العلم أساس تقدم الأمم" },
+				{ word: "قلم", example: "استخدمت القلم الأزرق" },
+				{ word: "حكم", example: "حكم المباراة كان عادلًا" },
 			],
 		},
 	},
@@ -668,9 +668,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "سنارة", example: "أمسكت بالسنارة للصيد" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "اعلن", example: "أعلن المدير عن الخطة الجديدة" },
+				{ word: "سكن", example: "سكن الطلاب كان مريحًا" },
+				{ word: "حنين", example: "المغتربون يشعرون بالحنين الى وطنهم" },
 			],
 		},
 	},
@@ -690,13 +690,13 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			],
 			middle: [
 				{ word: "مهندس", example: "عمل المهندس بجد" },
-				{ word: "حلم", example: "راودني حلم غريب" },
+				{ word: "انتهى", example: "انتهى الدرس بسرعة" },
 				{ word: "سهل", example: "سار المسافر في السهل" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "فوه", example: "نطق الشيخ بالحكمة من فوه قلبه" },
+				{ word: "اله", example: "لا اله الا الله" },
+				{ word: "وجه", example: "كان وجه القمر مشرقًا في الليل" },
 			],
 		},
 	},
@@ -720,9 +720,9 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 				{ word: "سور", example: "بنوا سورًا حول الحديقة" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "نحو", example: "اتجهت السيارة نحو المدينة" },
+				{ word: "نمو", example: "النمو الاقتصادي ضروري للتقدم" },
+				{ word: "سرو", example: "السرو شجرة دائمة الخضرة" },
 			],
 		},
 	},
@@ -743,12 +743,12 @@ export const lettersData: Partial<Record<ArabicLettersKeys, LetterData>> = {
 			middle: [
 				{ word: "بيت", example: "عدت إلى البيت مساءً" },
 				{ word: "حياة", example: "الحياة جميلة" },
-				{ word: "سيارة", example: "قادت السيارة بسرعة" },
+				{ word: "سيارة", example: "قدت السيارة بسرعة" },
 			],
 			end: [
-				{ word: "بحر", example: "سبحنا في البحر" },
-				{ word: "خير", example: "بحثت عن الخير للناس" },
-				{ word: "كتاب", example: "قرأت الكتاب كاملاً" },
+				{ word: "مضي", example: "مضي الوقت بسرعة اليوم" },
+				{ word: "النهي", example: "النهي عن الكذب من القيم المهمة" },
+				{ word: "سعي", example: "السعي وراء النجاح مطلوب" },
 			],
 		},
 	},
