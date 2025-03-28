@@ -187,7 +187,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في بداية الكلمة
+										:في بداية الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.start.map((ex, i) => (
@@ -230,7 +230,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في وسط الكلمة
+										:في وسط الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.middle.map((ex, i) => (
@@ -267,7 +267,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في نهاية الكلمة
+										:في نهاية الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.end.map((ex, i) => (
