@@ -1,11 +1,18 @@
 // components/numbers/NumberPage.tsx
 "use client";
 import { Button } from "@/components/ui/button";
+import { numberOcrApi } from "@/utils/api";
 import { ArabicNumeralsKeys } from "@/utils/arabicNumerals";
 import { numbersData } from "@/utils/numbersData";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+import {
+	FaArrowLeft,
+	FaEraser,
+	FaPencilAlt,
+	FaSpinner,
+	FaTimes,
+} from "react-icons/fa";
 import AmalNavbar from "../amalNavbar";
 
 export default function NumberPage({
@@ -24,6 +31,8 @@ export default function NumberPage({
 	const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [prediction, setPrediction] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [confidence, setConfidence] = useState<number | null>(null);
 
 	const currentNumber = numbersData[params.number];
 
@@ -39,12 +48,14 @@ export default function NumberPage({
 				ctx.lineCap = "round";
 				ctx.lineJoin = "round";
 				ctx.strokeStyle = "#1E3A6E";
-				ctx.lineWidth = 3;
+				ctx.lineWidth = 15;
 				ctx.fillStyle = "white";
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				ctxRef.current = ctx;
 			}
 			setAccuracyResult(null);
+			setPrediction(null);
+			setConfidence(null);
 		}
 	}, [showPad]);
 
@@ -69,16 +80,25 @@ export default function NumberPage({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
+		// إعدادات الممحاة
+		if (isErasing) {
+			ctx.globalCompositeOperation = "source-over";
+			ctx.strokeStyle = "#ffffff"; // لون الخلفية الأبيض
+			ctx.lineWidth = 20;
+		}
+		// إعدادات القلم
+		else {
+			ctx.globalCompositeOperation = "source-over";
+			ctx.strokeStyle = "#000000";
+			ctx.lineWidth = 15;
+		}
+
 		ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-		ctx.strokeStyle = "#000000";
-		ctx.lineWidth = 15;
-		ctx.lineCap = "round";
 		ctx.stroke();
 	};
 
 	const stopDrawing = () => {
 		if (!ctxRef.current) return;
-		// isDrawing.current = false;
 		setIsDrawing(false);
 		ctxRef.current.closePath();
 	};
@@ -90,22 +110,65 @@ export default function NumberPage({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
-		ctx.fillStyle = "#ffffff";
+		ctx.fillStyle = "white";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		setPrediction(null);
+		setAccuracyResult(null);
+		setConfidence(null);
 	};
 
-	const handleSubmitDrawing = () => {
-		const randomAccuracy = Math.floor(Math.random() * 30) + 70;
-		const isCorrect = randomAccuracy > 80;
+	const handleSubmitDrawing = async () => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
 
-		setAccuracyResult({
-			correct: isCorrect,
-			accuracy: randomAccuracy,
-			feedback: isCorrect
-				? "رسمة ممتازة! استمر في الممارسة"
-				: "حاول مرة أخرى وركز على الشكل الصحيح",
-		});
+		setIsLoading(true);
+		setAccuracyResult(null);
+
+		const dataUrl = canvas.toDataURL("image/png");
+		const blob = await (await fetch(dataUrl)).blob();
+
+		const formData = new FormData();
+		formData.append("image", blob, "drawing.png");
+
+		try {
+			const response = await fetch(numberOcrApi, {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+
+			const data = await response.json();
+			const predictedDigit = data.character;
+			const predictionConfidence = data.confidence;
+
+			const isCorrect = predictedDigit === currentNumber!.value.toString();
+
+			// تعيين الدقة بناءً على صحة التوقع
+			const finalAccuracy = isCorrect ? predictionConfidence : 0;
+
+			setAccuracyResult({
+				correct: isCorrect,
+				accuracy: finalAccuracy,
+				feedback: isCorrect
+					? "رسمة ممتازة! استمر في الممارسة"
+					: "حاول مرة أخرى وركز على الشكل الصحيح",
+			});
+
+			setPrediction(predictedDigit);
+			setConfidence(predictionConfidence);
+		} catch (error) {
+			console.error("Error:", error);
+			setAccuracyResult({
+				correct: false,
+				accuracy: 0,
+				feedback: "حدث خطأ أثناء معالجة الرسمة",
+			});
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	if (!currentNumber) {
@@ -282,8 +345,6 @@ export default function NumberPage({
 							onMouseMove={draw}
 							onMouseUp={stopDrawing}
 							onMouseLeave={stopDrawing}
-							// onTouchStart={startDrawing}
-							// onTouchMove={draw}
 							onTouchEnd={stopDrawing}
 						/>
 
@@ -299,8 +360,16 @@ export default function NumberPage({
 							<Button
 								className="bg-[#1E3A6E] text-white"
 								onClick={handleSubmitDrawing}
+								disabled={isLoading}
 							>
-								إرسال الرسمة
+								{isLoading ? (
+									<>
+										<FaSpinner className="mr-2 animate-spin" />
+										جاري المعالجة...
+									</>
+								) : (
+									"إرسال الرسمة"
+								)}
 							</Button>
 						</div>
 
@@ -312,8 +381,9 @@ export default function NumberPage({
 									{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
 								</p>
 								<p className="text-gray-600">
-									الدقة: {accuracyResult.accuracy}%
+									الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}%
 								</p>
+								<p className="text-gray-600">الرقم المتوقع: {prediction}</p>
 								{accuracyResult.feedback && (
 									<p className="mt-2 text-sm text-gray-500">
 										{accuracyResult.feedback}
