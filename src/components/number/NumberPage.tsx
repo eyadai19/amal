@@ -197,8 +197,35 @@ export default function NumberPage({
 						</div>
 					</div>
 				</div>
+				{/* Practice Section */}
+				<div className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
+					<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
+						تمرين الكتابة
+					</h2>
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+						{[1, 2, 3].map((size) => (
+							<div key={size} className="flex flex-col items-center">
+								<div className="mb-3 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-[#1E3A6E]/30 bg-[#F5F9FF] md:h-48">
+									<span
+										className={`text-${size * 4}xl text-[#1E3A6E] opacity-50`}
+									>
+										{currentNumber.numeral}
+									</span>
+								</div>
+								<Button
+									variant="outline"
+									className="w-full border-[#1E3A6E] text-[#1E3A6E] transition-all hover:bg-[#1E3A6E] hover:text-white"
+									onClick={() => setShowPad(true)}
+								>
+									اكتب الرقم بحجم {size}
+								</Button>
+							</div>
+						))}
+					</div>
+				</div>
 			</div>
 
+			{/* draw Section */}
 			{showPad && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-4 shadow-xl md:p-6">
