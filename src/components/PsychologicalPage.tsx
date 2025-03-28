@@ -9,6 +9,7 @@ import {
 	FaStop,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
+import { textToSpeech } from "@/utils/tts";
 
 type Message = {
 	id: string;
@@ -102,40 +103,20 @@ export default function PsychologicalSupport() {
 		}
 	};
 
-	const toggleAudioPlayback = (messageId: string) => {
-		const audio = audioRefs.current[messageId];
+	const toggleAudioPlayback = async (messageId: string) => {
+		const message = messages.find((m) => m.id === messageId);
+		if (!message) return;
 
-		if (!audio) {
-			// محاكاة تحويل النص إلى كلام
-			const audioUrl = `https://example.com/tts?text=${encodeURIComponent(
-				messages.find((m) => m.id === messageId)?.text || "",
-			)}`;
-
-			const newAudio = new Audio(audioUrl);
-			audioRefs.current[messageId] = newAudio;
-
-			newAudio.onplay = () => {
-				setIsPlaying(true);
-				setActiveAudioId(messageId);
-			};
-
-			newAudio.onpause = () => {
-				setIsPlaying(false);
-				setActiveAudioId(null);
-			};
-
-			newAudio.onended = () => {
-				setIsPlaying(false);
-				setActiveAudioId(null);
-			};
-
-			newAudio.play();
+		if (activeAudioId === messageId && isPlaying) {
+			window.speechSynthesis.cancel();
+			setIsPlaying(false);
+			setActiveAudioId(null);
 		} else {
-			if (isPlaying && activeAudioId === messageId) {
-				audio.pause();
-			} else {
-				audio.play();
-			}
+			setIsPlaying(true);
+			setActiveAudioId(messageId);
+			await textToSpeech(message.text);
+			setIsPlaying(false);
+			setActiveAudioId(null);
 		}
 	};
 
