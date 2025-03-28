@@ -1,11 +1,10 @@
 "use client";
 import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import AmalNavbar from "../amalNavbar";
 import Link from "next/link";
-import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
-
+import { useRouter } from "next/navigation";
+import { FaArrowLeft } from "react-icons/fa";
+import AmalNavbar from "../amalNavbar";
 
 const arabicNumberNames: Record<string, string> = {
 	ten: "عشرة",
@@ -20,8 +19,8 @@ const arabicNumberNames: Record<string, string> = {
 	hundred: "مائة",
 	thousand: "ألف",
 	million: "مليون",
-	billion: "مليار"
-  };
+	billion: "مليار",
+};
 
 export default function NumbersPage() {
 	const router = useRouter();
@@ -46,13 +45,15 @@ export default function NumbersPage() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
 			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
-			<div className="ml-15 mt-5 mb-6 md:mb-8 flex justify-start items-start gap-4 w-full">
+			<div className="mt-5 mb-6 ml-15 flex w-full items-start justify-start gap-4 md:mb-8">
 				<Link
 					href="/literacy"
 					className="flex items-center text-[#1E3A6E] hover:text-[#3f5680]"
 				>
 					<FaArrowLeft className="mr-2" />
-					<span className="text-sm md:text-base ">العودة إلى القسم التعليمي</span>
+					<span className="text-sm md:text-base">
+						العودة إلى القسم التعليمي
+					</span>
 				</Link>
 				<div className="hidden md:block md:w-8"></div>
 			</div>
@@ -115,11 +116,12 @@ export default function NumbersPage() {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
 							onClick={() => router.push(`/numbers/${key}`)}
-							>
+						>
 							<div className="text-center">
 								<div className="text-2xl">{number}</div>
 								<div className="text-sm text-gray-500">
-								{arabicNumberNames[key] || key} {/* Fallback to English if no Arabic name */}
+									{arabicNumberNames[key] || key}{" "}
+									{/* Fallback to English if no Arabic name */}
 								</div>
 							</div>
 						</motion.div>

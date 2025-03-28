@@ -1,15 +1,15 @@
 "use client";
-import AmalNavbar from "./amalNavbar";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { FaVolumeUp } from "react-icons/fa";
+import AmalNavbar from "./amalNavbar";
 
 export default function HomePage() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const playAudio = (audioPath: string) => {
 		const audio = new Audio(audioPath);
 		audio.play();
-	  };
+	};
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -57,7 +57,6 @@ export default function HomePage() {
 				id="home"
 				className="flex flex-1 items-center justify-center p-10 pt-20"
 			>
-				
 				<div className="grid w-full max-w-6xl grid-cols-1 gap-10 pt-15 md:grid-cols-2">
 					<motion.img
 						src="../image/logo/LOGO.png"
@@ -68,11 +67,11 @@ export default function HomePage() {
 						transition={{ duration: 1, ease: "easeOut" }}
 						whileHover={{ scale: 1.1 }}
 					/>
-					<div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 relative">
+					<div className="relative grid w-full grid-cols-1 gap-6 md:grid-cols-2">
 						{categories.map((category, index) => (
 							<div key={index} className="relative">
 								<FaVolumeUp
-									className={`absolute -top-6 right-6 translate-x-1/2 text-2xl cursor-pointer ${category.textColor}`}
+									className={`absolute -top-6 right-6 translate-x-1/2 cursor-pointer text-2xl ${category.textColor}`}
 									onClick={() => playAudio(category.audio)}
 								/>
 
@@ -109,9 +108,9 @@ export default function HomePage() {
 					viewport={{ once: true }}
 				>
 					<h2 className="text-4xl font-bold text-[#234330]">من نحن</h2>
-					<FaVolumeUp 
-						className="inline-block ml-2 cursor-pointer " 
-						onClick={() => playAudio("../audio/home/16.mp3")} 
+					<FaVolumeUp
+						className="ml-2 inline-block cursor-pointer"
+						onClick={() => playAudio("../audio/home/16.mp3")}
 					/>
 					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
 						<p>
@@ -144,9 +143,9 @@ export default function HomePage() {
 					viewport={{ once: true }}
 				>
 					<h2 className="text-4xl font-bold text-[#234330]">خدماتنا</h2>
-					<FaVolumeUp 
-						className="inline-block ml-2 cursor-pointer" 
-						onClick={() => playAudio("../audio/home/18.mp3")} 
+					<FaVolumeUp
+						className="ml-2 inline-block cursor-pointer"
+						onClick={() => playAudio("../audio/home/18.mp3")}
 					/>
 					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
 						<p>

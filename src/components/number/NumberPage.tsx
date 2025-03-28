@@ -47,7 +47,7 @@ export default function NumberPage({
 			setAccuracyResult(null);
 		}
 	}, [showPad]);
-	
+
 	const startDrawing = (e: React.MouseEvent) => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -114,7 +114,7 @@ export default function NumberPage({
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
-					<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 			<div className="container mx-auto max-w-6xl">
 				{/* Header */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">
@@ -200,107 +200,107 @@ export default function NumberPage({
 			</div>
 
 			{showPad && (
-							<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-								<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-4 shadow-xl md:p-6">
-									<div className="mb-4 flex items-center justify-between">
-										<h3 className="text-2xl font-bold text-[#1E3A6E]">
-											لوحة الكتابة
-										</h3>
-										<div className="flex space-x-4">
-											<button
-												className={`rounded-full p-2 ${!isErasing ? "bg-[#1E3A6E] text-white" : "bg-gray-200"}`}
-												onClick={() => setIsErasing(false)}
-												title="قلم"
-											>
-												<FaPencilAlt />
-											</button>
-											<button
-												className={`rounded-full p-2 ${isErasing ? "bg-[#C7BA9F] text-white" : "bg-gray-200"}`}
-												onClick={() => setIsErasing(true)}
-												title="ممحاة"
-											>
-												<FaEraser />
-											</button>
-											<button
-												className="rounded-full bg-gray-200 p-2 hover:bg-gray-300"
-												onClick={clearCanvas}
-												title="مسح الكل"
-											>
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													className="h-5 w-5"
-													viewBox="0 0 20 20"
-													fill="currentColor"
-												>
-													<path
-														fillRule="evenodd"
-														d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-														clipRule="evenodd"
-													/>
-												</svg>
-											</button>
-											<button
-												className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600"
-												onClick={() => setShowPad(false)}
-												title="إغلاق"
-											>
-												<FaTimes />
-											</button>
-										</div>
-									</div>
-									<canvas
-										ref={canvasRef}
-										className="h-64 w-full touch-none rounded-lg border-2 border-gray-300"
-										onMouseDown={startDrawing}
-										onMouseMove={draw}
-										onMouseUp={stopDrawing}
-										onMouseLeave={stopDrawing}
-										// onTouchStart={startDrawing}
-										// onTouchMove={draw}
-										onTouchEnd={stopDrawing}
-									/>
-			
-									<div className="mt-4 flex justify-between">
-										<Button
-											variant="outline"
-											className="border-red-500 text-red-500"
-											onClick={clearCanvas}
-										>
-											مسح الكل
-										</Button>
-			
-										<Button
-											className="bg-[#1E3A6E] text-white"
-											onClick={handleSubmitDrawing}
-										>
-											إرسال الرسمة
-										</Button>
-									</div>
-			
-									{accuracyResult && (
-										<div className="mt-4 rounded-lg bg-gray-100 p-3 text-center">
-											<p
-												className={`text-lg font-medium ${accuracyResult.correct ? "text-green-600" : "text-red-600"}`}
-											>
-												{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
-											</p>
-											<p className="text-gray-600">
-												الدقة: {accuracyResult.accuracy}%
-											</p>
-											{accuracyResult.feedback && (
-												<p className="mt-2 text-sm text-gray-500">
-													{accuracyResult.feedback}
-												</p>
-											)}
-										</div>
-									)}
-			
-									<div className="mt-4 text-center text-gray-500">
-										اسحب بإصبعك أو بالفأرة للكتابة
-									</div>
-								</div>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+					<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-4 shadow-xl md:p-6">
+						<div className="mb-4 flex items-center justify-between">
+							<h3 className="text-2xl font-bold text-[#1E3A6E]">
+								لوحة الكتابة
+							</h3>
+							<div className="flex space-x-4">
+								<button
+									className={`rounded-full p-2 ${!isErasing ? "bg-[#1E3A6E] text-white" : "bg-gray-200"}`}
+									onClick={() => setIsErasing(false)}
+									title="قلم"
+								>
+									<FaPencilAlt />
+								</button>
+								<button
+									className={`rounded-full p-2 ${isErasing ? "bg-[#C7BA9F] text-white" : "bg-gray-200"}`}
+									onClick={() => setIsErasing(true)}
+									title="ممحاة"
+								>
+									<FaEraser />
+								</button>
+								<button
+									className="rounded-full bg-gray-200 p-2 hover:bg-gray-300"
+									onClick={clearCanvas}
+									title="مسح الكل"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										className="h-5 w-5"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+									>
+										<path
+											fillRule="evenodd"
+											d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								</button>
+								<button
+									className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600"
+									onClick={() => setShowPad(false)}
+									title="إغلاق"
+								>
+									<FaTimes />
+								</button>
+							</div>
+						</div>
+						<canvas
+							ref={canvasRef}
+							className="h-64 w-full touch-none rounded-lg border-2 border-gray-300"
+							onMouseDown={startDrawing}
+							onMouseMove={draw}
+							onMouseUp={stopDrawing}
+							onMouseLeave={stopDrawing}
+							// onTouchStart={startDrawing}
+							// onTouchMove={draw}
+							onTouchEnd={stopDrawing}
+						/>
+
+						<div className="mt-4 flex justify-between">
+							<Button
+								variant="outline"
+								className="border-red-500 text-red-500"
+								onClick={clearCanvas}
+							>
+								مسح الكل
+							</Button>
+
+							<Button
+								className="bg-[#1E3A6E] text-white"
+								onClick={handleSubmitDrawing}
+							>
+								إرسال الرسمة
+							</Button>
+						</div>
+
+						{accuracyResult && (
+							<div className="mt-4 rounded-lg bg-gray-100 p-3 text-center">
+								<p
+									className={`text-lg font-medium ${accuracyResult.correct ? "text-green-600" : "text-red-600"}`}
+								>
+									{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
+								</p>
+								<p className="text-gray-600">
+									الدقة: {accuracyResult.accuracy}%
+								</p>
+								{accuracyResult.feedback && (
+									<p className="mt-2 text-sm text-gray-500">
+										{accuracyResult.feedback}
+									</p>
+								)}
 							</div>
 						)}
+
+						<div className="mt-4 text-center text-gray-500">
+							اسحب بإصبعك أو بالفأرة للكتابة
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
