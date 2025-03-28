@@ -3,6 +3,25 @@ import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AmalNavbar from "../amalNavbar";
+import Link from "next/link";
+import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+
+
+const arabicNumberNames: Record<string, string> = {
+	ten: "عشرة",
+	twenty: "عشرون",
+	thirty: "ثلاثون",
+	forty: "أربعون",
+	fifty: "خمسون",
+	sixty: "ستون",
+	seventy: "سبعون",
+	eighty: "ثمانون",
+	ninety: "تسعون",
+	hundred: "مائة",
+	thousand: "ألف",
+	million: "مليون",
+	billion: "مليار"
+  };
 
 export default function NumbersPage() {
 	const router = useRouter();
@@ -27,6 +46,16 @@ export default function NumbersPage() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
 			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			<div className="ml-15 mt-5 mb-6 md:mb-8 flex justify-start items-start gap-4 w-full">
+				<Link
+					href="/literacy"
+					className="flex items-center text-[#1E3A6E] hover:text-[#3f5680]"
+				>
+					<FaArrowLeft className="mr-2" />
+					<span className="text-sm md:text-base ">العودة إلى القسم التعليمي</span>
+				</Link>
+				<div className="hidden md:block md:w-8"></div>
+			</div>
 
 			<motion.h1
 				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"
@@ -86,10 +115,12 @@ export default function NumbersPage() {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
 							onClick={() => router.push(`/numbers/${key}`)}
-						>
+							>
 							<div className="text-center">
 								<div className="text-2xl">{number}</div>
-								<div className="text-sm text-gray-500">{key}</div>
+								<div className="text-sm text-gray-500">
+								{arabicNumberNames[key] || key} {/* Fallback to English if no Arabic name */}
+								</div>
 							</div>
 						</motion.div>
 					))}

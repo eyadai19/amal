@@ -116,7 +116,7 @@ export default function LetterPage({
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
-			<AmalNavbar backgroundColor="#1E3A6E" activeSection={"literacy"} />
+			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 			<div className="container mx-auto max-w-6xl">
 				{/* Header with back button */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">
@@ -138,22 +138,30 @@ export default function LetterPage({
 					{/* Letter image and description */}
 					<div className="lg:col-span-1">
 						<div className="flex h-full flex-col items-center rounded-2xl bg-white p-4 shadow-lg md:p-6">
-							<div className="mb-4 flex h-48 w-48 items-center justify-center md:h-64 md:w-64">
+							{/* Image remains at the top */}
+							<div className="mt-25 mb-4 flex h-48 w-48 items-center justify-center md:h-64 md:w-64">
 								<img
 									src={currentLetter.image}
 									alt={currentLetter.title}
 									className="max-h-full max-w-full object-contain"
 								/>
 							</div>
+
+							{/* Spacer to push content to the bottom */}
+							<div className="flex-grow"></div>
+
+							{/* Text description moved to the bottom */}
 							<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
 								{currentLetter.description}
 							</p>
-							<div className="mt-auto w-full">
+
+							{/* Button at the very bottom */}
+							<div className="w-full">
 								<Button
 									className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
 									onClick={() => setShowPad(true)}
 								>
-									جرب كتابة الحرف بنفسك!
+									!جرب كتابة الحرف بنفسك
 								</Button>
 							</div>
 						</div>
@@ -164,12 +172,12 @@ export default function LetterPage({
 						{/* Initial form */}
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
 							<div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
-								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-32 md:w-32">
+								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-40 md:w-40">
 									{currentLetter.start_image ? (
 										<img
 											src={currentLetter.start_image}
 											alt="شكل الحرف في البداية"
-											className="h-16 w-16 md:h-20 md:w-20"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -179,7 +187,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في بداية الكلمة
+										:في بداية الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.start.map((ex, i) => (
@@ -201,12 +209,12 @@ export default function LetterPage({
 						{/* Middle form */}
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
 							<div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
-								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-32 md:w-32">
+								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-40 md:w-40">
 									{currentLetter.middle_image ? (
 										<img
 											src={currentLetter.middle_image}
 											alt="شكل الحرف في الوسط"
-											className="h-16 w-16 md:h-20 md:w-20"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -222,7 +230,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في وسط الكلمة
+										:في وسط الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.middle.map((ex, i) => (
@@ -244,12 +252,12 @@ export default function LetterPage({
 						{/* End form */}
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
 							<div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
-								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-32 md:w-32">
+								<div className="flex h-24 w-24 items-center justify-center rounded-lg border border-[#1E3A6E]/20 bg-[#F5F9FF] md:h-40 md:w-40">
 									{currentLetter.end_image ? (
 										<img
 											src={currentLetter.end_image}
 											alt="شكل الحرف في النهاية"
-											className="h-16 w-16 md:h-20 md:w-20"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -259,7 +267,7 @@ export default function LetterPage({
 								</div>
 								<div className="flex-1">
 									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										في نهاية الكلمة
+										:في نهاية الكلمة
 									</h3>
 									<div className="text-right">
 										{currentLetter.forms.end.map((ex, i) => (
@@ -304,12 +312,12 @@ export default function LetterPage({
 							},
 						].map((item) => (
 							<div key={item.type} className="flex flex-col items-center">
-								<div className="mb-3 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-[#1E3A6E]/30 bg-[#F5F9FF] md:h-48">
+								<div className="mb-3 flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-[#1E3A6E]/30 bg-[#F5F9FF] md:h-50">
 									{item.image ? (
 										<img
 											src={item.image}
 											alt={`تمرين ${item.type}`}
-											className="h-20 w-20 opacity-50"
+											className="h-30 w-20 opacity-50"
 										/>
 									) : (
 										<span className="text-6xl text-[#1E3A6E] opacity-50">
