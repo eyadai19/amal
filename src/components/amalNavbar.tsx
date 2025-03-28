@@ -118,7 +118,7 @@ export default function AmalNavbar({
 				<div className="hidden items-center space-x-8 md:flex">
 					{isHomePage ? (
 						<>
-							<div className="flex space-x-6">
+							<div className="flex space-x-10">
 								<Link
 									href="/home#about"
 									className="text-lg font-medium transition hover:text-[#D8E5F0]"

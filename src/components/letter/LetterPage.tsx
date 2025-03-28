@@ -5,6 +5,7 @@ import { lettersData } from "@/utils/letterData";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+import AmalNavbar from "../amalNavbar";
 
 export default function LetterPage({
 	params,
@@ -114,7 +115,8 @@ export default function LetterPage({
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-8 md:p-6 md:pt-10">
+		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
+			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 			<div className="container mx-auto max-w-6xl">
 				{/* Header with back button */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">
@@ -175,7 +177,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.start_image}
 											alt="شكل الحرف في البداية"
-											className="h-16 w-16 md:h-25 md:w-25"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -212,7 +214,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.middle_image}
 											alt="شكل الحرف في الوسط"
-											className="h-16 w-16 md:h-25 md:w-25"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -255,7 +257,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.end_image}
 											alt="شكل الحرف في النهاية"
-											className="h-16 w-16 md:h-28 md:w-25"
+											className="h-16 w-16 md:h-23 md:w-20"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">

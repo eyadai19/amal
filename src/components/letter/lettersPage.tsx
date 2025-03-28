@@ -12,7 +12,7 @@ export default function LettersPage() {
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" />
+			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 			<div className="ml-15 mt-5 mb-6 md:mb-8 flex justify-start items-start gap-4 w-full">
 				<Link
 					href="/literacy"
