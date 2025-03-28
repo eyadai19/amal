@@ -7,70 +7,67 @@ import { FaBook, FaCalculator } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
 export default function LiteracyPage() {
-	const router = useRouter();
+  const router = useRouter();
 
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const toggleMenu = () => {
-		setIsMenuOpen(!isMenuOpen);
-	};
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#D8E5F0] to-[#A3B7D6] p-6 pt-24 font-sans">
+      <AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 
-			<motion.h1
-				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"
-				initial={{ opacity: 0, y: -50 }}
-				animate={{ opacity: 1, y: 0 }}
-			>
-				القسم التعليمي
-			</motion.h1>
+      <motion.h1
+        className="mb-16 text-center text-5xl font-extrabold text-[#1E3A6E] sm:text-6xl"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        القسم التعليمي
+      </motion.h1>
 
-			<div className="grid w-full max-w-4xl grid-cols-1 justify-center gap-10 sm:grid-cols-2">
-				<motion.div
-					className="flex h-[300px] w-full flex-col items-center rounded-2xl bg-white p-8 text-center shadow-md md:w-[350px] lg:w-[400px] xl:w-[450px]"
-					initial={{ opacity: 0, y: 50 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6 }}
-					whileHover={{ scale: 1.05 }}
-				>
-					<FaBook className="mx-auto mb-3 text-5xl text-[#1E3A6E]" />
-					<h2 className="text-xl font-semibold text-[#1E3A6E]">الأحرف</h2>
-					<div className="flex flex-grow items-center justify-center">
-						<p className="text-[#344A72FF]">
-							!تعلّم معنا القراءة والكتابة بطريقة بسيطة وفعّالة
-						</p>
-					</div>
-					<Button
-						className="mt-6 w-full bg-[#D8E5F0] text-[#1E3A6E] hover:bg-[#3f5680] hover:text-[#D8E5F0]"
-						onClick={() => router.push("/letters")}
-					>
-						!ابدأ التعلم
-					</Button>
-				</motion.div>
+      <div className="grid w-full max-w-5xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+        {/* Letters Card */}
+        <motion.div
+          className="flex h-[350px] w-full flex-col items-center justify-between rounded-3xl bg-white p-8 text-center shadow-xl transition-all transform hover:scale-105"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <FaBook className="mx-auto mb-6 text-6xl text-[#1E3A6E]" />
+          <h2 className="text-2xl font-semibold text-[#1E3A6E]">الأحرف</h2>
+          <p className="mt-4 text-lg text-[#344A72]">
+            تعلّم معنا القراءة والكتابة بطريقة بسيطة وفعّالة.
+          </p>
+          <Button
+            className="mt-6 w-full bg-[#1E3A6E] text-white hover:bg-[#3f5680] transition-all"
+            onClick={() => router.push("/letters")}
+          >
+            !ابدأ التعلم
+          </Button>
+        </motion.div>
 
-				<motion.div
-					className="flex h-[300px] w-full flex-col items-center rounded-2xl bg-white p-8 text-center shadow-md md:w-[350px] lg:w-[400px] xl:w-[450px]"
-					initial={{ opacity: 0, y: 50 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6 }}
-					whileHover={{ scale: 1.05 }}
-				>
-					<FaCalculator className="mx-auto mb-3 text-5xl text-[#1E3A6E]" />
-					<h2 className="text-xl font-semibold text-[#1E3A6E]">الأرقام</h2>
-					<div className="flex flex-grow items-center justify-center">
-						<p className="text-[#344A72FF]">
-							!تعلّم معنا الأرقام بطريقة بسيطة وفعالة
-						</p>
-					</div>
-					<Button
-						className="mt-6 w-full bg-[#D8E5F0] text-[#1E3A6E] hover:bg-[#3f5680] hover:text-[#D8E5F0]"
-						onClick={() => router.push("/numbers")}
-					>
-						!ابدأ التعلم
-					</Button>
-				</motion.div>
-			</div>
-		</div>
-	);
+        {/* Numbers Card */}
+        <motion.div
+          className="flex h-[350px] w-full flex-col items-center justify-between rounded-3xl bg-white p-8 text-center shadow-xl transition-all transform hover:scale-105"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <FaCalculator className="mx-auto mb-6 text-6xl text-[#1E3A6E]" />
+          <h2 className="text-2xl font-semibold text-[#1E3A6E]">الأرقام</h2>
+          <p className="mt-4 text-lg text-[#344A72]">
+            تعلّم معنا الأرقام بطريقة بسيطة وفعّالة.
+          </p>
+          <Button
+            className="mt-6 w-full bg-[#1E3A6E] text-white hover:bg-[#3f5680] transition-all"
+            onClick={() => router.push("/numbers")}
+          >
+            !ابدأ التعلم
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  );
 }

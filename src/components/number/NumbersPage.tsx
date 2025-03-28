@@ -28,7 +28,7 @@ export default function NumbersPage() {
 
 	// تصفية الأرقام الأساسية فقط (0-9) لعرضها في الشبكة
 	const basicNumbers = numbersWithKeys.filter(([key]) =>
-		[
+		[ 
 			"zero",
 			"one",
 			"two",
@@ -43,8 +43,9 @@ export default function NumbersPage() {
 	);
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
+		<div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#D8E5F0] to-[#A3B7D6] p-6 pt-24 font-sans">
 			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			
 			<div className="mt-5 mb-6 ml-15 flex w-full items-start justify-start gap-4 md:mb-8">
 				<Link
 					href="/literacy"
@@ -59,9 +60,10 @@ export default function NumbersPage() {
 			</div>
 
 			<motion.h1
-				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"
+				className="mb-16 text-center text-5xl font-extrabold text-[#1E3A6E] sm:text-6xl"
 				initial={{ opacity: 0, y: -50 }}
 				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.8 }}
 			>
 				الأرقام العربية
 			</motion.h1>
@@ -83,7 +85,7 @@ export default function NumbersPage() {
 
 			{/* قسم للأعداد الكبيرة */}
 			<motion.h2
-				className="mt-16 mb-8 text-center text-3xl font-bold text-[#1E3A6E]"
+				className="mt-16 mb-8 text-center text-3xl font-extrabold text-[#1E3A6E]"
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5 }}
