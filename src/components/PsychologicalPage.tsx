@@ -1,5 +1,7 @@
 "use client";
 
+import { startVoiceRecognition } from "@/utils/stt";
+import { textToSpeech } from "@/utils/tts";
 import { useEffect, useRef, useState } from "react";
 import {
 	FaMicrophone,
@@ -9,7 +11,6 @@ import {
 	FaStop,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
-import { textToSpeech } from "@/utils/tts";
 
 type Message = {
 	id: string;
@@ -28,17 +29,16 @@ export default function PsychologicalSupport() {
 		},
 	]);
 	const [inputText, setInputText] = useState("");
-	const [isRecording, setIsRecording] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
 	const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
 
-	// هذه الدالة تحاكي استدعاء API للدعم النفسي
-	// في التطبيق الحقيقي، ستستبدل هذه الدالة باستدعاء حقيقي للباكند
+	const [error, setError] = useState("");
+	const [isRecording, setIsRecording] = useState(false);
+
 	const getPsychologicalResponse = async (
 		userMessage: string,
 	): Promise<string> => {
-		// محاكاة استجابة من API مع ردود عشوائية
 		const responses = [
 			"أنا هنا لأسمعك. أخبرني المزيد عن ما تشعر به.",
 			"يبدو أنك تمر بوقت صعب. تذكر أن مشاعرك مشروعة ومهمة.",
@@ -48,7 +48,6 @@ export default function PsychologicalSupport() {
 			"أنا أسمعك وأقدّر صراحتك. الحياة قد تكون صعبة أحياناً ولكن هناك دائماً أمل.",
 		];
 
-		// محاكاة تأخير الشبكة
 		await new Promise((resolve) =>
 			setTimeout(resolve, 1000 + Math.random() * 2000),
 		);
@@ -59,7 +58,6 @@ export default function PsychologicalSupport() {
 	const handleSendMessage = async () => {
 		if (!inputText.trim()) return;
 
-		// إضافة رسالة المستخدم
 		const userMessage: Message = {
 			id: Date.now().toString(),
 			text: inputText,
@@ -69,7 +67,6 @@ export default function PsychologicalSupport() {
 		setMessages((prev) => [...prev, userMessage]);
 		setInputText("");
 
-		// الحصول على رد من البوت
 		const botResponseText = await getPsychologicalResponse(inputText);
 		const botMessage: Message = {
 			id: Date.now().toString(),
@@ -87,19 +84,21 @@ export default function PsychologicalSupport() {
 		}
 	};
 
-	const toggleRecording = () => {
-		// هنا سيتم تنفيذ منطق التسجيل الصوتي
-		setIsRecording(!isRecording);
+	const toggleRecording = async () => {
+		setError("");
+		try {
+			setIsRecording(true);
 
-		if (!isRecording) {
-			// محاكاة عملية التسجيل
-			console.log("بدء التسجيل...");
-		} else {
-			// محاكاة تحويل الصوت إلى نص
-			setTimeout(() => {
-				const recordedText = "هذا نص محاكى من الصوت المسجل";
-				setInputText(recordedText);
-			}, 1500);
+			// طلب إذن الميكروفون أولاً
+			await navigator.mediaDevices.getUserMedia({ audio: true });
+
+			const transcript = await startVoiceRecognition();
+			setInputText(transcript);
+		} catch (err) {
+			setError("يجب منح الإذن لاستخدام الميكروفون");
+			console.error("خطأ في الوصول للميكروفون:", err);
+		} finally {
+			setIsRecording(false);
 		}
 	};
 
@@ -120,7 +119,6 @@ export default function PsychologicalSupport() {
 		}
 	};
 
-	// تنظيف تأثيرات الصوت عند إلغاء تحميل المكون
 	useEffect(() => {
 		return () => {
 			Object.values(audioRefs.current).forEach((audio) => {
@@ -213,6 +211,7 @@ export default function PsychologicalSupport() {
 						<FaPaperPlane size={16} />
 					</button>
 				</div>
+				{error && <p className="mt-2 text-red-500">{error}</p>}
 			</div>
 		</div>
 	);
