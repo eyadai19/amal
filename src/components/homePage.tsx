@@ -1,248 +1,383 @@
 "use client";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { FaVolumeUp } from "react-icons/fa";
+import { FaArrowRight, FaVolumeUp } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
 export default function HomePage() {
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [activeHover, setActiveHover] = useState<number | null>(null);
+
 	const playAudio = (audioPath: string) => {
 		const audio = new Audio(audioPath);
 		audio.play();
-	};
-
-	const toggleMenu = () => {
-		setIsMenuOpen(!isMenuOpen);
 	};
 
 	const categories = [
 		{
 			title: "القسم التعليمي",
 			description: "!تعلّم معنا",
-			bgColor: "bg-[#D8E5F0]",
+			bgColor: "bg-gradient-to-br from-[#D8E5F0] to-[#A8C4E0]",
 			textColor: "text-[#1E3A6E]",
+			hoverColor: "hover:shadow-[#1E3A6E]/40",
 			href: "/literacy",
 			audio: "../audio/home/1.mp3",
+			icon: "📚",
 		},
 		{
 			title: "القسم المهني",
 			description: "!مسارك المهني",
-			bgColor: "bg-[#E49B97]",
+			bgColor: "bg-gradient-to-br from-[#E49B97] to-[#D87A75]",
 			textColor: "text-[#B84941]",
+			hoverColor: "hover:shadow-[#B84941]/40",
 			href: "/career",
 			audio: "../audio/home/2.mp3",
+			icon: "💼",
 		},
 		{
 			title: "القسم النفسي",
 			description: "!صحتك النفسية",
-			bgColor: "bg-[#E2C8D3]",
+			bgColor: "bg-gradient-to-br from-[#E2C8D3] to-[#D9A8BE]",
 			textColor: "text-[#582C5E]",
+			hoverColor: "hover:shadow-[#582C5E]/40",
 			href: "/psychological",
 			audio: "../audio/home/3.mp3",
+			icon: "🧠",
 		},
 		{
 			title: "القسم القانوني",
 			description: "!ثق بنا واسألنا ما تريد",
-			bgColor: "bg-[#FFCB99]",
+			bgColor: "bg-gradient-to-br from-[#FFCB99] to-[#FFB570]",
 			textColor: "text-[#D78448]",
+			hoverColor: "hover:shadow-[#D78448]/40",
 			href: "/legal",
 			audio: "../audio/home/4.mp3",
+			icon: "⚖️",
 		},
 	];
 
-	return (
-		<div className="flex h-670 flex-col scroll-smooth bg-[#E1D9D1]">
-			<AmalNavbar backgroundColor="#234330" activeSection={null} />
-			<div
-				id="home"
-				className="flex flex-1 items-center justify-center p-10 pt-20"
-			>
-				<div className="grid w-full max-w-6xl grid-cols-1 gap-10 pt-15 md:grid-cols-2">
-					<motion.img
-						src="../image/logo/LOGO.png"
-						alt="أمل Logo"
-						className="m-9 w-70"
-						initial={{ opacity: 0, scale: 0.8, y: -20 }}
-						animate={{ opacity: 1, scale: 1, y: 0 }}
-						transition={{ duration: 1, ease: "easeOut" }}
-						whileHover={{ scale: 1.1 }}
-					/>
-					<div className="relative grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-						{categories.map((category, index) => (
-							<div key={index} className="relative">
-								<FaVolumeUp
-									className={`absolute -top-6 right-6 translate-x-1/2 cursor-pointer text-2xl ${category.textColor}`}
-									onClick={() => playAudio(category.audio)}
-								/>
+	const services = [
+		{
+			title: "التعليم ومحو الأمية",
+			description:
+				"دروس تفاعلية تدعم الصوت والكتابة اليدوية لتطوير مهارات القراءة والكتابة بطرق مبتكرة.",
+			icon: "📚",
+			color: "bg-[#D8E5F0]",
+		},
+		{
+			title: "التوجيه المهني",
+			description:
+				"اختبارات تقييم المهارات وربط المستخدمين بفرص التدريب والعمل في مختلف المجالات.",
+			icon: "💼",
+			color: "bg-[#E49B97]",
+		},
+		{
+			title: "الدعم النفسي",
+			description:
+				"دردشة ذكية لتحليل المشاعر وتقديم استشارات نفسية مع الكشف المبكر عن علامات الاكتئاب.",
+			icon: "🧠",
+			color: "bg-[#E2C8D3]",
+		},
+		{
+			title: "المساعدة القانونية",
+			description:
+				"قاعدة بيانات قانونية ذكية وإمكانية التواصل مع محامين لتقديم الاستشارات القانونية.",
+			icon: "⚖️",
+			color: "bg-[#FFCB99]",
+		},
+		{
+			title: "التواصل المجتمعي",
+			description:
+				"مجموعات داعمة وورش عمل لتعزيز التواصل الاجتماعي وبناء شبكات العلاقات.",
+			icon: "🤝",
+			color: "bg-[#C8E2D3]",
+		},
+		{
+			title: "التتبع والتقييم",
+			description:
+				"نظام متكامل لمتابعة التقدم وتقييم التحسن في مختلف الجوانب التعليمية والمهنية.",
+			icon: "📊",
+			color: "bg-[#D3C8E2]",
+		},
+	];
 
-								<motion.a
-									href={category.href}
+	const contactMethods = [
+		{ icon: "📧", title: "البريد الإلكتروني", content: "Amal@gmail.com" },
+		{ icon: "📞", title: "رقم الهاتف", content: "+963 991 647 194" },
+		{ icon: "🌍", title: "الموقع الإلكتروني", content: "Amal.com" },
+		{ icon: "📍", title: "العنوان", content: "دمشق، سوريا" },
+	];
+
+	return (
+		<div className="min-h-screen bg-gradient-to-b from-[#F5F0EA] to-[#E1D9D1]">
+			<AmalNavbar backgroundColor="#234330" activeSection={null} />
+
+			{/* Hero Section */}
+			<section id="home" className="relative overflow-hidden">
+				<div className="absolute inset-0 bg-[url('/image/patterns/arabesque.png')] bg-cover opacity-10" />
+				<div className="container mx-auto flex min-h-[80vh] flex-col items-center justify-center px-4 py-12 sm:px-6 md:flex-row md:py-24">
+					<motion.div
+						className="relative z-10 mb-8 w-full text-center md:mb-0 md:w-1/2 md:pr-8 md:text-right"
+						initial={{ opacity: 0, x: -50 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ duration: 0.8 }}
+					>
+						<motion.img
+							src="../image/logo/LOGO.png"
+							alt="أمل Logo"
+							className="mx-auto w-56 drop-shadow-lg sm:w-64 md:w-72 lg:w-80"
+							initial={{ opacity: 0, scale: 0.8 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+							whileHover={{ scale: 1.05 }}
+						/>
+						<motion.h1
+							className="mt-6 text-3xl font-bold text-[#234330] sm:text-4xl md:mt-8 md:text-5xl"
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.8, delay: 0.4 }}
+						>
+							منصة <span className="text-[#4A8B5C]">أمل</span> للاندماج المجتمعي
+						</motion.h1>
+					</motion.div>
+
+					<motion.div
+						className="relative z-10 grid w-full grid-cols-1 gap-4 sm:gap-5 md:w-1/2 md:grid-cols-2 md:gap-6"
+						initial={{ opacity: 0, y: 50 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.8, delay: 0.6 }}
+					>
+						{categories.map((category, index) => (
+							<motion.div
+								key={index}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
+								whileHover={{ y: -5 }}
+								onMouseEnter={() => setActiveHover(index)}
+								onMouseLeave={() => setActiveHover(null)}
+								className="h-full transform transition-transform duration-300 hover:scale-[1.03]"
+							>
+								<div className="relative h-full">
+									<FaVolumeUp
+										className={`absolute -top-2 -right-2 z-20 cursor-pointer rounded-full bg-white p-1.5 text-xl shadow-md sm:-top-3 sm:-right-3 sm:p-2 sm:text-2xl ${category.textColor}`}
+										onClick={() => playAudio(category.audio)}
+									/>
+
+									<motion.a
+										href={category.href}
+										className={`block h-full rounded-xl p-4 shadow-lg transition-all duration-300 sm:rounded-2xl sm:p-6 ${category.bgColor} ${category.hoverColor} ${activeHover === index ? "shadow-xl" : "shadow-md"}`}
+									>
+										<div className="flex h-full flex-col items-start justify-between">
+											<div>
+												<span className="text-2xl sm:text-3xl">
+													{category.icon}
+												</span>
+												<h2
+													className={`mt-2 text-xl font-bold sm:mt-4 sm:text-2xl ${category.textColor}`}
+												>
+													{category.title}
+												</h2>
+												<p
+													className={`mt-1 text-base sm:mt-2 sm:text-lg ${category.textColor}`}
+												>
+													{category.description}
+												</p>
+											</div>
+											<motion.div
+												className={`mt-2 flex items-center sm:mt-4 ${category.textColor}`}
+												initial={{ x: 0 }}
+												animate={{ x: activeHover === index ? 5 : 0 }}
+												transition={{ duration: 0.3 }}
+											>
+												<span className="text-xs font-medium sm:text-sm">
+													ابدأ الرحلة
+												</span>
+												<FaArrowRight className="mr-1 sm:mr-2" />
+											</motion.div>
+										</div>
+									</motion.a>
+								</div>
+							</motion.div>
+						))}
+					</motion.div>
+				</div>
+			</section>
+
+			{/* About Section */}
+			<section id="about" className="relative py-12 sm:py-16 md:py-20">
+				<div className="absolute inset-0 bg-[#234330] opacity-5"></div>
+				<div className="container mx-auto px-4 sm:px-6">
+					<motion.div
+						initial={{ opacity: 0, y: 50 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.8 }}
+						viewport={{ once: true, margin: "-100px" }}
+						className="relative rounded-2xl bg-white p-6 shadow-xl sm:rounded-3xl sm:p-8 md:p-10"
+					>
+						<div className="flex items-center justify-center">
+							<h2 className="text-3xl font-bold text-[#234330] sm:text-4xl">
+								من نحن
+							</h2>
+							<FaVolumeUp
+								className="mr-3 cursor-pointer text-xl text-[#4A8B5C] sm:text-2xl"
+								onClick={() => playAudio("../audio/home/16.mp3")}
+							/>
+						</div>
+
+						<div className="mt-8 grid grid-cols-1 gap-8 md:mt-12 md:grid-cols-2 md:gap-12">
+							<div className="relative">
+								<div className="absolute top-0 -left-4 h-full w-1.5 rounded-full bg-gradient-to-b from-[#4A8B5C] to-[#234330] sm:-left-6 sm:w-2"></div>
+								<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
+									<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
+										رؤيتنا
+									</span>
+									نؤمن في <strong className="text-[#4A8B5C]">أمل</strong> بأن
+									لكل فرد الحق في فرصة ثانية لبناء مستقبل أفضل. نعمل على تسخير
+									التكنولوجيا الحديثة لخلق بيئة داعمة تمكن المفرج عنهم من تحقيق
+									الاندماج المجتمعي الكامل والاستقرار النفسي والمادي.
+								</p>
+							</div>
+
+							<div className="relative">
+								<div className="absolute top-0 -left-4 h-full w-1.5 rounded-full bg-gradient-to-b from-[#4A8B5C] to-[#234330] sm:-left-6 sm:w-2"></div>
+								<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
+									<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
+										مهمتنا
+									</span>
+									نقدم منصة رقمية شاملة تعتمد على الذكاء الاصطناعي لتقديم حلول
+									مبتكرة في مجالات التعليم، التوجيه المهني، الدعم النفسي،
+									والمساعدة القانونية. نهدف إلى تمكين المستخدمين من خلال أدوات
+									ذكية تسهل عملية إعادة الاندماج.
+								</p>
+							</div>
+						</div>
+
+						<div className="mt-8 md:mt-12">
+							<motion.img
+								src="../image/patterns/team.png"
+								alt="فريق العمل"
+								className="mx-auto w-full max-w-md rounded-lg shadow-md md:max-w-2xl"
+								initial={{ opacity: 0 }}
+								whileInView={{ opacity: 1 }}
+								transition={{ duration: 0.8, delay: 0.2 }}
+								viewport={{ once: true }}
+							/>
+						</div>
+					</motion.div>
+				</div>
+			</section>
+
+			{/* Services Section */}
+			<section
+				id="services"
+				className="bg-gradient-to-r from-[#F5F0EA] to-[#E1D9D1] py-12 sm:py-16 md:py-20"
+			>
+				<div className="container mx-auto px-4 sm:px-6">
+					<motion.div
+						initial={{ opacity: 0, y: 50 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.8 }}
+						viewport={{ once: true }}
+						className="text-center"
+					>
+						<div className="inline-flex items-center">
+							<h2 className="text-3xl font-bold text-[#234330] sm:text-4xl">
+								خدماتنا
+							</h2>
+							<FaVolumeUp
+								className="mr-3 cursor-pointer text-xl text-[#4A8B5C] sm:text-2xl"
+								onClick={() => playAudio("../audio/home/18.mp3")}
+							/>
+						</div>
+
+						<div className="mt-8 grid grid-cols-1 gap-5 sm:mt-12 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+							{services.map((service, index) => (
+								<motion.div
+									key={index}
 									initial={{ opacity: 0, y: 20 }}
 									whileInView={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: index * 0.2 }}
+									transition={{ duration: 0.5, delay: index * 0.1 }}
 									viewport={{ once: true }}
+									className="rounded-xl bg-white p-5 text-right shadow-lg sm:rounded-2xl sm:p-6 md:p-8"
 								>
 									<div
-										className={`transform cursor-pointer rounded-xl p-6 shadow-lg transition-transform duration-300 hover:scale-105 ${category.bgColor} ${category.textColor} w-full`}
+										className={`inline-flex h-12 w-12 items-center justify-center rounded-full ${service.color} mb-4 text-xl sm:h-16 sm:w-16 sm:text-2xl`}
 									>
-										<div className="flex h-full flex-col items-center justify-center">
-											<h2 className="text-center text-2xl font-bold md:text-3xl">
-												{category.title}
-											</h2>
-											<p className="mt-2 text-center text-lg md:mt-4 md:text-xl">
-												{category.description}
-											</p>
-										</div>
+										{service.icon}
 									</div>
-								</motion.a>
-							</div>
-						))}
-					</div>
+									<h3 className="mb-3 text-xl font-bold text-[#234330] sm:text-2xl">
+										{service.title}
+									</h3>
+									<p className="text-sm leading-relaxed text-gray-700 sm:text-base">
+										{service.description}
+									</p>
+								</motion.div>
+							))}
+						</div>
+					</motion.div>
 				</div>
-			</div>
-			<section id="about" className="bg-[#E1D9D1] px-10 py-20 text-center">
-				<motion.div
-					initial={{ opacity: 0, y: 50 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.8 }}
-					viewport={{ once: true }}
-				>
-					<h2 className="text-4xl font-bold text-[#234330]">من نحن</h2>
-					<FaVolumeUp
-						className="ml-2 inline-block cursor-pointer"
-						onClick={() => playAudio("../audio/home/16.mp3")}
-					/>
-					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
-						<p>
-							نحن <strong>أمل</strong> منصة رقمية ذكية تعتمد على تقنيات الذكاء
-							الاصطناعي لدعم المفرج عنهم حديثًا في رحلتهم نحو إعادة الاندماج في
-							المجتمع. نهدف إلى تمكين الأفراد من خلال تقديم حلول مبتكرة في
-							مجالات التعليم، التوجيه المهني، الدعم النفسي، والمساعدة القانونية،
-							لضمان بداية جديدة وحياة مستقرة.
-						</p>
-						<p className="mt-4">
-							من خلال واجهة تفاعلية متعددة اللغات، نوفر برامج لمحو الأمية عبر
-							دروس القراءة والكتابة، ونساعد في تطوير المهارات المهنية من خلال
-							تقييم القدرات وربط المستخدمين بفرص التدريب والعمل. كما نقدم دعمًا
-							نفسيًا ذكيًا من خلال تحليل المشاعر واستشارات الصحة النفسية،
-							بالإضافة إلى توفير قاعدة بيانات قانونية متكاملة وخدمات استشارية
-							تسهم في تعزيز الحقوق القانونية للمستخدمين.
-						</p>
-						<p className="mt-4">
-							نؤمن بأن لكل فرد فرصة ثانية لبناء مستقبل أفضل، ونعمل جاهدين على
-							تسخير التكنولوجيا لخلق بيئة داعمة تسهم في تحقيق هذا الهدف.
-						</p>
-					</div>
-				</motion.div>
 			</section>
-			<section id="services" className="bg-[#E1D9D1] px-10 py-20 text-center">
-				<motion.div
-					initial={{ opacity: 0, y: 50 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.8 }}
-					viewport={{ once: true }}
-				>
-					<h2 className="text-4xl font-bold text-[#234330]">خدماتنا</h2>
-					<FaVolumeUp
-						className="ml-2 inline-block cursor-pointer"
-						onClick={() => playAudio("../audio/home/18.mp3")}
-					/>
-					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
-						<p>
-							في أمل، نقدم مجموعة متكاملة من الخدمات المصممة خصيصًا لدعم المفرج
-							عنهم حديثًا وتمكينهم من تحقيق اندماج ناجح في المجتمع، وذلك من خلال
-							الذكاء الاصطناعي والتقنيات التفاعلية.
-						</p>
-						<div className="mt-8 space-y-8">
-							<div>
-								<h3 className="text-2xl font-bold text-[#234330]">
-									التعليم ومحو الأمية
-								</h3>
-								<p className="mt-2">
-									نساعد المستخدمين على تطوير مهارات القراءة والكتابة من خلال
-									دروس تفاعلية تدعم الصوت والكتابة اليدوية، مما يسهل التعلم
-									بأساليب مبتكرة.
-								</p>
+
+			{/* Contact Section */}
+			<section
+				id="contact"
+				className="relative bg-[#234330] py-12 text-white sm:py-16 md:py-20"
+			>
+				<div className="absolute inset-0 bg-[url('/image/patterns/dots.png')] bg-cover opacity-10"></div>
+				<div className="container mx-auto px-4 sm:px-6">
+					<motion.div
+						initial={{ opacity: 0, y: 50 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.8 }}
+						viewport={{ once: true }}
+						className="relative rounded-2xl bg-[#2D5A3D] p-6 shadow-xl sm:rounded-3xl sm:p-8 md:p-12"
+					>
+						<div className="flex flex-col items-center">
+							<h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+								تواصل معنا
+							</h2>
+							<p className="mb-8 max-w-2xl text-center text-base sm:text-lg md:mb-12 md:text-xl">
+								نحن هنا لدعمكم والإجابة على جميع استفساراتكم. تواصلوا معنا عبر
+								القنوات التالية:
+							</p>
+
+							<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-8">
+								{contactMethods.map((item, index) => (
+									<motion.div
+										key={index}
+										whileHover={{ y: -5 }}
+										className="rounded-lg bg-[#3A6E4F] p-4 text-center sm:rounded-xl sm:p-5 md:p-6"
+									>
+										<div className="mb-3 text-2xl sm:text-3xl">{item.icon}</div>
+										<h3 className="mb-2 text-lg font-bold sm:text-xl">
+											{item.title}
+										</h3>
+										<p className="text-sm sm:text-base">{item.content}</p>
+									</motion.div>
+								))}
 							</div>
-							<div>
-								<h3 className="text-2xl font-bold text-[#234330]">
-									التوجيه المهني وتطوير المهارات
+
+							<div className="mt-8 w-full max-w-2xl sm:mt-12">
+								<h3 className="mb-4 text-center text-xl font-bold sm:text-2xl">
+									تابعونا على وسائل التواصل
 								</h3>
-								<p className="mt-2">
-									نقدم اختبارات تقييم المهارات باستخدام أنظمة خبراء، ونوفر
-									توصيات للتدريب المهني وربط المستخدمين بفرص تعليمية في مجالات
-									مثل الحرف اليدوية والوظائف التقنية.
-								</p>
-							</div>
-							<div>
-								<h3 className="text-2xl font-bold text-[#234330]">
-									الدعم النفسي الذكي
-								</h3>
-								<p className="mt-2">
-									نوفر دردشة ذكية تعتمد على معالجة اللغة الطبيعية (NLP) لتحليل
-									المشاعر وتقديم استشارات للصحة النفسية، مع إمكانية الكشف المبكر
-									عن علامات الاكتئاب والتوتر.
-								</p>
-							</div>
-							<div>
-								<h3 className="text-2xl font-bold text-[#234330]">
-									المساعدة القانونية
-								</h3>
-								<p className="mt-2">
-									نقدم قاعدة بيانات قانونية محلية مزودة بمحرك بحث ذكي، بالإضافة
-									إلى إمكانية التواصل مع محامين عند الحاجة لتقديم الاستشارات
-									القانونية اللازمة.
-								</p>
-							</div>
-							<div>
-								<h3 className="text-2xl font-bold text-[#234330]">
-									واجهة تفاعلية متعددة اللغات
-								</h3>
-								<p className="mt-2">
-									تصميم مريح وسهل الاستخدام، مع دعم للغة العربية كلغة أساسية،
-									لتوفير تجربة سلسة تلبي احتياجات المستخدمين المختلفة.
-								</p>
+								<div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+									{["Facebook", "Twitter", "Instagram", "LinkedIn"].map(
+										(social, index) => (
+											<motion.div
+												key={index}
+												whileHover={{ scale: 1.1 }}
+												className="cursor-pointer rounded-full bg-[#4A8B5C] px-4 py-2 text-sm sm:text-base"
+											>
+												<span className="text-white">{social}</span>
+											</motion.div>
+										),
+									)}
+								</div>
 							</div>
 						</div>
-					</div>
-				</motion.div>
-			</section>
-			<section id="contact" className="bg-[#E1D9D1] px-10 py-20 text-center">
-				<motion.div
-					initial={{ opacity: 0, y: 50 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.8 }}
-					viewport={{ once: true }}
-				>
-					<h2 className="text-4xl font-bold text-[#234330]">تواصل معنا</h2>
-					<div className="mx-auto mt-15 max-w-4xl text-right text-xl leading-loose text-gray-700">
-						<p>
-							نحن هنا لدعمكم والإجابة على جميع استفساراتكم! يمكنكم التواصل معنا
-							عبر القنوات التالية:
-						</p>
-						<div className="mt-8 space-y-4">
-							<p>
-								<strong>البريد الإلكتروني 📧:</strong> Amal@gmail.com
-							</p>
-							<p>
-								<strong>رقم الهاتف 📞:</strong> +963 991 647 194
-							</p>
-							<p>
-								<strong>الموقع الإلكتروني 🌍:</strong> Amal.com
-							</p>
-							<p>
-								<strong>العنوان 📍:</strong> Damascus, Syria
-							</p>
-						</div>
-						<p className="mt-8">
-							كما يمكنكم متابعتنا على وسائل التواصل الاجتماعي للبقاء على اطلاع
-							بآخر التحديثات والخدمات التي نقدمها.
-						</p>
-						<p className="mt-4">
-							💙 !لا تترددوا في التواصل معنا، فنحن دائمًا هنا لمساعدتكم
-						</p>
-					</div>
-				</motion.div>
+					</motion.div>
+				</div>
 			</section>
 		</div>
 	);
