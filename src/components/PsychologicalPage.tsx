@@ -3,106 +3,100 @@
 import { startVoiceRecognition } from "@/utils/stt";
 import { textToSpeech } from "@/utils/tts";
 import { useEffect, useRef, useState } from "react";
-import {
-	FaMicrophone,
-	FaPaperPlane,
-	FaPause,
-	FaPlay,
-	FaStop,
-} from "react-icons/fa";
+import { FaMicrophone, FaPaperPlane, FaPause, FaPlay, FaStop } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
 type Message = {
-	id: string;
-	text: string;
-	sender: "user" | "bot";
-	timestamp: Date;
+  id: string;
+  text: string;
+  sender: "user" | "bot";
+  timestamp: Date;
 };
 
 export default function PsychologicalSupport() {
-	const [messages, setMessages] = useState<Message[]>([
-		{
-			id: "1",
-			text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
-			sender: "bot",
-			timestamp: new Date(),
-		},
-	]);
-	const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
+      sender: "bot",
+      timestamp: new Date(),
+    },
+  ]);
+  const [inputText, setInputText] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [isBotTyping, setIsBotTyping] = useState(false); // Bot typing indicator
+  const [isVoiceRecognizing, setIsVoiceRecognizing] = useState(false); // Voice recognition loading state
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
 	const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
+  const [error, setError] = useState("");
 
-	const [error, setError] = useState("");
-	const [isRecording, setIsRecording] = useState(false);
+  const getPsychologicalResponse = async (userMessage: string
+  ): Promise<string> => {
+    const userFeeling = userMessage.toLowerCase().includes("حزين") ? "حزين" : "جيد";
+    const responses = {
+      حزين: "أشعر بما تمر به. هل ترغب في التحدث عن ذلك؟",
+      جيد: "أنت بخير، ولكن هل هناك شيء ترغب في مشاركته؟",
+      default: "أنا هنا للاستماع إليك. كيف يمكنني مساعدتك؟",
+    };
 
-	const getPsychologicalResponse = async (
-		userMessage: string,
-	): Promise<string> => {
-		const responses = [
-			"أنا هنا لأسمعك. أخبرني المزيد عن ما تشعر به.",
-			"يبدو أنك تمر بوقت صعب. تذكر أن مشاعرك مشروعة ومهمة.",
-			"شكراً لمشاركتي هذا. هل يمكنك أن تصف لي شعورك بمزيد من التفاصيل؟",
-			"أنا أفهم أن هذا قد يكون صعباً عليك. أنت لست وحدك في هذا.",
-			"مشاعرك مهمة جداً. دعنا نستكشف هذا الشعور معاً.",
-			"أنا أسمعك وأقدّر صراحتك. الحياة قد تكون صعبة أحياناً ولكن هناك دائماً أمل.",
-		];
+    await new Promise((resolve) => 
+    setTimeout(resolve, 1000 + Math.random() * 2000)); // Simulate delay
+	return responses[userFeeling] || responses.default;
+  };
 
-		await new Promise((resolve) =>
-			setTimeout(resolve, 1000 + Math.random() * 2000),
-		);
+  const handleSendMessage = async () => {
+    if (!inputText.trim()) return;
 
-		return responses[Math.floor(Math.random() * responses.length)];
-	};
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputText,
+      sender: "user",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText("");
 
-	const handleSendMessage = async () => {
-		if (!inputText.trim()) return;
+    setIsBotTyping(true); // Show typing indicator while bot is thinking
+    const botResponseText = await getPsychologicalResponse(inputText);
+    setIsBotTyping(false); // Hide typing indicator once bot response is received
 
-		const userMessage: Message = {
-			id: Date.now().toString(),
-			text: inputText,
-			sender: "user",
-			timestamp: new Date(),
-		};
-		setMessages((prev) => [...prev, userMessage]);
-		setInputText("");
+    const botMessage: Message = {
+      id: Date.now().toString(),
+      text: botResponseText,
+      sender: "bot",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, botMessage]);
+  };
 
-		const botResponseText = await getPsychologicalResponse(inputText);
-		const botMessage: Message = {
-			id: Date.now().toString(),
-			text: botResponseText,
-			sender: "bot",
-			timestamp: new Date(),
-		};
-		setMessages((prev) => [...prev, botMessage]);
-	};
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
-	const handleKeyPress = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter" && !e.shiftKey) {
-			e.preventDefault();
-			handleSendMessage();
-		}
-	};
-
-	const toggleRecording = async () => {
-		setError("");
-		try {
-			setIsRecording(true);
-
-			// طلب إذن الميكروفون أولاً
+  const toggleRecording = async () => {
+    setError("");
+    try {
+      setIsRecording(true);
+      // طلب إذن الميكروفون أولاً
 			await navigator.mediaDevices.getUserMedia({ audio: true });
+      setIsVoiceRecognizing(true); // Show loading spinner for voice recognition
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const transcript = await startVoiceRecognition();
+      setInputText(transcript);
+    } catch (err) {
+      setError("يجب منح الإذن لاستخدام الميكروفون");
+      console.error("خطأ في الوصول للميكروفون:", err);
+    } finally {
+      setIsRecording(false);
+      setIsVoiceRecognizing(false); // Hide loading spinner
+    }
+  };
 
-			const transcript = await startVoiceRecognition();
-			setInputText(transcript);
-		} catch (err) {
-			setError("يجب منح الإذن لاستخدام الميكروفون");
-			console.error("خطأ في الوصول للميكروفون:", err);
-		} finally {
-			setIsRecording(false);
-		}
-	};
-
-	const toggleAudioPlayback = async (messageId: string) => {
+  const toggleAudioPlayback = async (messageId: string) => {
 		const message = messages.find((m) => m.id === messageId);
 		if (!message) return;
 
@@ -130,89 +124,134 @@ export default function PsychologicalSupport() {
 		};
 	}, []);
 
-	return (
+
+  // Function to reset the conversation
+  const handleResetConversation = () => {
+    setMessages([
+      {
+        id: "1",
+        text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
+        sender: "bot",
+        timestamp: new Date(),
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    return () => {
+      // Clean up resources if needed
+    };
+  }, []);
+
+  return (
 		<div className="flex h-screen flex-col bg-gray-100 pt-24">
-			<AmalNavbar backgroundColor="#9257AD" activeSection={"psychological"} />
+      <AmalNavbar backgroundColor="#582C5E" activeSection={"psychological"} />
 
-			{/* منطقة المحادثة */}
-			<div className="flex-1 space-y-4 overflow-y-auto p-4">
-				{messages.map((message) => (
-					<div
-						key={message.id}
-						className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"}`}
-					>
-						<div
-							className={`max-w-xs rounded-lg p-4 md:max-w-md lg:max-w-lg ${
-								message.sender === "user"
-									? "bg-[#D9B3E6] text-[#7D3C98]"
-									: "bg-[#9257AD] text-white"
-							}`}
-						>
-							<p className="text-sm">{message.text}</p>
-							<div className="mt-2 flex items-center justify-between">
-								<span className="text-xs opacity-70">
-									{message.timestamp.toLocaleTimeString("ar-EG", {
-										hour: "2-digit",
-										minute: "2-digit",
-									})}
-								</span>
-								{message.sender === "bot" && (
-									<button
-										onClick={() => toggleAudioPlayback(message.id)}
-										className={`rounded-full p-1 ${
-											activeAudioId === message.id && isPlaying
-												? "bg-[#7D3C98] text-white"
-												: "bg-white text-[#7D3C98]"
-										}`}
-									>
-										{activeAudioId === message.id && isPlaying ? (
-											<FaPause size={12} />
-										) : (
-											<FaPlay size={12} />
-										)}
-									</button>
-								)}
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
-
-			{/* منطقة الإدخال */}
-			<div className="border-t border-gray-200 bg-white p-4">
-				<div className="flex items-center rounded-lg bg-[#D9B3E6] p-2">
-					<button
-						onClick={toggleRecording}
-						className={`mr-2 rounded-full p-2 ${
-							isRecording
-								? "bg-[#7D3C98] text-white"
-								: "bg-white text-[#7D3C98]"
-						}`}
-					>
-						{isRecording ? <FaStop size={16} /> : <FaMicrophone size={16} />}
-					</button>
-					<textarea
-						value={inputText}
-						onChange={(e) => setInputText(e.target.value)}
-						onKeyPress={handleKeyPress}
-						placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
-						className="flex-1 resize-none bg-transparent text-[#7D3C98] placeholder-[#9257AD] outline-none"
-						rows={1}
-					/>
-					<button
-						onClick={handleSendMessage}
-						disabled={!inputText.trim()}
-						className={`ml-2 rounded-full p-2 ${
-							inputText.trim()
-								? "bg-[#7D3C98] text-white"
-								: "bg-gray-300 text-gray-500"
-						}`}
-					>
-						<FaPaperPlane size={16} />
-					</button>
-				</div>
-				{error && <p className="mt-2 text-red-500">{error}</p>}
-			</div>
+      {/* Message Section */}
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        {messages.map((message) => (
+        <div key={message.id} className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"}`}>
+		<div
+		  className={`max-w-xs p-4 rounded-xl shadow-lg transition-transform duration-300 ${
+			message.sender === "user"
+			  ? "bg-white text-[#582C5E]"
+			  : "bg-[#582C5E] text-white"
+		  }`}
+			>
+			<p className="text-sm">{message.text}</p>
+		  <div className="mt-2 flex items-center justify-between">
+			<span className="text-xs opacity-80">
+			  {message.timestamp.toLocaleTimeString("ar-EG", {
+				hour: "2-digit",
+				minute: "2-digit",
+			  })}
+			</span>
+			{message.sender === "user" && (
+			  <button
+				onClick={() => toggleAudioPlayback(message.id)} // Add this button for user messages
+				className={`rounded-full p-1 ${
+				  activeAudioId === message.id && isPlaying
+					? "bg-white text-[#582C5E]"
+					: "bg-[#582C5E] text-white"
+				}`}
+			  >
+				{activeAudioId === message.id && isPlaying ? (
+				  <FaPause size={12} />
+				) : (
+				  <FaPlay size={12} />
+				)}
+			  </button>
+			)}
+			{message.sender === "bot" && (
+			  <button
+				onClick={() => toggleAudioPlayback(message.id)}
+				className={`rounded-full p-1 ${
+				  activeAudioId === message.id && isPlaying
+					? "bg-white text-[#582C5E]"
+					: "bg-[#582C5E] text-white"
+				}`}
+			  >
+				{activeAudioId === message.id && isPlaying ? (
+				  <FaPause size={12} />
+				) : (
+				  <FaPlay size={12} />
+				)}
+			  </button>
+			)}
+		  </div>
 		</div>
-	);
+	  </div>
+	  
+        ))}
+        {isBotTyping && (
+          <div className="flex justify-end">
+            <div className="max-w-xs rounded-lg p-5 shadow-lg bg-[#F1F0F0] text-[#582C5E]">
+              <p>...</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Input Section */}
+      <div className="border-t border-gray-300 bg-white p-6 shadow-md">
+        <div className="flex items-center rounded-lg bg-[#F1F0F0] p-3 shadow-lg transition-all">
+          <button
+            onClick={toggleRecording}
+            className={`mr-3 rounded-full p-2 ${
+              isRecording
+                ? "bg-[#582C5E] text-white" 
+                : "bg-white text-[#582C5E]"}`}
+          >
+            {isRecording ? <FaStop size={16} /> : <FaMicrophone size={16} />}
+          </button>
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
+            className="flex-1 resize-none bg-transparent text-[#582C5E] placeholder-[#E2C8D3] outline-none focus:ring-2 focus:ring-[#582C5E] transition-all rounded-lg shadow-md p-3"
+            rows={1}
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={!inputText.trim()}
+            className={`ml-3 rounded-full p-2 ${
+              inputText.trim() 
+                ? "bg-[#582C5E] text-white hover:bg-[#4F2345]" 
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+          >
+            <FaPaperPlane size={16} />
+          </button>
+        </div>
+        {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
+        <button
+          onClick={handleResetConversation}
+          className="mt-4 ml-4 bg-red-500 text-white px-4 py-2 rounded-full"
+        >
+          محادثة جديدة
+        </button>
+        {isVoiceRecognizing && <div className="spinner">...</div>}
+      </div>
+    </div>
+  );
 }
