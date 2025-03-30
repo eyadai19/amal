@@ -1,10 +1,17 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { numberOcrApi } from "@/utils/api";
 import { ArabicLettersKeys } from "@/utils/arabicLetters";
 import { lettersData } from "@/utils/letterData";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+import {
+	FaArrowLeft,
+	FaEraser,
+	FaPencilAlt,
+	FaSpinner,
+	FaTimes,
+} from "react-icons/fa";
 import AmalNavbar from "../amalNavbar";
 
 export default function LetterPage({
@@ -21,9 +28,10 @@ export default function LetterPage({
 	} | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-	// const isDrawing = useRef(false);
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [prediction, setPrediction] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [confidence, setConfidence] = useState<number | null>(null);
 
 	const currentLetter = lettersData[params.letter];
 
@@ -39,12 +47,14 @@ export default function LetterPage({
 				ctx.lineCap = "round";
 				ctx.lineJoin = "round";
 				ctx.strokeStyle = "#1E3A6E";
-				ctx.lineWidth = 3;
+				ctx.lineWidth = 15;
 				ctx.fillStyle = "white";
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				ctxRef.current = ctx;
 			}
 			setAccuracyResult(null);
+			setPrediction(null);
+			setConfidence(null);
 		}
 	}, [showPad]);
 
@@ -69,16 +79,25 @@ export default function LetterPage({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
+		// إعدادات الممحاة
+		if (isErasing) {
+			ctx.globalCompositeOperation = "source-over";
+			ctx.strokeStyle = "#ffffff"; // لون الخلفية الأبيض
+			ctx.lineWidth = 20;
+		}
+		// إعدادات القلم
+		else {
+			ctx.globalCompositeOperation = "source-over";
+			ctx.strokeStyle = "#000000";
+			ctx.lineWidth = 15;
+		}
+
 		ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-		ctx.strokeStyle = "#000000";
-		ctx.lineWidth = 15;
-		ctx.lineCap = "round";
 		ctx.stroke();
 	};
 
 	const stopDrawing = () => {
 		if (!ctxRef.current) return;
-		// isDrawing.current = false;
 		setIsDrawing(false);
 		ctxRef.current.closePath();
 	};
@@ -90,24 +109,67 @@ export default function LetterPage({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
-		ctx.fillStyle = "#ffffff";
+		ctx.fillStyle = "white";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		setPrediction(null);
+		setAccuracyResult(null);
+		setConfidence(null);
 	};
 
-	const handleSubmitDrawing = () => {
-		// هنا يمكنك إضافة منطق تقييم الرسمة
-		// هذا مثال فقط للتوضيح
-		const randomAccuracy = Math.floor(Math.random() * 30) + 70;
-		const isCorrect = randomAccuracy > 80;
+	const handleSubmitDrawing = async () => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
 
-		setAccuracyResult({
-			correct: isCorrect,
-			accuracy: randomAccuracy,
-			feedback: isCorrect
-				? "رسمة ممتازة! استمر في الممارسة"
-				: "حاول مرة أخرى وركز على الشكل الصحيح",
-		});
+		setIsLoading(true);
+		setAccuracyResult(null);
+
+		const dataUrl = canvas.toDataURL("image/png");
+		const blob = await (await fetch(dataUrl)).blob();
+
+		const formData = new FormData();
+		formData.append("image", blob, "drawing.png");
+
+		try {
+			const response = await fetch(numberOcrApi, {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				throw new Error("Network response was not ok");
+			}
+
+			const data = await response.json();
+			const predictedDigit = data.character;
+			const predictionConfidence = data.confidence;
+
+			// هنا يجب تعديل المنطق ليتناسب مع تقييم الحروف بدلاً من الأرقام
+			// هذا مثال فقط - يجب استبداله بمنطق التقييم المناسب للحروف
+			const isCorrect = predictedDigit === currentLetter!.title;
+
+			// تعيين الدقة بناءً على صحة التوقع
+			const finalAccuracy = isCorrect ? predictionConfidence : 0;
+
+			setAccuracyResult({
+				correct: isCorrect,
+				accuracy: finalAccuracy,
+				feedback: isCorrect
+					? "رسمة ممتازة! استمر في الممارسة"
+					: "حاول مرة أخرى وركز على الشكل الصحيح",
+			});
+
+			setPrediction(predictedDigit);
+			setConfidence(predictionConfidence);
+		} catch (error) {
+			console.error("Error:", error);
+			setAccuracyResult({
+				correct: false,
+				accuracy: 0,
+				feedback: "حدث خطأ أثناء معالجة الرسمة",
+			});
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	if (!currentLetter) {
@@ -118,7 +180,7 @@ export default function LetterPage({
 		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
 			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
 			<div className="container mx-auto max-w-6xl">
-				{/* Header with back button */}
+				{/* Header */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">
 					<Link
 						href="/letters"
@@ -128,46 +190,36 @@ export default function LetterPage({
 						<span className="text-sm md:text-base">العودة إلى الحروف</span>
 					</Link>
 					<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
-						{currentLetter.title}
+						حرف {currentLetter.title}
 					</h1>
 					<div className="hidden md:block md:w-8"></div>
 				</div>
 
-				{/* Main content */}
+				{/* Main Content */}
 				<div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-					{/* Letter image and description */}
+					{/* Letter Info */}
 					<div className="lg:col-span-1">
 						<div className="flex h-full flex-col items-center rounded-2xl bg-white p-4 shadow-lg md:p-6">
-							{/* Image remains at the top */}
-							<div className="mt-25 mb-4 flex h-48 w-48 items-center justify-center md:h-64 md:w-64">
+							<div className="mb-4 flex h-48 w-48 items-center justify-center md:h-64 md:w-64">
 								<img
 									src={currentLetter.image}
 									alt={currentLetter.title}
 									className="max-h-full max-w-full object-contain"
 								/>
 							</div>
-
-							{/* Spacer to push content to the bottom */}
-							<div className="flex-grow"></div>
-
-							{/* Text description moved to the bottom */}
 							<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
 								{currentLetter.description}
 							</p>
-
-							{/* Button at the very bottom */}
-							<div className="w-full">
-								<Button
-									className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
-									onClick={() => setShowPad(true)}
-								>
-									!جرب كتابة الحرف بنفسك
-								</Button>
-							</div>
+							<Button
+								className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
+								onClick={() => setShowPad(true)}
+							>
+								!جرب كتابة الحرف بنفسك
+							</Button>
 						</div>
 					</div>
 
-					{/* Letter forms */}
+					{/* Usage Examples */}
 					<div className="space-y-4 lg:col-span-1">
 						{/* Initial form */}
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
@@ -288,9 +340,9 @@ export default function LetterPage({
 					</div>
 				</div>
 
-				{/* Practice section */}
+				{/* Practice Section */}
 				<div className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
-					<h2 className="mb-4 text-center text-2xl font-bold text-[#1E3A6E] md:mb-6 md:text-3xl">
+					<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
 						تمرين الكتابة
 					</h2>
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -347,7 +399,7 @@ export default function LetterPage({
 				</div>
 			</div>
 
-			{/* Drawing pad modal */}
+			{/* draw Section */}
 			{showPad && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 					<div className="mx-4 w-full max-w-md rounded-2xl bg-white p-4 shadow-xl md:p-6">
@@ -404,8 +456,6 @@ export default function LetterPage({
 							onMouseMove={draw}
 							onMouseUp={stopDrawing}
 							onMouseLeave={stopDrawing}
-							// onTouchStart={startDrawing}
-							// onTouchMove={draw}
 							onTouchEnd={stopDrawing}
 						/>
 
@@ -421,8 +471,16 @@ export default function LetterPage({
 							<Button
 								className="bg-[#1E3A6E] text-white"
 								onClick={handleSubmitDrawing}
+								disabled={isLoading}
 							>
-								إرسال الرسمة
+								{isLoading ? (
+									<>
+										<FaSpinner className="mr-2 animate-spin" />
+										جاري المعالجة...
+									</>
+								) : (
+									"إرسال الرسمة"
+								)}
 							</Button>
 						</div>
 
@@ -434,8 +492,9 @@ export default function LetterPage({
 									{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
 								</p>
 								<p className="text-gray-600">
-									الدقة: {accuracyResult.accuracy}%
+									الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}%
 								</p>
+								<p className="text-gray-600">الحرف المتوقع: {prediction}</p>
 								{accuracyResult.feedback && (
 									<p className="mt-2 text-sm text-gray-500">
 										{accuracyResult.feedback}
