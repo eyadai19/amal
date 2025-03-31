@@ -47,6 +47,8 @@ const colors = {
   accent: "#D78448", // Accent color for buttons
   text: "#333333", // Dark text color
   lightText: "#FFFFFF", // Light text color for button text
+  playButtonColor: "#D78448", // Play button color
+  pauseButtonColor: "#FF4C4C", // Pause button color (change this to your desired color)
 };
 
 export default function LegalSupport({
@@ -162,6 +164,9 @@ export default function LegalSupport({
       // Update state to reflect that the speech is playing
       utterance.onstart = () => setIsPlaying(true);
       utterance.onend = () => setIsPlaying(false);
+
+      // Optionally, you can also listen for a 'pause' event if you want to implement custom pausing logic
+      utterance.onpause = () => setIsPlaying(false);
     }
   };
 
@@ -172,15 +177,13 @@ export default function LegalSupport({
     if (!isRecording) {
       try {
         const transcript = await startVoiceRecognition();
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          text: transcript,
-          sender: "user",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, userMessage]);
 
-        // Call the chatbot action with the recognized speech
+        // Set the transcribed text into the search query
+        setSearchQuery(transcript);  // This updates the search query with the recognized text
+
+        // No need to add this as a message, so we don't need the message creation logic here
+
+        // Call the chatbot action with the recognized speech (optional, you can use it or not)
         const lastBotMessage = messages.findLast((m) => m.sender === "bot");
         setIsBotTyping(true);
         const botResponse = await ChatbotExpAction(lastBotMessage?.text || "", transcript);
@@ -235,7 +238,7 @@ export default function LegalSupport({
                       </p>
                       <button
                         onClick={() => playMessage(message.text)}
-                        className="self-end pt-2 text-[#D78448] hover:text-[#D78448] transition-colors duration-300"
+                        className={`self-end pt-2 transition-colors duration-300 ${isPlaying ? `text-${colors.pauseButtonColor}` : `text-${colors.playButtonColor}`}`}
                       >
                         {isPlaying ? <FaPause size={12} /> : <FaPlay size={12} />}
                       </button>
@@ -257,7 +260,7 @@ export default function LegalSupport({
                             {answer}
                             <button
                               onClick={() => playMessage(answer)}
-                              className="pl-3 text-[#D78448] hover:text-[#D78448]"
+                              className={`pl-3 text-${colors.playButtonColor} hover:text-${colors.playButtonColor}`}
                             >
                               <FaPlay size={12} />
                             </button>
@@ -277,7 +280,7 @@ export default function LegalSupport({
                       {message.text}
                       <button
                         onClick={() => playMessage(message.text)}
-                        className="pl-3 text-[#D78448] hover:text-[#D78448] transition-colors duration-300"
+                        className={`pl-3 text-${colors.playButtonColor} hover:text-${colors.playButtonColor} transition-colors duration-300`}
                       >
                         <FaPlay size={12} />
                       </button>
@@ -358,49 +361,18 @@ export default function LegalSupport({
               </button>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 sm:hidden">
-              <button
-                onClick={handleResetConversation}
-                className="rounded-lg bg-[#D78448] p-2 text-white transition-colors hover:bg-[#D78448]"
-              >
-                <FaRedo size={20} />
-              </button>
-              <button
-                onClick={toggleRecording}
-                className={`rounded-lg p-2 transition-colors ${isRecording ? "bg-[#D78448] text-white" : "bg-gray-100 text-[#D78448] hover:bg-[#FFCB99] hover:scale-105"}`}
-              >
-                <FaMicrophone size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Large screen buttons */}
-          <div className="hidden items-center gap-2 sm:flex">
-            <button
-              onClick={handleResetConversation}
-              className="flex items-center gap-2 rounded-lg bg-[#D78448] px-3 py-2 text-white transition-colors hover:bg-[#D78448] hover:scale-105"
-            >
-              <FaRedo className="shrink-0" />
-              <span>إعادة</span>
-            </button>
+            {/* Voice Record Button */}
             <button
               onClick={toggleRecording}
-              className={`rounded-lg p-2 transition-colors ${isRecording ? "bg-[#D78448] text-white" : "bg-gray-100 text-[#D78448] hover:bg-[#FFCB99] hover:scale-105"}`}
+              className={`${
+                isRecording ? "bg-red-500 text-white" : "bg-[#D78448] text-white"
+              } rounded-full p-3 transition-colors`}
             >
-              <FaMicrophone size={20} />
+              <FaMicrophone />
             </button>
           </div>
         </div>
       </div>
-
-      <style jsx>
-        {`
-          .clip-triangle {
-            clip-path: polygon(0 0, 0% 100%, 100% 0);
-          }
-        `}
-      </style>
     </div>
   );
 }
