@@ -26,13 +26,12 @@ export default function PsychologicalSupport() {
   const [isRecording, setIsRecording] = useState(false);
   const [isBotTyping, setIsBotTyping] = useState(false); // Bot typing indicator
   const [isVoiceRecognizing, setIsVoiceRecognizing] = useState(false); // Voice recognition loading state
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
-	const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
   const [error, setError] = useState("");
 
-  const getPsychologicalResponse = async (userMessage: string
-  ): Promise<string> => {
+  const getPsychologicalResponse = async (userMessage: string): Promise<string> => {
     const userFeeling = userMessage.toLowerCase().includes("حزين") ? "حزين" : "جيد";
     const responses = {
       حزين: "أشعر بما تمر به. هل ترغب في التحدث عن ذلك؟",
@@ -40,9 +39,10 @@ export default function PsychologicalSupport() {
       default: "أنا هنا للاستماع إليك. كيف يمكنني مساعدتك؟",
     };
 
-    await new Promise((resolve) => 
-    setTimeout(resolve, 1000 + Math.random() * 2000)); // Simulate delay
-	return responses[userFeeling] || responses.default;
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1000 + Math.random() * 2000)
+    ); // Simulate delay
+    return responses[userFeeling] || responses.default;
   };
 
   const handleSendMessage = async () => {
@@ -82,7 +82,7 @@ export default function PsychologicalSupport() {
     try {
       setIsRecording(true);
       // طلب إذن الميكروفون أولاً
-			await navigator.mediaDevices.getUserMedia({ audio: true });
+      await navigator.mediaDevices.getUserMedia({ audio: true });
       setIsVoiceRecognizing(true); // Show loading spinner for voice recognition
       await navigator.mediaDevices.getUserMedia({ audio: true });
       const transcript = await startVoiceRecognition();
@@ -97,33 +97,32 @@ export default function PsychologicalSupport() {
   };
 
   const toggleAudioPlayback = async (messageId: string) => {
-		const message = messages.find((m) => m.id === messageId);
-		if (!message) return;
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
 
-		if (activeAudioId === messageId && isPlaying) {
-			window.speechSynthesis.cancel();
-			setIsPlaying(false);
-			setActiveAudioId(null);
-		} else {
-			setIsPlaying(true);
-			setActiveAudioId(messageId);
-			await textToSpeech(message.text);
-			setIsPlaying(false);
-			setActiveAudioId(null);
-		}
-	};
+    if (activeAudioId === messageId && isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      setActiveAudioId(null);
+    } else {
+      setIsPlaying(true);
+      setActiveAudioId(messageId);
+      await textToSpeech(message.text);
+      setIsPlaying(false);
+      setActiveAudioId(null);
+    }
+  };
 
-	useEffect(() => {
-		return () => {
-			Object.values(audioRefs.current).forEach((audio) => {
-				if (audio) {
-					audio.pause();
-					audio.src = "";
-				}
-			});
-		};
-	}, []);
-
+  useEffect(() => {
+    return () => {
+      Object.values(audioRefs.current).forEach((audio) => {
+        if (audio) {
+          audio.pause();
+          audio.src = "";
+        }
+      });
+    };
+  }, []);
 
   // Function to reset the conversation
   const handleResetConversation = () => {
@@ -137,71 +136,67 @@ export default function PsychologicalSupport() {
     ]);
   };
 
-  useEffect(() => {
-    return () => {
-      // Clean up resources if needed
-    };
-  }, []);
-
   return (
-		<div className="flex h-screen flex-col bg-gray-100 pt-24">
+    <div className="flex flex-col h-screen bg-gray-100 pt-24">
       <AmalNavbar backgroundColor="#582C5E" activeSection={"psychological"} />
 
       {/* Message Section */}
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {messages.map((message) => (
-        <div key={message.id} className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"}`}>
-		<div
-		  className={`max-w-xs p-4 rounded-xl shadow-lg transition-transform duration-300 ${
-			message.sender === "user"
-			  ? "bg-white text-[#582C5E]"
-			  : "bg-[#582C5E] text-white"
-		  }`}
-			>
-			<p className="text-sm">{message.text}</p>
-		  <div className="mt-2 flex items-center justify-between">
-			<span className="text-xs opacity-80">
-			  {message.timestamp.toLocaleTimeString("ar-EG", {
-				hour: "2-digit",
-				minute: "2-digit",
-			  })}
-			</span>
-			{message.sender === "user" && (
-			  <button
-				onClick={() => toggleAudioPlayback(message.id)} // Add this button for user messages
-				className={`rounded-full p-1 ${
-				  activeAudioId === message.id && isPlaying
-					? "bg-white text-[#582C5E]"
-					: "bg-[#582C5E] text-white"
-				}`}
-			  >
-				{activeAudioId === message.id && isPlaying ? (
-				  <FaPause size={12} />
-				) : (
-				  <FaPlay size={12} />
-				)}
-			  </button>
-			)}
-			{message.sender === "bot" && (
-			  <button
-				onClick={() => toggleAudioPlayback(message.id)}
-				className={`rounded-full p-1 ${
-				  activeAudioId === message.id && isPlaying
-					? "bg-white text-[#582C5E]"
-					: "bg-[#582C5E] text-white"
-				}`}
-			  >
-				{activeAudioId === message.id && isPlaying ? (
-				  <FaPause size={12} />
-				) : (
-				  <FaPlay size={12} />
-				)}
-			  </button>
-			)}
-		  </div>
-		</div>
-	  </div>
-	  
+          <div
+            key={message.id}
+            className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"}`}
+          >
+            <div
+              className={`max-w-xs p-4 rounded-xl shadow-lg transition-transform duration-300 ${
+                message.sender === "user"
+                  ? "bg-white text-[#582C5E]"
+                  : "bg-[#582C5E] text-white"
+              } font-serif`} // Ensure this is the same font used in AmalNavbar
+            >
+              <p className="text-lg">{message.text}</p> {/* Increased font size */}
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-xs opacity-80">
+                  {message.timestamp.toLocaleTimeString("ar-EG", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {message.sender === "user" && (
+                  <button
+                    onClick={() => toggleAudioPlayback(message.id)}
+                    className={`rounded-full p-1 ${
+                      activeAudioId === message.id && isPlaying
+                        ? "bg-white text-[#582C5E]"
+                        : "bg-[#582C5E] text-white"
+                    }`}
+                  >
+                    {activeAudioId === message.id && isPlaying ? (
+                      <FaPause size={12} />
+                    ) : (
+                      <FaPlay size={12} />
+                    )}
+                  </button>
+                )}
+                {message.sender === "bot" && (
+                  <button
+                    onClick={() => toggleAudioPlayback(message.id)}
+                    className={`rounded-full p-1 ${
+                      activeAudioId === message.id && isPlaying
+                        ? "bg-white text-[#582C5E]"
+                        : "bg-[#582C5E] text-white"
+                    }`}
+                  >
+                    {activeAudioId === message.id && isPlaying ? (
+                      <FaPause size={12} />
+                    ) : (
+                      <FaPlay size={12} />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         ))}
         {isBotTyping && (
           <div className="flex justify-end">
@@ -218,9 +213,8 @@ export default function PsychologicalSupport() {
           <button
             onClick={toggleRecording}
             className={`mr-3 rounded-full p-2 ${
-              isRecording
-                ? "bg-[#582C5E] text-white" 
-                : "bg-white text-[#582C5E]"}`}
+              isRecording ? "bg-[#582C5E] text-white" : "bg-white text-[#582C5E]"
+            }`}
           >
             {isRecording ? <FaStop size={16} /> : <FaMicrophone size={16} />}
           </button>
@@ -229,27 +223,33 @@ export default function PsychologicalSupport() {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
-            className="flex-1 resize-none bg-transparent text-[#582C5E] placeholder-[#E2C8D3] outline-none focus:ring-2 focus:ring-[#582C5E] transition-all rounded-lg shadow-md p-3"
+            className="flex-1 resize-none bg-transparent text-[#582C5E] placeholder-[#E2C8D3] outline-none focus:ring-2 focus:ring-[#582C5E] transition-all rounded-lg shadow-md p-3 font-serif text-lg" // Increased font size here
             rows={1}
           />
           <button
             onClick={handleSendMessage}
             disabled={!inputText.trim()}
             className={`ml-3 rounded-full p-2 ${
-              inputText.trim() 
-                ? "bg-[#582C5E] text-white hover:bg-[#4F2345]" 
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+              inputText.trim()
+                ? "bg-[#582C5E] text-white hover:bg-[#4F2345]"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
             <FaPaperPlane size={16} />
           </button>
         </div>
         {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
-        <button
-          onClick={handleResetConversation}
-          className="mt-4 ml-4 bg-red-500 text-white px-4 py-2 rounded-full"
-        >
-          محادثة جديدة
-        </button>
+
+        {/* Reset Conversation Button */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={handleResetConversation}
+            className="bg-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-red-600 transition-all"
+          >
+            محادثة جديدة
+          </button>
+        </div>
+
         {isVoiceRecognizing && <div className="spinner">...</div>}
       </div>
     </div>
