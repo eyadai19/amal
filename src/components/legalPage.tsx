@@ -199,8 +199,43 @@ export default function LegalSupport({
 		setActiveAudioId(null);
 		startConversation();
 	};
-	const handleSearch = () => {
+
+	const handleSearch = async () => {
 		console.log("Searching for:", searchQuery);
+
+		try {
+			const response = await fetch(
+				"https://970b-34-138-114-72.ngrok-free.app/api/similar_questions",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						query: searchQuery,
+						top_n: 3, // يمكنك تغيير هذا الرقم حسب الحاجة
+					}),
+				},
+			);
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			const data = await response.json();
+			console.log("API Results:", data);
+
+			// إذا أردت معالجة البيانات بشكل منفصل:
+			data.forEach((item: any, index: any) => {
+				console.log(`Result ${index + 1}:`);
+				console.log("Question:", item.question);
+				console.log("Answer:", item.answer);
+				console.log("Similarity Score:", item.similarity_score);
+				console.log("-------------------");
+			});
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
 	};
 
 	const toggleAudioPlayback = async (audioId: string, text: string) => {
