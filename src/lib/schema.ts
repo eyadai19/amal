@@ -138,7 +138,6 @@ export const TB_user_digit_progress = pgTable("user_digit_progress", {
 	attempts: integer("attempts").notNull().default(0),
 });
 
-
 // جدول السجل القانوني
 export const TB_legal_history = pgTable("legal_history", {
 	id: text("id").primaryKey(),
@@ -158,9 +157,11 @@ export const TB_legal_history_answer = pgTable("legal_history_answer", {
 		.notNull()
 		.references(() => TB_legal_history.sessionId, { onDelete: "cascade" }),
 	answer: text("answer").notNull(),
-	exception: text("exception"), // يمكن أن يكون فارغًا (NULL)
+	exception: text("exception"),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
 });
-
 
 // re
 import { relations } from "drizzle-orm";
@@ -269,26 +270,34 @@ export const RE_user_digit_progress = relations(
 			references: [TB_digit_level.id],
 		}),
 	}),
-
-
-	
 );
 
 // العلاقات الجديدة
 
-
-export const RE_legal_history = relations(TB_legal_history, ({ one, many }) => ({
-	user: one(TB_user, {
-		fields: [TB_legal_history.userId],
-		references: [TB_user.id],
+export const RE_legal_history = relations(
+	TB_legal_history,
+	({ one, many }) => ({
+		user: one(TB_user, {
+			fields: [TB_legal_history.userId],
+			references: [TB_user.id],
+		}),
+		answers: many(TB_legal_history_answer),
 	}),
-	answers: many(TB_legal_history_answer),
-}));
+);
 
-export const RE_legal_history_answer = relations(TB_legal_history_answer, ({ one }) => ({
-	session: one(TB_legal_history, {
-		fields: [TB_legal_history_answer.sessionId],
-		references: [TB_legal_history.sessionId],
+export const RE_legal_history_answer = relations(
+	TB_legal_history_answer,
+	({ one }) => ({
+		// العلاقة مع الجدول الرئيسي (legal_history)
+		session: one(TB_legal_history, {
+			fields: [TB_legal_history_answer.sessionId],
+			references: [TB_legal_history.sessionId],
+		}),
+
+		// العلاقة مع المستخدم (user)
+		user: one(TB_user, {
+			fields: [TB_legal_history_answer.userId],
+			references: [TB_user.id],
+		}),
 	}),
-}));
-
+);
