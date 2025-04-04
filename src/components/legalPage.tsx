@@ -2,96 +2,207 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-	FaCheck,
-	FaExclamationTriangle,
-	FaMicrophone,
-	FaPause,
-	FaPlay,
-	FaRedo,
-	FaSearch,
+  FaCheck,
+  FaExclamationTriangle,
+  FaMicrophone,
+  FaPause,
+  FaPlay,
+  FaRedo,
+  FaSearch,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
-// Function to start speech-to-text (voice recognition)
+// Speech recognition function
 const startVoiceRecognition = async (): Promise<string> => {
-	return new Promise<string>((resolve, reject) => {
-		const recognition = new (window.SpeechRecognition ||
-			window.webkitSpeechRecognition)();
-		recognition.lang = "ar-SA"; // Set the language to Arabic
+  return new Promise<string>((resolve, reject) => {
+    const recognition = new (window.SpeechRecognition ||
+      window.webkitSpeechRecognition)();
+    recognition.lang = "ar-SA";
 
-		recognition.start();
+    recognition.start();
 
-		recognition.onresult = (event: any) => {
-			const transcript = event.results[0][0].transcript;
-			resolve(transcript); // Return the recognized speech as text
-		};
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      resolve(transcript);
+    };
 
-		recognition.onerror = (event) => {
-			reject(event.error);
-		};
-	});
+    recognition.onerror = (event) => {
+      reject(event.error);
+    };
+  });
 };
 
 type Message = {
-	id: string;
-	text: string;
-	sender: "user" | "bot";
-	timestamp: Date;
-	answers?: string[];
-	isFinalAnswer?: boolean;
-	isException?: boolean;
+  id: string;
+  text: string;
+  sender: "user" | "bot";
+  timestamp: Date;
+  answers?: string[];
+  isFinalAnswer?: boolean;
+  isException?: boolean;
+  // Add new type for search results
+  isSearchResult?: boolean;
+  searchResults?: {
+    question: string;
+    answer: string;
+    score: number;
+  }[];
 };
 
 const colors = {
-	primary: "#D78448",
-	secondary: "#FFCB99",
-	accent: "#D78448",
-	text: "#333333",
-	lightText: "#FFFFFF",
-	playButtonColor: "#D78448",
-	pauseButtonColor: "#FF4C4C",
+  primary: "#D78448",
+  secondary: "#FFCB99",
+  accent: "#D78448",
+  text: "#333333",
+  lightText: "#FFFFFF",
+  playButtonColor: "#D78448",
+  pauseButtonColor: "#FF4C4C",
 };
 
+// Hardcoded knowledge base
+const knowledgeBase = [
+  {
+    question: "ما هي مدة التقادم في الدعاوى التجارية؟",
+    answer: "مدة التقادم في الدعاوى التجارية هي 10 سنوات وفقًا لنظام القانون التجاري السعودي",
+    similarity_score: 0.95
+  },
+  {
+    question: "كيف يمكنني رفع دعوى قضائية؟",
+    answer: "يمكنك رفع دعوى قضائية عن طريق تقديم صحيفة الدعوى إلى المحكمة المختصة مع المستندات المطلوبة",
+    similarity_score: 0.87
+  },
+  {
+    question: "ما هي حقوق المستأجر في السعودية؟",
+    answer: "للمستأجر حق الانتفاع بالمأجور وفقاً لشروط العقد وحق المطالبة بالإصلاحات الضرورية",
+    similarity_score: 0.78
+  }
+];
 export default function LegalSupport({
-	ChatbotExpAction,
+  ChatbotExpAction,
 }: {
-	ChatbotExpAction: (
-		question: string,
-		answer: string,
-	) => Promise<
-		| { question: string; answers: string[] }
-		| { field: string; message: string }
-		| { answer: string }
-		| { answer: string; exception: string }
-	>;
+  ChatbotExpAction: (
+    question: string,
+    answer: string,
+  ) => Promise<
+    | { question: string; answers: string[] }
+    | { field: string; message: string }
+    | { answer: string }
+    | { answer: string; exception: string }
+  >;
 }) {
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [isBotTyping, setIsBotTyping] = useState(false);
+  	const [isBotTyping, setIsBotTyping] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(
-		new Set(),
-	);
+	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(new Set());
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [speechInstance, setSpeechInstance] =
-		useState<SpeechSynthesisUtterance | null>(null);
+	const [speechInstance, setSpeechInstance] = useState<SpeechSynthesisUtterance | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const [activeQuestions, setActiveQuestions] = useState<Set<string>>(
-		new Set(),
-	);
-	const [audioStates, setAudioStates] = useState<Map<string, boolean>>(
-		new Map(),
-	);
+	const [activeQuestions, setActiveQuestions] = useState<Set<string>>(new Set());
+	const [audioStates, setAudioStates] = useState<Map<string, boolean>>(new Map());
 	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
-
+	
 	useEffect(() => {
 		scrollToBottom();
-		startConversation();
-	}, []);
-
+    	startConversation();
+  	}, []);
+	
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
+	const handleAnswerSelection = async (answer: string, questionId: string) => {
+		// Early return if question is not active or answer already selected
+		if (!activeQuestions.has(questionId) || selectedAnswers.has(answer)) {
+			return;
+		}
+	
+		// Lock the selection to prevent duplicate submissions
+		setSelectedAnswers(prev => {
+			const newSet = new Set(prev);
+			newSet.add(answer);
+			return newSet;
+		});
+	
+		// Create user message
+		const userMessage: Message = {
+			id: `${questionId}-${Date.now()}`,
+			text: answer,
+			sender: "user",
+			timestamp: new Date(),
+		};
+	
+		// Update messages with duplicate protection
+		setMessages(prev => {
+			// Check if the last user message is the same
+			const lastUserMessage = [...prev]
+				.reverse()
+				.find(m => m.sender === "user");
+			
+			if (lastUserMessage?.text === answer) {
+				return prev;
+			}
+			return [...prev, userMessage];
+		});
+	
+		// Disable the question immediately
+		setActiveQuestions(prev => {
+			const newSet = new Set(prev);
+			newSet.delete(questionId);
+			return newSet;
+		});
+	
+		setIsBotTyping(true);
+		try {
+			const botResponse = await ChatbotExpAction(
+				messages.find((m) => m.id === questionId)?.text || "",
+				answer,
+			);
+	
+			if ("answer" in botResponse) {
+				const botMessage: Message = {
+					id: Date.now().toString(),
+					text: botResponse.answer,
+					sender: "bot",
+					timestamp: new Date(),
+					isFinalAnswer: true,
+				};
+	
+				
+	
+				if ("exception" in botResponse && botResponse.exception) {
+					setMessages(prev => [...prev, {
+						id: (Date.now() + 1).toString(),
+						text: botResponse.exception,
+						sender: "bot",
+						timestamp: new Date(),
+						isException: true,
+					}]);
+				}
+			} 
+			else if ("question" in botResponse) {
+				const botMessage: Message = {
+					id: Date.now().toString(),
+					text: botResponse.question,
+					sender: "bot",
+					timestamp: new Date(),
+					answers: botResponse.answers,
+				};
+	
+				setMessages(prev => {
+					const newMessages = [...prev];
+					// Only add bot message if the last user message matches
+					if (newMessages[newMessages.length - 1]?.text === answer) {
+						newMessages.push(botMessage);
+						setActiveQuestions(prev => new Set(prev).add(botMessage.id));
+					}
+					return newMessages;
+				});
+			}
+		} finally {
+			setIsBotTyping(false);
+		}
+	};
+
 
 	const startConversation = async () => {
 		setIsBotTyping(true);
@@ -99,97 +210,20 @@ export default function LegalSupport({
 		setIsBotTyping(false);
 
 		if ("question" in initialResponse) {
-			const initialMessage: Message = {
-				// تحديد النوع صراحة
-				id: Date.now().toString(),
-				text: initialResponse.question,
-				sender: "bot" as const,
-				timestamp: new Date(),
-				answers: initialResponse.answers,
-			};
-
-			setMessages([initialMessage]);
-			setActiveQuestions(new Set([initialMessage.id]));
-		}
-	};
-
-	const handleAnswerSelection = async (answer: string, questionId: string) => {
-		if (!activeQuestions.has(questionId) || selectedAnswers.has(answer)) {
-			return;
-		}
-
-		const userMessage: Message = {
+		const initialMessage: Message = {
 			id: Date.now().toString(),
-			text: answer,
-			sender: "user",
+			text: initialResponse.question,
+			sender: "bot",
 			timestamp: new Date(),
+			answers: initialResponse.answers,
 		};
 
-		// تحديث الرسائل مع منع التكرار
-		setMessages((prev) => {
-			const lastUserMessage = [...prev]
-				.reverse()
-				.find((m) => m.sender === "user");
-			if (lastUserMessage?.text === answer) {
-				return prev;
-			}
-			return [...prev, userMessage];
-		});
-
-		setSelectedAnswers((prev) => new Set([...prev, answer]));
-
-		setIsBotTyping(true);
-		const botResponse = await ChatbotExpAction(
-			messages.find((m) => m.id === questionId)?.text || "",
-			answer,
-		);
-		setIsBotTyping(false);
-
-		// تعطيل السؤال السابق
-		setActiveQuestions((prev) => {
-			const newSet = new Set(prev);
-			newSet.delete(questionId);
-			return newSet;
-		});
-
-		if ("answer" in botResponse) {
-			const botMessage: Message = {
-				id: Date.now().toString(),
-				text: botResponse.answer,
-				sender: "bot",
-				timestamp: new Date(),
-				isFinalAnswer: true,
-			};
-
-			const newMessages = [...messages, userMessage, botMessage];
-
-			if ("exception" in botResponse && botResponse.exception) {
-				newMessages.push({
-					id: (Date.now() + 1).toString(),
-					text: botResponse.exception,
-					sender: "bot",
-					timestamp: new Date(),
-					isException: true,
-				});
-			}
-
-			setMessages(newMessages);
-		} else if ("question" in botResponse) {
-			const botMessage: Message = {
-				id: Date.now().toString(),
-				text: botResponse.question,
-				sender: "bot",
-				timestamp: new Date(),
-				answers: botResponse.answers,
-			};
-
-			setMessages((prev) => [...prev, userMessage, botMessage]);
-			// إضافة السؤال الجديد للأسئلة النشطة
-			setActiveQuestions((prev) => new Set(prev).add(botMessage.id));
+		setMessages([initialMessage]);
+		setActiveQuestions(new Set([initialMessage.id]));
 		}
 	};
 
-	const handleResetConversation = () => {
+  	const handleResetConversation = () => {
 		window.speechSynthesis.cancel();
 		setMessages([]);
 		setSelectedAnswers(new Set());
@@ -200,43 +234,42 @@ export default function LegalSupport({
 		startConversation();
 	};
 
-	const handleSearch = async () => {
-		console.log("Searching for:", searchQuery);
-
-		try {
-			const response = await fetch(
-				"https://970b-34-138-114-72.ngrok-free.app/api/similar_questions",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						query: searchQuery,
-						top_n: 3, // يمكنك تغيير هذا الرقم حسب الحاجة
-					}),
-				},
-			);
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
-			const data = await response.json();
-			console.log("API Results:", data);
-
-			// إذا أردت معالجة البيانات بشكل منفصل:
-			data.forEach((item: any, index: any) => {
-				console.log(`Result ${index + 1}:`);
-				console.log("Question:", item.question);
-				console.log("Answer:", item.answer);
-				console.log("Similarity Score:", item.similarity_score);
-				console.log("-------------------");
-			});
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		}
-	};
+  	const handleSearch = async () => {
+    	if (!searchQuery.trim()) return;
+    
+		// Add user's search query as a message
+		const userMessage: Message = {
+		id: Date.now().toString(),
+		text: searchQuery,
+		sender: "user",
+		timestamp: new Date(),
+		};
+    
+		setMessages(prev => [...prev, userMessage]);
+		
+		// Simulate API call with hardcoded results
+		setIsBotTyping(true);
+		setTimeout(() => { // Simulate network delay
+		const searchResults = knowledgeBase.map(item => ({
+			question: item.question,
+			answer: item.answer,
+			score: item.similarity_score
+		}));
+		
+		const botMessage: Message = {
+			id: Date.now().toString(),
+			text: "إليك أهم الأسئلة المشابهة لبحثك:",
+			sender: "bot",
+			timestamp: new Date(),
+			isSearchResult: true,
+			searchResults: searchResults
+		};
+		
+		setMessages(prev => [...prev, botMessage]);
+		setIsBotTyping(false);
+		scrollToBottom();
+		}, 1500);
+  	};
 
 	const toggleAudioPlayback = async (audioId: string, text: string) => {
 		// إيقاف أي صوت قيد التشغيل حالياً
@@ -313,20 +346,19 @@ export default function LegalSupport({
 
 	return (
 		<div className="flex h-screen flex-col bg-gray-50 pt-24">
-			<AmalNavbar backgroundColor={"#D78448"} activeSection={"legal"} />
+			<AmalNavbar backgroundColor={"#D66E45FF"} activeSection={"legal"} />
 
 			{/* Messages container */}
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
-				{messages.map((message) => (
-					<div
-						key={message.id}
-						className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"} transition-all ease-in-out`}
-					>
-						<div className="w-full max-w-[90%] lg:max-w-[70%]">
-							{/* Bot Question */}
-							{message.sender === "bot" &&
-								!message.isFinalAnswer &&
-								!message.isException && (
+			{messages.map((message) => (
+			<div
+				key={message.id}
+				className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"} transition-all ease-in-out`}
+			>
+				<div className="w-full max-w-[90%] lg:max-w-[70%]">
+				{/* Bot Question (keep existing) */}
+				{message.sender === "bot" && !message.isFinalAnswer 
+				&& !message.isException && !message.isSearchResult && (
 									<div className="mb-4 space-y-3 text-right">
 										<div className="inline-block max-w-fit transform rounded-xl bg-white p-4 shadow-lg transition-all duration-500 hover:scale-105">
 											<div className="flex flex-col items-start gap-1">
@@ -405,7 +437,7 @@ export default function LegalSupport({
 								)}
 
 							{/* User Answer */}
-							{message.sender === "user" && (
+							{message.sender === "user" && !message.isSearchResult && (
 								<div className="flex justify-start">
 									<div className="relative max-w-[80%] transform rounded-xl rounded-bl-none bg-[#FFCB99] p-3 shadow-sm transition-all duration-300 hover:scale-105">
 										<p className="font-medium text-[#D78448]">
@@ -430,6 +462,33 @@ export default function LegalSupport({
 												)}
 											</button>
 										</p>
+									</div>
+								</div>
+							)}
+
+							{message.isSearchResult && (
+								<div className="mt-4 w-full rounded-xl border border-[#D78448] bg-[#FFCB99] p-4 text-right">
+									<h3 className="text-lg font-medium mb-3">{message.text}</h3>
+									<div className="space-y-3">
+										{message.searchResults?.map((result, index) => (
+										<div key={index} className="bg-white p-3 rounded-lg shadow">
+											<p className="font-medium text-[#D78448]">{result.question}</p>
+											<p className="text-gray-700 mt-1">{result.answer}</p>
+											<div className="text-sm text-gray-500 mt-1">
+												درجة التطابق: {(result.score * 100).toFixed(0)}%
+											</div>
+											<button
+												onClick={() => toggleAudioPlayback(`result-${index}`, `${result.question} ${result.answer}`)}
+												className="text-[#D78448] mt-2"
+											>
+											{audioStates.get(`result-${index}`) ? (
+												<FaPause size={14} />
+											) : (
+												<FaPlay size={14} />
+											)}
+											</button>
+										</div>
+									))}
 									</div>
 								</div>
 							)}
