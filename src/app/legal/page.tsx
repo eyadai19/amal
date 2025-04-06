@@ -3,6 +3,7 @@ import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExpLegal";
 import { getUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_legal_history, TB_legal_history_answer } from "@/lib/schema";
+import { and, asc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export default function LegalSupportPage() {
@@ -69,5 +70,122 @@ export async function saveAnswerLegalAction(
 			field: "root",
 			message: "An unexpected error occurred, please try again later",
 		};
+	}
+}
+
+export async function fetchConversationHistory(sessionId: string): Promise<
+	| {
+			questionsAndAnswers: { question: string; answer: string }[];
+			lastAnswer: string;
+			exception: string | null;
+	  }
+	| { field: string; message: string }
+> {
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		// البحث عن الأسئلة والأجوبة المرتبطة بهذه الجلسة
+		const historyRecords = await db.query.TB_legal_history.findMany({
+			where: (history, { eq, and }) =>
+				and(eq(history.sessionId, sessionId), eq(history.userId, user.id)),
+			orderBy: (history, { asc }) => asc(history.questionIndex),
+		});
+
+		if (!historyRecords || historyRecords.length === 0) {
+			return { field: "root", message: "No questions found for this session." };
+		}
+
+		// تحويل البيانات إلى الشكل المطلوب
+		const questionsAndAnswers = historyRecords.map((record) => ({
+			question: record.question,
+			answer: record.answer,
+		}));
+
+		// جلب آخر جواب والاستثناء من جدول legal_history_answer
+		const lastAnswer = await db.query.TB_legal_history_answer.findFirst({
+			where: (answer, { eq, and }) =>
+				and(eq(answer.sessionId, sessionId), eq(answer.userId, user.id)),
+			orderBy: (answer, { desc }) => desc(answer.id),
+		});
+
+		if (!lastAnswer) {
+			return { field: "root", message: "No answers found for this session." };
+		}
+
+		return {
+			questionsAndAnswers, // مصفوفة الأسئلة والأجوبة بعد التحويل
+			lastAnswer: lastAnswer.answer, // آخر جواب
+			exception: lastAnswer.exception || null, // الاستثناء (إن وجد)
+		};
+	} catch (error) {
+		console.error("Error fetching conversation history:", error);
+		return {
+			field: "root",
+			message: "Failed to fetch conversation history. Please try again.",
+		};
+	}
+}
+
+//  إرجاع أرقام الجلسات وآخر سؤال في كل جلسة
+export async function fetchAllSessions(): Promise<
+	| { sessions: { sessionId: string; lastQuestion: string }[] }
+	| { field: string; message: string }
+> {
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const sessions = await db
+			.select({
+				sessionId: TB_legal_history.sessionId,
+				lastQuestion: TB_legal_history.question,
+			})
+			.from(TB_legal_history)
+			.where(eq(TB_legal_history.userId, user.id))
+			.orderBy(asc(TB_legal_history.sessionId));
+
+		if (sessions.length === 0) {
+			return { field: "root", message: "No sessions found for this user." };
+		}
+
+		return { sessions };
+	} catch (error) {
+		console.error("Error fetching sessions:", error);
+		return {
+			field: "root",
+			message: "Failed to fetch sessions. Please try again.",
+		};
+	}
+}
+
+// حذف جميع البيانات المرتبطة بجلسة معينة للمستخدم الحالي
+export async function deleteSession(sessionId: string) {
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		await db
+			.delete(TB_legal_history)
+			.where(
+				and(
+					eq(TB_legal_history.sessionId, sessionId),
+					eq(TB_legal_history.userId, user.id),
+				),
+			);
+
+		await db
+			.delete(TB_legal_history_answer)
+			.where(
+				and(
+					eq(TB_legal_history_answer.sessionId, sessionId),
+					eq(TB_legal_history_answer.userId, user.id),
+				),
+			);
+
+		return { success: true };
+	} catch (error) {
+		console.error("Error deleting session:", error);
+		return { field: "root", message: "Failed to delete session." };
 	}
 }
