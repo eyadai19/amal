@@ -163,7 +163,27 @@ export const TB_legal_history_answer = pgTable("legal_history_answer", {
 		.references(() => TB_user.id, { onDelete: "cascade" }),
 });
 
-// re
+export const TB_psychological_history = pgTable("psychological_history", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	sessionId: text("session_id").notNull(),
+	question: text("question").notNull(),
+	answer: text("answer").notNull(),
+	questionIndex: integer("question_index").notNull(),
+});
+
+export const RE_psychological_history = relations(
+	TB_psychological_history,
+	({ one }) => ({
+		user: one(TB_user, {
+			fields: [TB_psychological_history.userId],
+			references: [TB_user.id],
+		}),
+	}),
+);
+
 import { relations } from "drizzle-orm";
 
 // علاقات جدول المستخدم

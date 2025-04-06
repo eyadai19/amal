@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { TB_legal_history, TB_legal_history_answer } from "@/lib/schema";
 import { nanoid } from "nanoid";
 
-export default function lettersPage() {
+export default function LegalSupportPage() {
 	return (
 		<div>
 			<LegalSupport ChatbotExpAction={ChatbotExpAction} />
@@ -18,6 +18,8 @@ export async function saveQuestionLegalAction(
 	answer: string,
 	sessionId: string,
 ): Promise<{ field: string; message: string } | undefined> {
+	"use server";
+
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
@@ -50,6 +52,7 @@ export async function saveAnswerLegalAction(
 	answer: string,
 	sessionId: string,
 ): Promise<{ field: string; message: string } | undefined> {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
