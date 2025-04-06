@@ -111,53 +111,48 @@ export default function LegalSupport({
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
 	const handleAnswerSelection = async (answer: string, questionId: string) => {
-		// Early return if question is not active or answer already selected
+		// التوقف إذا كان السؤال غير نشط أو الإجابة مختارة مسبقاً
 		if (!activeQuestions.has(questionId) || selectedAnswers.has(answer)) {
 			return;
 		}
-	
-		// Lock the selection to prevent duplicate submissions
-		setSelectedAnswers(prev => {
-			const newSet = new Set(prev);
-			newSet.add(answer);
-			return newSet;
-		});
-	
-		// Create user message
+
+		// تأمين الإجابة المختارة لمنع التكرار
+		setSelectedAnswers((prev) => new Set([...prev, answer]));
+
+		// إنشاء رسالة المستخدم
 		const userMessage: Message = {
 			id: `${questionId}-${Date.now()}`,
 			text: answer,
 			sender: "user",
 			timestamp: new Date(),
 		};
-	
-		// Update messages with duplicate protection
-		setMessages(prev => {
-			// Check if the last user message is the same
+
+		// تحديث الرسائل مع منع التكرار
+		setMessages((prev) => {
 			const lastUserMessage = [...prev]
 				.reverse()
-				.find(m => m.sender === "user");
-			
+				.find((m) => m.sender === "user");
+
 			if (lastUserMessage?.text === answer) {
 				return prev;
 			}
 			return [...prev, userMessage];
 		});
-	
-		// Disable the question immediately
-		setActiveQuestions(prev => {
+
+		// تعطيل السؤال الحالي
+		setActiveQuestions((prev) => {
 			const newSet = new Set(prev);
 			newSet.delete(questionId);
 			return newSet;
 		});
-	
+
 		setIsBotTyping(true);
 		try {
 			const botResponse = await ChatbotExpAction(
 				messages.find((m) => m.id === questionId)?.text || "",
 				answer,
 			);
-	
+
 			if ("answer" in botResponse) {
 				const botMessage: Message = {
 					id: Date.now().toString(),
@@ -166,20 +161,24 @@ export default function LegalSupport({
 					timestamp: new Date(),
 					isFinalAnswer: true,
 				};
-	
-				
-	
+
+				// إضافة رسالة البوت النهائية
+				setMessages((prev) => [...prev, botMessage]);
+
+				// معالجة الاستثناءات إذا وجدت
 				if ("exception" in botResponse && botResponse.exception) {
-					setMessages(prev => [...prev, {
-						id: (Date.now() + 1).toString(),
-						text: botResponse.exception,
-						sender: "bot",
-						timestamp: new Date(),
-						isException: true,
-					}]);
+					setMessages((prev) => [
+						...prev,
+						{
+							id: (Date.now() + 1).toString(),
+							text: botResponse.exception,
+							sender: "bot",
+							timestamp: new Date(),
+							isException: true,
+						},
+					]);
 				}
-			} 
-			else if ("question" in botResponse) {
+			} else if ("question" in botResponse) {
 				const botMessage: Message = {
 					id: Date.now().toString(),
 					text: botResponse.question,
@@ -187,19 +186,14 @@ export default function LegalSupport({
 					timestamp: new Date(),
 					answers: botResponse.answers,
 				};
-	
-				setMessages(prev => {
-					const newMessages = [...prev];
-					// Only add bot message if the last user message matches
-					if (newMessages[newMessages.length - 1]?.text === answer) {
-						newMessages.push(botMessage);
-						setActiveQuestions(prev => new Set(prev).add(botMessage.id));
-					}
-					return newMessages;
-				});
+
+				// إضافة سؤال البوت الجديد
+				setMessages((prev) => [...prev, botMessage]);
+				setActiveQuestions((prev) => new Set([...prev, botMessage.id]));
 			}
 		} finally {
 			setIsBotTyping(false);
+			scrollToBottom(); // التأكد من التمرير للأسفل
 		}
 	};
 
