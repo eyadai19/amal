@@ -87,7 +87,6 @@ export async function logoutAction() {
 			expires: new Date(0),
 		});
 	}
-	redirect("/login");
 }
 
 declare module "lucia" {

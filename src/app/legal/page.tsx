@@ -1,15 +1,20 @@
 import LegalSupport from "@/components/legalPage";
 import { ChatbotExpAction } from "@/lib/ServerAction/chatbotExpLegal";
-import { getUser } from "@/lib/auth";
+import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_legal_history, TB_legal_history_answer } from "@/lib/schema";
-import { and, asc, eq } from "drizzle-orm";
+import { and, eq, max } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 export default function LegalSupportPage() {
 	return (
 		<div>
-			<LegalSupport ChatbotExpAction={ChatbotExpAction} />
+			<LegalSupport
+				logoutAction={logoutAction}
+				ChatbotExpAction={ChatbotExpAction}
+				saveAnswerLegalAction={saveAnswerLegalAction}
+				saveQuestionLegalAction={saveQuestionLegalAction}
+			/>
 		</div>
 	);
 }
@@ -35,10 +40,10 @@ export async function saveQuestionLegalAction(
 		await db.insert(TB_legal_history).values({
 			id: nanoid(),
 			userId: user.id,
-			question,
-			answer,
+			question: question,
+			answer: answer,
 			questionIndex: lastIndex,
-			sessionId,
+			sessionId: sessionId,
 		});
 	} catch (error) {
 		return {
@@ -73,7 +78,7 @@ export async function saveAnswerLegalAction(
 	}
 }
 
-export async function fetchConversationHistory(sessionId: string): Promise<
+export async function fetchLegalConversationHistory(sessionId: string): Promise<
 	| {
 			questionsAndAnswers: { question: string; answer: string }[];
 			lastAnswer: string;
@@ -81,6 +86,7 @@ export async function fetchConversationHistory(sessionId: string): Promise<
 	  }
 	| { field: string; message: string }
 > {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
@@ -128,22 +134,43 @@ export async function fetchConversationHistory(sessionId: string): Promise<
 }
 
 //  إرجاع أرقام الجلسات وآخر سؤال في كل جلسة
-export async function fetchAllSessions(): Promise<
+export async function fetchAllLegalSessions(): Promise<
 	| { sessions: { sessionId: string; lastQuestion: string }[] }
 	| { field: string; message: string }
 > {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
 
+		// استعلام فرعي للعثور على أحدث سؤال لكل جلسة
+		const subquery = db
+			.select({
+				sessionId: TB_legal_history.sessionId,
+				maxQuestionIndex: max(TB_legal_history.questionIndex).as(
+					"maxQuestionIndex",
+				),
+			})
+			.from(TB_legal_history)
+			.where(eq(TB_legal_history.userId, user.id))
+			.groupBy(TB_legal_history.sessionId)
+			.as("subquery");
+
+		// استرجاع آخر سؤال لكل جلسة
 		const sessions = await db
 			.select({
 				sessionId: TB_legal_history.sessionId,
 				lastQuestion: TB_legal_history.question,
 			})
 			.from(TB_legal_history)
-			.where(eq(TB_legal_history.userId, user.id))
-			.orderBy(asc(TB_legal_history.sessionId));
+			.innerJoin(
+				subquery,
+				and(
+					eq(TB_legal_history.sessionId, subquery.sessionId),
+					eq(TB_legal_history.questionIndex, subquery.maxQuestionIndex),
+				),
+			)
+			.where(eq(TB_legal_history.userId, user.id));
 
 		if (sessions.length === 0) {
 			return { field: "root", message: "No sessions found for this user." };
@@ -160,7 +187,10 @@ export async function fetchAllSessions(): Promise<
 }
 
 // حذف جميع البيانات المرتبطة بجلسة معينة للمستخدم الحالي
-export async function deleteSession(sessionId: string) {
+export async function deleteSession(
+	sessionId: string,
+): Promise<{ success: boolean } | { field: string; message: string }> {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };

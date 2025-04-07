@@ -53,8 +53,12 @@ const colors = {
 };
 
 export default function LegalSupport({
+	logoutAction,
 	ChatbotExpAction,
+	saveQuestionLegalAction,
+	saveAnswerLegalAction,
 }: {
+	logoutAction: () => Promise<void>;
 	ChatbotExpAction: (
 		question: string,
 		answer: string,
@@ -64,6 +68,16 @@ export default function LegalSupport({
 		| { answer: string }
 		| { answer: string; exception: string }
 	>;
+	saveQuestionLegalAction: (
+		question: string,
+		answer: string,
+		sessionId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	saveAnswerLegalAction: (
+		exception: string | null,
+		answer: string,
+		sessionId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isBotTyping, setIsBotTyping] = useState(false);
@@ -278,7 +292,7 @@ export default function LegalSupport({
 
 	return (
 		<div className="flex h-screen flex-col bg-gray-50 pt-24">
-			<AmalNavbar backgroundColor={"#D78448"} activeSection={"legal"} />
+			<AmalNavbar logoutAction={logoutAction} backgroundColor={"#D78448"} activeSection={"legal"} />
 
 			{/* Messages container */}
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">

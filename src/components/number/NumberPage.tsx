@@ -17,8 +17,10 @@ import AmalNavbar from "../amalNavbar";
 
 export default function NumberPage({
 	params,
+	logoutAction,
 }: {
 	params: { number: ArabicNumeralsKeys };
+	logoutAction: () => Promise<void>;
 }) {
 	const [showPad, setShowPad] = useState(false);
 	const [isErasing, setIsErasing] = useState(false);
@@ -177,7 +179,11 @@ export default function NumberPage({
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-28 md:p-6 md:pt-32">
-			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#283a5c"
+				activeSection={"literacy"}
+			/>
 			<div className="container mx-auto max-w-6xl">
 				{/* Header */}
 				<div className="mb-6 flex flex-col items-center gap-4 md:mb-8 md:flex-row md:justify-between">

@@ -1,93 +1,59 @@
-'use server';
+import { getUser, logoutAction } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { TB_psychological_history } from "@/lib/schema";
+import { and, eq, max } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import PsychologicalSupport from "../../components/PsychologicalPage";
 
-import { db } from '@/lib/db';
-import { TB_psychological_history } from '@/db/schema';
-import { nanoid } from 'nanoid';
-import { getUser } from '@/lib/auth';
-import { eq ,and} from 'drizzle-orm';
+export default function PsychologicalPage() {
+	return (
+		<div>
+			<PsychologicalSupport logoutAction={logoutAction} />
+		</div>
+	);
+}
 
 export async function savePsychologicalConversationEntry(
 	sessionId: string,
-	question: string | null,
+	question: string,
 	answer: string,
-	questionIndex: number
 ): Promise<{ success: boolean } | { field: string; message: string }> {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
 
-		const userInfo = await db.query.TB_user.findFirst({
-			where: (searchUser, { eq }) => eq(searchUser.id, user.id),
+		const lastEntry = await db.query.TB_psychological_history.findFirst({
+			where: (history, { eq }) => eq(history.sessionId, sessionId),
+			orderBy: (history, { desc }) => [desc(history.questionIndex)],
 		});
-		if (!userInfo) return { field: "root", message: "User not found" };
+
+		const lastIndex = lastEntry ? lastEntry.questionIndex : 0;
 
 		await db.insert(TB_psychological_history).values({
 			id: nanoid(),
 			userId: user.id,
-			sessionId,
-			question,
-			answer,
-			questionIndex,
+			answer: answer,
+			question: question,
+			sessionId: sessionId,
+			questionIndex: lastIndex,
 		});
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error saving conversation entry:", error);
 		return { field: "root", message: "Failed to save conversation entry." };
 	}
 }
 
 export async function fetchPsychologicalConversationHistory(
-	sessionId: string
-): Promise<{
-	questionsAndAnswers: { question: string; answer: string }[];
-	lastAnswer: string;
-} | { field: string; message: string }> {
-	try {
-		const user = await getUser();
-		if (!user) return { field: "root", message: "User not authenticated." };
-
-		const historyRecords = await db.query.TB_psychological_history.findMany({
-			where: (record, { eq, and }) =>
-				and(eq(record.sessionId, sessionId), eq(record.userId, user.id)),
-		});
-
-		if (!historyRecords || historyRecords.length === 0) {
-			return { field: "root", message: "No entries found for this session." };
-		}
-
-		// استخراج الأسئلة والإجابات من السجلات
-		const questionsAndAnswers = historyRecords
-			.filter(record => record.question !== null)
-			.map(record => ({
-				question: record.question!,
-				answer: record.answer,
-			}));
-
-		// الحصول على آخر إجابة
-		const lastEntry = historyRecords[historyRecords.length - 1];
-
-		return {
-			questionsAndAnswers,
-			lastAnswer: lastEntry.answer,
-		};
-	} catch (error) {
-		console.error("Error fetching conversation history:", error);
-		return {
-			field: "root",
-			message: "Failed to fetch conversation history. Please try again.",
-		};
-	}
-}
-
-
-/////////إرجاع الأسئلة والإجابات مع آخر إجابة
-export async function fetchConversationHistory(
-	sessionId: string
-): Promise<{
-	questionsAndAnswers: { question: string; answer: string }[];
-	lastAnswer: string;
-} | { field: string; message: string }> {
+	sessionId: string,
+): Promise<
+	| {
+			questionsAndAnswers: { question: string; answer: string }[];
+	  }
+	| { field: string; message: string }
+> {
+	"use server";
 	try {
 		const user = await getUser();
 		if (!user) return { field: "root", message: "User not authenticated." };
@@ -102,20 +68,16 @@ export async function fetchConversationHistory(
 		}
 
 		const questionsAndAnswers = historyRecords
-			.filter(record => record.question !== null)
-			.map(record => ({
+			.filter((record) => record.question !== null)
+			.map((record) => ({
 				question: record.question!,
 				answer: record.answer,
 			}));
 
-		const lastEntry = historyRecords[historyRecords.length - 1];
-
 		return {
 			questionsAndAnswers,
-			lastAnswer: lastEntry.answer,
 		};
 	} catch (error) {
-		console.error("Error fetching conversation history:", error);
 		return {
 			field: "root",
 			message: "Failed to fetch conversation history. Please try again.",
@@ -123,28 +85,78 @@ export async function fetchConversationHistory(
 	}
 }
 
+export async function fetchAllPsychologicalSessions(): Promise<
+	| { sessions: { sessionId: string; lastQuestion: string }[] }
+	| { field: string; message: string }
+> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
 
-////////حذف الجلسة عن طريق رقمها
+		// استعلام فرعي لإيجاد آخر سؤال لكل جلسة (أعلى questionIndex)
+		const subquery = db
+			.select({
+				sessionId: TB_psychological_history.sessionId,
+				maxQuestionIndex: max(TB_psychological_history.questionIndex).as(
+					"maxQuestionIndex",
+				),
+			})
+			.from(TB_psychological_history)
+			.where(eq(TB_psychological_history.userId, user.id))
+			.groupBy(TB_psychological_history.sessionId)
+			.as("subquery");
 
-export async function deleteConversationSession(sessionId: string) {
-  try {
-    const user = await getUser();
-    if (!user) return { field: "root", message: "User not authenticated." };
+		// استرجاع آخر سؤال لكل جلسة
+		const sessions = await db
+			.select({
+				sessionId: TB_psychological_history.sessionId,
+				lastQuestion: TB_psychological_history.question,
+			})
+			.from(TB_psychological_history)
+			.innerJoin(
+				subquery,
+				and(
+					eq(TB_psychological_history.sessionId, subquery.sessionId),
+					eq(TB_psychological_history.questionIndex, subquery.maxQuestionIndex),
+				),
+			)
+			.where(eq(TB_psychological_history.userId, user.id));
 
-    await db
-      .delete(TB_psychological_history)
-      .where(
-        and(
-          eq(TB_psychological_history.sessionId, sessionId),
-          eq(TB_psychological_history.userId, user.id)
-        )
-      );
+		if (sessions.length === 0) {
+			return { field: "root", message: "No sessions found for this user." };
+		}
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting session:", error);
-    return { field: "root", message: "Failed to delete session." };
-  }
+		return { sessions };
+	} catch (error) {
+		console.error("Error fetching psychological sessions:", error);
+		return {
+			field: "root",
+			message: "Failed to fetch psychological sessions. Please try again.",
+		};
+	}
 }
 
+export async function deleteConversationSession(
+	sessionId: string,
+): Promise<{ success: boolean } | { field: string; message: string }> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
 
+		await db
+			.delete(TB_psychological_history)
+			.where(
+				and(
+					eq(TB_psychological_history.sessionId, sessionId),
+					eq(TB_psychological_history.userId, user.id),
+				),
+			);
+
+		return { success: true };
+	} catch (error) {
+		console.error("Error deleting session:", error);
+		return { field: "root", message: "Failed to delete session." };
+	}
+}

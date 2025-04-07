@@ -1,4 +1,5 @@
 import LetterPage from "@/components/letter/LetterPage";
+import { logoutAction } from "@/lib/auth";
 import { ArabicLettersKeys } from "@/utils/arabicLetters";
 
 export default function LettersPage({
@@ -6,5 +7,5 @@ export default function LettersPage({
 }: {
 	params: { letter: ArabicLettersKeys };
 }) {
-	return <LetterPage params={params} />;
+	return <LetterPage logoutAction={logoutAction} params={params} />;
 }

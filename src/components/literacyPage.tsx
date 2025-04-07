@@ -6,7 +6,7 @@ import { useState } from "react";
 import { FaBook, FaCalculator } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
-export default function LiteracyPage() {
+export default function LiteracyPage({ logoutAction }: { logoutAction: () => Promise<void> }) {
 	const router = useRouter();
 
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +16,11 @@ export default function LiteracyPage() {
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#283a5c"
+				activeSection={"literacy"}
+			/>
 
 			<motion.h1
 				className="mb-16 text-center text-4xl font-bold text-[#1E3A6E]"

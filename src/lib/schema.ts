@@ -138,7 +138,7 @@ export const TB_user_digit_progress = pgTable("user_digit_progress", {
 	attempts: integer("attempts").notNull().default(0),
 });
 
-// جدول السجل القانوني
+// // جدول السجل القانوني
 export const TB_legal_history = pgTable("legal_history", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
@@ -147,15 +147,13 @@ export const TB_legal_history = pgTable("legal_history", {
 	question: text("question").notNull(),
 	answer: text("answer").notNull(),
 	questionIndex: integer("question_index").notNull(),
-	sessionId: text("session_id").notNull(),
+	sessionId: text("session_id").notNull(), // بدون unique
 });
 
 // جدول إجابات السجل القانوني
 export const TB_legal_history_answer = pgTable("legal_history_answer", {
 	id: text("id").primaryKey(),
-	sessionId: text("session_id")
-		.notNull()
-		.references(() => TB_legal_history.sessionId, { onDelete: "cascade" }),
+	sessionId: text("session_id").notNull(), // بدون .references()
 	answer: text("answer").notNull(),
 	exception: text("exception"),
 	userId: text("user_id")
@@ -294,30 +292,21 @@ export const RE_user_digit_progress = relations(
 
 // العلاقات الجديدة
 
-export const RE_legal_history = relations(
-	TB_legal_history,
-	({ one, many }) => ({
-		user: one(TB_user, {
-			fields: [TB_legal_history.userId],
-			references: [TB_user.id],
-		}),
-		answers: many(TB_legal_history_answer),
-	}),
-);
+// export const RE_legal_history = relations(TB_legal_history, ({ one }) => ({
+// 	user: one(TB_user, {
+// 		fields: [TB_legal_history.userId],
+// 		references: [TB_user.id],
+// 	}),
+// 	// تمت إزالة العلاقة مع legal_history_answer
+// }));
 
-export const RE_legal_history_answer = relations(
-	TB_legal_history_answer,
-	({ one }) => ({
-		// العلاقة مع الجدول الرئيسي (legal_history)
-		session: one(TB_legal_history, {
-			fields: [TB_legal_history_answer.sessionId],
-			references: [TB_legal_history.sessionId],
-		}),
-
-		// العلاقة مع المستخدم (user)
-		user: one(TB_user, {
-			fields: [TB_legal_history_answer.userId],
-			references: [TB_user.id],
-		}),
-	}),
-);
+// export const RE_legal_history_answer = relations(
+// 	TB_legal_history_answer,
+// 	({ one }) => ({
+// 		user: one(TB_user, {
+// 			fields: [TB_legal_history_answer.userId],
+// 			references: [TB_user.id],
+// 		}),
+// 		// تمت إزالة العلاقة مع legal_history
+// 	}),
+// );

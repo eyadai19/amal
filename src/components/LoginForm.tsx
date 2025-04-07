@@ -27,7 +27,6 @@ export function LoginForm({
 				const response = await fetch("/api/is_logged_in");
 
 				if (!response.ok) {
-					console.error("Failed to fetch login status:", response.statusText);
 					setIsLoading(false);
 					return;
 				}
@@ -40,7 +39,6 @@ export function LoginForm({
 					setIsLoading(false);
 				}
 			} catch (error) {
-				console.error("An error occurred while checking login status:", error);
 				setIsLoading(false);
 			}
 		}
