@@ -208,3 +208,50 @@ export default function ProfilePage() {
 
 
 
+'use server';
+
+import { db } from '@/lib/db'; 
+import { eq } from 'drizzle-orm';
+import { getUser } from '@/lib/auth'; 
+export async function getCurrentUserInfo(): Promise<
+	| {
+			id: string;
+			username: string;
+			firstName: string;
+			lastName: string;
+			photo: string | null;
+			age: number | null;
+			releaseDate: Date | null;
+			sentenceDuration: number | null;
+			createdTime: Date;
+			lastUpdateTime: Date;
+	  }
+	| { field: string; message: string }
+> {
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const userInfo = await db.query.TB_user.findFirst({
+			where: (table, { eq }) => eq(table.id, user.id),
+		});
+
+		if (!userInfo) return { field: "root", message: "User not found." };
+
+		return {
+			id: userInfo.id,
+			username: userInfo.username,
+			firstName: userInfo.firstName,
+			lastName: userInfo.lastName,
+			photo: userInfo.photo,
+			age: userInfo.age,
+			releaseDate: userInfo.releaseDate,
+			sentenceDuration: userInfo.sentenceDuration,
+			createdTime: userInfo.createdTime,
+			lastUpdateTime: userInfo.lastUpdateTime,
+		};
+	} catch (error) {
+		console.error("Error fetching user info:", error);
+		return { field: "root", message: "Failed to fetch user info." };
+	}
+}
