@@ -2,38 +2,56 @@
 
 import { startVoiceRecognition } from "@/utils/stt";
 import { textToSpeech } from "@/utils/tts";
+import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
-import { FaMicrophone, FaPaperPlane, FaPause, FaPlay, FaStop } from "react-icons/fa";
+import {
+	FaMicrophone,
+	FaPaperPlane,
+	FaPause,
+	FaPlay,
+	FaStop,
+} from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
 type Message = {
-  id: string;
-  text: string;
-  sender: "user" | "bot";
-  timestamp: Date;
+	id: string;
+	text: string;
+	sender: "user" | "bot";
+	timestamp: Date;
 };
 
 export default function PsychologicalSupport({
 	logoutAction,
+	savePsychologicalConversationEntryAction,
 }: {
 	logoutAction: () => Promise<void>;
+	savePsychologicalConversationEntryAction: (
+		sessionId: string,
+		question: string,
+		answer: string,
+	) => Promise<{ success: boolean } | { field: string; message: string }>;
 }) {
-	const [messages, setMessages] = useState<Message[]>([
-		{
-			id: "1",
-			text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
-			sender: "bot",
-			timestamp: new Date(),
-		},
-	]);
+	const [sessionId, setSessionId] = useState<string>(nanoid());
+	const [messages, setMessages] = useState<Message[]>([]);
+	const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
 	const [inputText, setInputText] = useState("");
 	const [isRecording, setIsRecording] = useState(false);
-	const [isBotTyping, setIsBotTyping] = useState(false); // Bot typing indicator
-	const [isVoiceRecognizing, setIsVoiceRecognizing] = useState(false); // Voice recognition loading state
+	const [isBotTyping, setIsBotTyping] = useState(false);
+	const [isVoiceRecognizing, setIsVoiceRecognizing] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
 	const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
 	const [error, setError] = useState("");
+	// تهيئة الرسالة الترحيبية عند التحميل
+	useEffect(() => {
+		const welcomeMessage: Message = {
+			id: nanoid(),
+			text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
+			sender: "bot",
+			timestamp: new Date(),
+		};
+		setMessages([welcomeMessage]);
+	}, []);
 
 	const getPsychologicalResponse = async (
 		userMessage: string,
@@ -49,15 +67,16 @@ export default function PsychologicalSupport({
 
 		await new Promise((resolve) =>
 			setTimeout(resolve, 1000 + Math.random() * 2000),
-		); // Simulate delay
+		);
 		return responses[userFeeling] || responses.default;
 	};
 
 	const handleSendMessage = async () => {
 		if (!inputText.trim()) return;
 
+		// إضافة رسالة اليوزر للشات
 		const userMessage: Message = {
-			id: Date.now().toString(),
+			id: nanoid(),
 			text: inputText,
 			sender: "user",
 			timestamp: new Date(),
@@ -65,17 +84,41 @@ export default function PsychologicalSupport({
 		setMessages((prev) => [...prev, userMessage]);
 		setInputText("");
 
-		setIsBotTyping(true); // Show typing indicator while bot is thinking
+		// توليد رد البوت
+		setIsBotTyping(true);
 		const botResponseText = await getPsychologicalResponse(inputText);
-		setIsBotTyping(false); // Hide typing indicator once bot response is received
+		setIsBotTyping(false);
 
+		// إضافة رد البوت للشات
 		const botMessage: Message = {
-			id: Date.now().toString(),
+			id: nanoid(),
 			text: botResponseText,
 			sender: "bot",
 			timestamp: new Date(),
 		};
 		setMessages((prev) => [...prev, botMessage]);
+
+		// تخزين الزوج (رسالة اليوزر الحالية + رد البوت الحالي)
+		// فقط إذا لم تكن هذه هي الرسالة الترحيبية
+		if (messages.length > 0) {
+			// تأكد أن هناك رسائل سابقة (لتفادي الترحيب)
+			await savePsychologicalConversationEntryAction(
+				sessionId,
+				inputText, // رسالة اليوزر الحالية
+				botResponseText, // رد البوت الحالي
+			);
+		}
+	};
+
+	const saveConversationPair = async (
+		botMessage: string,
+		userMessage: string,
+	) => {
+		await savePsychologicalConversationEntryAction(
+			sessionId,
+			botMessage,
+			userMessage,
+		);
 	};
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -89,9 +132,8 @@ export default function PsychologicalSupport({
 		setError("");
 		try {
 			setIsRecording(true);
-			// طلب إذن الميكروفون أولاً
 			await navigator.mediaDevices.getUserMedia({ audio: true });
-			setIsVoiceRecognizing(true); // Show loading spinner for voice recognition
+			setIsVoiceRecognizing(true);
 			await navigator.mediaDevices.getUserMedia({ audio: true });
 			const transcript = await startVoiceRecognition();
 			setInputText(transcript);
@@ -100,7 +142,7 @@ export default function PsychologicalSupport({
 			console.error("خطأ في الوصول للميكروفون:", err);
 		} finally {
 			setIsRecording(false);
-			setIsVoiceRecognizing(false); // Hide loading spinner
+			setIsVoiceRecognizing(false);
 		}
 	};
 
@@ -121,6 +163,20 @@ export default function PsychologicalSupport({
 		}
 	};
 
+	const handleResetConversation = () => {
+		const newSessionId = nanoid();
+		setSessionId(newSessionId);
+
+		const welcomeMessage: Message = {
+			id: nanoid(),
+			text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
+			sender: "bot",
+			timestamp: new Date(),
+		};
+		setMessages([welcomeMessage]);
+		setLastUserMessage(null);
+	};
+
 	useEffect(() => {
 		return () => {
 			Object.values(audioRefs.current).forEach((audio) => {
@@ -132,18 +188,6 @@ export default function PsychologicalSupport({
 		};
 	}, []);
 
-	// Function to reset the conversation
-	const handleResetConversation = () => {
-		setMessages([
-			{
-				id: "1",
-				text: "مرحباً بك في منصة أمل للدعم النفسي. كيف يمكنني مساعدتك اليوم؟",
-				sender: "bot",
-				timestamp: new Date(),
-			},
-		]);
-	};
-
 	return (
 		<div className="flex h-screen flex-col bg-gray-100 pt-24">
 			<AmalNavbar
@@ -152,7 +196,6 @@ export default function PsychologicalSupport({
 				activeSection={"psychological"}
 			/>
 
-			{/* Message Section */}
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
 				{messages.map((message) => (
 					<div
@@ -164,10 +207,9 @@ export default function PsychologicalSupport({
 								message.sender === "user"
 									? "bg-white text-[#582C5E]"
 									: "bg-[#582C5E] text-white"
-							} font-serif`} // Ensure this is the same font used in AmalNavbar
+							} font-serif`}
 						>
-							<p className="text-lg">{message.text}</p>{" "}
-							{/* Increased font size */}
+							<p className="text-lg">{message.text}</p>
 							<div className="mt-2 flex items-center justify-between">
 								<span className="text-xs opacity-80">
 									{message.timestamp.toLocaleTimeString("ar-EG", {
@@ -175,38 +217,24 @@ export default function PsychologicalSupport({
 										minute: "2-digit",
 									})}
 								</span>
-								{message.sender === "user" && (
-									<button
-										onClick={() => toggleAudioPlayback(message.id)}
-										className={`rounded-full p-1 ${
-											activeAudioId === message.id && isPlaying
-												? "bg-white text-[#582C5E]"
-												: "bg-[#582C5E] text-white"
-										}`}
-									>
-										{activeAudioId === message.id && isPlaying ? (
-											<FaPause size={12} />
-										) : (
-											<FaPlay size={12} />
-										)}
-									</button>
-								)}
-								{message.sender === "bot" && (
-									<button
-										onClick={() => toggleAudioPlayback(message.id)}
-										className={`rounded-full p-1 ${
-											activeAudioId === message.id && isPlaying
-												? "bg-white text-[#582C5E]"
-												: "bg-[#582C5E] text-white"
-										}`}
-									>
-										{activeAudioId === message.id && isPlaying ? (
-											<FaPause size={12} />
-										) : (
-											<FaPlay size={12} />
-										)}
-									</button>
-								)}
+								<button
+									onClick={() => toggleAudioPlayback(message.id)}
+									className={`rounded-full p-1 ${
+										activeAudioId === message.id && isPlaying
+											? message.sender === "user"
+												? "bg-[#582C5E] text-white"
+												: "bg-white text-[#582C5E]"
+											: message.sender === "user"
+												? "bg-[#582C5E] text-white"
+												: "bg-white text-[#582C5E]"
+									}`}
+								>
+									{activeAudioId === message.id && isPlaying ? (
+										<FaPause size={12} />
+									) : (
+										<FaPlay size={12} />
+									)}
+								</button>
 							</div>
 						</div>
 					</div>
@@ -220,7 +248,6 @@ export default function PsychologicalSupport({
 				)}
 			</div>
 
-			{/* Input Section */}
 			<div className="border-t border-gray-300 bg-white p-6 shadow-md">
 				<div className="flex items-center rounded-lg bg-[#F1F0F0] p-3 shadow-lg transition-all">
 					<button
@@ -238,7 +265,7 @@ export default function PsychologicalSupport({
 						onChange={(e) => setInputText(e.target.value)}
 						onKeyPress={handleKeyPress}
 						placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
-						className="flex-1 resize-none rounded-lg bg-transparent p-3 font-serif text-lg text-[#582C5E] placeholder-[#E2C8D3] shadow-md transition-all outline-none focus:ring-2 focus:ring-[#582C5E]" // Increased font size here
+						className="flex-1 resize-none rounded-lg bg-transparent p-3 font-serif text-lg text-[#582C5E] placeholder-[#E2C8D3] shadow-md transition-all outline-none focus:ring-2 focus:ring-[#582C5E]"
 						rows={1}
 					/>
 					<button
@@ -255,7 +282,6 @@ export default function PsychologicalSupport({
 				</div>
 				{error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
-				{/* Reset Conversation Button */}
 				<div className="mt-4 flex justify-end">
 					<button
 						onClick={handleResetConversation}

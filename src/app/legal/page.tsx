@@ -35,7 +35,7 @@ export async function saveQuestionLegalAction(
 			orderBy: (history, { desc }) => [desc(history.questionIndex)],
 		});
 
-		const lastIndex = lastEntry ? lastEntry.questionIndex : 0;
+		const lastIndex = lastEntry ? lastEntry.questionIndex + 1 : 0;
 
 		await db.insert(TB_legal_history).values({
 			id: nanoid(),

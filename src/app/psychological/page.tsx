@@ -8,12 +8,17 @@ import PsychologicalSupport from "../../components/PsychologicalPage";
 export default function PsychologicalPage() {
 	return (
 		<div>
-			<PsychologicalSupport logoutAction={logoutAction} />
+			<PsychologicalSupport
+				savePsychologicalConversationEntryAction={
+					savePsychologicalConversationEntryAction
+				}
+				logoutAction={logoutAction}
+			/>
 		</div>
 	);
 }
 
-export async function savePsychologicalConversationEntry(
+export async function savePsychologicalConversationEntryAction(
 	sessionId: string,
 	question: string,
 	answer: string,
@@ -28,7 +33,7 @@ export async function savePsychologicalConversationEntry(
 			orderBy: (history, { desc }) => [desc(history.questionIndex)],
 		});
 
-		const lastIndex = lastEntry ? lastEntry.questionIndex : 0;
+		const lastIndex = lastEntry ? lastEntry.questionIndex + 1 : 0;
 
 		await db.insert(TB_psychological_history).values({
 			id: nanoid(),
