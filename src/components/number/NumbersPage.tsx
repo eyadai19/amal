@@ -22,7 +22,7 @@ const arabicNumberNames: Record<string, string> = {
 	billion: "مليار",
 };
 
-export default function NumbersPage() {
+export default function NumbersPage({ logoutAction }: { logoutAction: () => Promise<void> }) {
 	const router = useRouter();
 	const numbersWithKeys = Object.entries(getArabicNumerals);
 
@@ -44,7 +44,11 @@ export default function NumbersPage() {
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#283a5c"
+				activeSection={"literacy"}
+			/>
 			<div className="mt-5 mb-6 ml-15 flex w-full items-start justify-start gap-4 md:mb-8">
 				<Link
 					href="/literacy"

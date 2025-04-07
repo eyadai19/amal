@@ -4,7 +4,11 @@ import { useState } from "react";
 import { FaArrowRight, FaVolumeUp } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
-export default function HomePage() {
+export default function HomePage({
+	logoutAction,
+}: {
+	logoutAction: () => Promise<void>;
+}) {
 	const [activeHover, setActiveHover] = useState<number | null>(null);
 
 	const playAudio = (audioPath: string) => {
@@ -109,7 +113,11 @@ export default function HomePage() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-[#F5F0EA] to-[#E1D9D1]">
-			<AmalNavbar backgroundColor="#234330" activeSection={null} />
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#234330"
+				activeSection={null}
+			/>
 
 			{/* Hero Section */}
 			<section id="home" className="relative overflow-hidden">

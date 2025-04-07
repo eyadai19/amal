@@ -78,17 +78,31 @@ const knowledgeBase = [
   }
 ];
 export default function LegalSupport({
-  ChatbotExpAction,
+	logoutAction,
+	ChatbotExpAction,
+	saveQuestionLegalAction,
+	saveAnswerLegalAction,
 }: {
-  ChatbotExpAction: (
-    question: string,
-    answer: string,
-  ) => Promise<
-    | { question: string; answers: string[] }
-    | { field: string; message: string }
-    | { answer: string }
-    | { answer: string; exception: string }
-  >;
+	logoutAction: () => Promise<void>;
+	ChatbotExpAction: (
+		question: string,
+		answer: string,
+	) => Promise<
+		| { question: string; answers: string[] }
+		| { field: string; message: string }
+		| { answer: string }
+		| { answer: string; exception: string }
+	>;
+	saveQuestionLegalAction: (
+		question: string,
+		answer: string,
+		sessionId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
+	saveAnswerLegalAction: (
+		exception: string | null,
+		answer: string,
+		sessionId: string,
+	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [messages, setMessages] = useState<Message[]>([]);
   	const [isBotTyping, setIsBotTyping] = useState(false);
@@ -340,19 +354,25 @@ export default function LegalSupport({
 
 	return (
 		<div className="flex h-screen flex-col bg-gray-50 pt-24">
-			<AmalNavbar backgroundColor={"#CA5A29FF"} activeSection={"legal"} />
+			<AmalNavbar
+				backgroundColor={"#CA5A29FF"}
+				logoutAction={logoutAction}
+				activeSection={"legal"}
+			/>
 
 			{/* Messages container */}
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
-			{messages.map((message) => (
-			<div
-				key={message.id}
-				className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"} transition-all ease-in-out`}
-			>
-				<div className="w-full max-w-[90%] lg:max-w-[70%]">
-				{/* Bot Question (keep existing) */}
-				{message.sender === "bot" && !message.isFinalAnswer 
-				&& !message.isException && !message.isSearchResult && (
+				{messages.map((message) => (
+					<div
+						key={message.id}
+						className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"} transition-all ease-in-out`}
+					>
+						<div className="w-full max-w-[90%] lg:max-w-[70%]">
+							{/* Bot Question (keep existing) */}
+							{message.sender === "bot" &&
+								!message.isFinalAnswer &&
+								!message.isException &&
+								!message.isSearchResult && (
 									<div className="mb-4 space-y-3 text-right">
 										<div className="inline-block max-w-fit transform rounded-xl bg-white p-4 shadow-lg transition-all duration-500 hover:scale-105">
 											<div className="flex flex-col items-start gap-1">
@@ -462,27 +482,37 @@ export default function LegalSupport({
 
 							{message.isSearchResult && (
 								<div className="mt-4 w-full rounded-xl border border-[#D78448] bg-[#FFCB99] p-4 text-right">
-									<h3 className="text-lg font-medium mb-3">{message.text}</h3>
+									<h3 className="mb-3 text-lg font-medium">{message.text}</h3>
 									<div className="space-y-3">
 										{message.searchResults?.map((result, index) => (
-										<div key={index} className="bg-white p-3 rounded-lg shadow">
-											<p className="font-medium text-[#D78448]">{result.question}</p>
-											<p className="text-gray-700 mt-1">{result.answer}</p>
-											<div className="text-sm text-gray-500 mt-1">
-												درجة التطابق: {(result.score * 100).toFixed(0)}%
-											</div>
-											<button
-												onClick={() => toggleAudioPlayback(`result-${index}`, `${result.question} ${result.answer}`)}
-												className="text-[#D78448] mt-2"
+											<div
+												key={index}
+												className="rounded-lg bg-white p-3 shadow"
 											>
-											{audioStates.get(`result-${index}`) ? (
-												<FaPause size={14} />
-											) : (
-												<FaPlay size={14} />
-											)}
-											</button>
-										</div>
-									))}
+												<p className="font-medium text-[#D78448]">
+													{result.question}
+												</p>
+												<p className="mt-1 text-gray-700">{result.answer}</p>
+												<div className="mt-1 text-sm text-gray-500">
+													درجة التطابق: {(result.score * 100).toFixed(0)}%
+												</div>
+												<button
+													onClick={() =>
+														toggleAudioPlayback(
+															`result-${index}`,
+															`${result.question} ${result.answer}`,
+														)
+													}
+													className="mt-2 text-[#D78448]"
+												>
+													{audioStates.get(`result-${index}`) ? (
+														<FaPause size={14} />
+													) : (
+														<FaPlay size={14} />
+													)}
+												</button>
+											</div>
+										))}
 									</div>
 								</div>
 							)}

@@ -5,11 +5,6 @@ import { useEffect, useState } from "react";
 
 type SectionType = "literacy" | "career" | "psychological" | "legal" | null;
 
-interface AmalNavbarProps {
-	backgroundColor?: string;
-	activeSection?: SectionType;
-}
-
 const sectionColors: Record<
 	string,
 	{ bg: string; text: string; light: string; hover: string }
@@ -47,7 +42,12 @@ const sectionColors: Record<
 export default function AmalNavbar({
 	backgroundColor = "#283a5c",
 	activeSection = null,
-}: AmalNavbarProps) {
+	logoutAction,
+}: {
+	backgroundColor?: string;
+	activeSection?: SectionType;
+	logoutAction: () => Promise<void>;
+}) {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [userLoggedIn, setUserLoggedIn] = useState(true);
 	const pathname = usePathname();
@@ -58,47 +58,29 @@ export default function AmalNavbar({
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
 	};
-
-	useEffect(() => {
-		async function checkLoginStatus() {
-			try {
-				const response = await fetch("/api/is_logged_in");
-				if (!response.ok) {
-					console.error("Failed to fetch login status:", response.statusText);
-					setUserLoggedIn(false);
-					return;
-				} else setUserLoggedIn(true);
-			} catch (error) {
+	async function checkLoginStatus() {
+		try {
+			const response = await fetch("/api/is_logged_in");
+			if (!response.ok) {
+				console.error("Failed to fetch login status:", response.statusText);
 				setUserLoggedIn(false);
 				return;
-			}
+			} else setUserLoggedIn(true);
+		} catch (error) {
+			setUserLoggedIn(false);
+			return;
 		}
-
+	}
+	useEffect(() => {
 		checkLoginStatus();
 	}, []);
 
 	const handleLogout = async () => {
 		setIsLoading(true);
-		try {
-			const response = await fetch("/api/logout", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-
-			if (response.redirected) {
-				window.location.href = response.url;
-			} else {
-				router.push("/login");
-			}
-		} catch (error) {
-			console.error("Logout failed:", error);
-		} finally {
-			setIsLoading(false);
-		}
+		await logoutAction();
+		await checkLoginStatus();
+		setIsLoading(false);
 	};
-
 	return (
 		<nav
 			className="fixed top-0 left-0 z-50 w-full py-2 text-white shadow-md"

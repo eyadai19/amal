@@ -138,7 +138,50 @@ export const TB_user_digit_progress = pgTable("user_digit_progress", {
 	attempts: integer("attempts").notNull().default(0),
 });
 
-// re
+// // جدول السجل القانوني
+export const TB_legal_history = pgTable("legal_history", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	question: text("question").notNull(),
+	answer: text("answer").notNull(),
+	questionIndex: integer("question_index").notNull(),
+	sessionId: text("session_id").notNull(), // بدون unique
+});
+
+// جدول إجابات السجل القانوني
+export const TB_legal_history_answer = pgTable("legal_history_answer", {
+	id: text("id").primaryKey(),
+	sessionId: text("session_id").notNull(), // بدون .references()
+	answer: text("answer").notNull(),
+	exception: text("exception"),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+});
+
+export const TB_psychological_history = pgTable("psychological_history", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => TB_user.id, { onDelete: "cascade" }),
+	sessionId: text("session_id").notNull(),
+	question: text("question").notNull(),
+	answer: text("answer").notNull(),
+	questionIndex: integer("question_index").notNull(),
+});
+
+export const RE_psychological_history = relations(
+	TB_psychological_history,
+	({ one }) => ({
+		user: one(TB_user, {
+			fields: [TB_psychological_history.userId],
+			references: [TB_user.id],
+		}),
+	}),
+);
+
 import { relations } from "drizzle-orm";
 
 // علاقات جدول المستخدم
@@ -246,3 +289,24 @@ export const RE_user_digit_progress = relations(
 		}),
 	}),
 );
+
+// العلاقات الجديدة
+
+// export const RE_legal_history = relations(TB_legal_history, ({ one }) => ({
+// 	user: one(TB_user, {
+// 		fields: [TB_legal_history.userId],
+// 		references: [TB_user.id],
+// 	}),
+// 	// تمت إزالة العلاقة مع legal_history_answer
+// }));
+
+// export const RE_legal_history_answer = relations(
+// 	TB_legal_history_answer,
+// 	({ one }) => ({
+// 		user: one(TB_user, {
+// 			fields: [TB_legal_history_answer.userId],
+// 			references: [TB_user.id],
+// 		}),
+// 		// تمت إزالة العلاقة مع legal_history
+// 	}),
+// );

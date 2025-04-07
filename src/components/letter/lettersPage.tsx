@@ -1,25 +1,35 @@
 "use client";
 import { getArabicLetters } from "@/utils/arabicLetters";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import AmalNavbar from "../amalNavbar";
 import Link from "next/link";
-import { FaArrowLeft, FaEraser, FaPencilAlt, FaTimes } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { FaArrowLeft } from "react-icons/fa";
+import AmalNavbar from "../amalNavbar";
 
-export default function LettersPage() {
+export default function LettersPage({
+	logoutAction,
+}: {
+	logoutAction: () => Promise<void>;
+}) {
 	const router = useRouter();
 	const lettersWithKeys = Object.entries(getArabicLetters);
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-[#D8E5F0] p-6 pt-24">
-			<AmalNavbar backgroundColor="#283a5c" activeSection={"literacy"} />
-			<div className="ml-15 mt-5 mb-6 md:mb-8 flex justify-start items-start gap-4 w-full">
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#283a5c"
+				activeSection={"literacy"}
+			/>
+			<div className="mt-5 mb-6 ml-15 flex w-full items-start justify-start gap-4 md:mb-8">
 				<Link
 					href="/literacy"
 					className="flex items-center text-[#1E3A6E] hover:text-[#3f5680]"
 				>
 					<FaArrowLeft className="mr-2" />
-					<span className="text-sm md:text-base ">العودة إلى القسم التعليمي</span>
+					<span className="text-sm md:text-base">
+						العودة إلى القسم التعليمي
+					</span>
 				</Link>
 				<div className="hidden md:block md:w-8"></div>
 			</div>

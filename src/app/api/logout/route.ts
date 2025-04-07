@@ -2,14 +2,28 @@
 import { lucia } from "@/lib/auth";
 import { cookies } from "next/headers";
 
-export default async function handler() {
-	const sessionCookie = cookies().get(lucia.sessionCookieName);
-	if (sessionCookie) {
-		await lucia.invalidateSession(sessionCookie.value);
-		cookies().set({
-			name: lucia.sessionCookieName,
-			value: "",
-			expires: new Date(0),
-		});
+import { NextResponse } from "next/server";
+
+export async function POST() {
+	try {
+		const sessionCookie = cookies().get(lucia.sessionCookieName);
+
+		if (sessionCookie) {
+			await lucia.invalidateSession(sessionCookie.value);
+			const blankCookie = lucia.createBlankSessionCookie();
+			cookies().set({
+				name: lucia.sessionCookieName,
+				value: "",
+				expires: new Date(0),
+			});
+		}
+
+		return;
+	} catch (error) {
+		console.error("Logout error:", error);
+		return NextResponse.json(
+			{ error: "Internal server error" },
+			{ status: 500 },
+		);
 	}
 }
