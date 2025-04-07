@@ -229,7 +229,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.start_image}
 											alt="شكل الحرف في البداية"
-											className="h-16 w-16 md:h-23 md:w-20"
+											className="h-16 w-16 md:h-40 md:w-40"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -266,7 +266,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.middle_image}
 											alt="شكل الحرف في الوسط"
-											className="h-16 w-16 md:h-23 md:w-20"
+											className="h-16 w-16 md:h-40 md:w-40"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -309,7 +309,7 @@ export default function LetterPage({
 										<img
 											src={currentLetter.end_image}
 											alt="شكل الحرف في النهاية"
-											className="h-16 w-16 md:h-23 md:w-20"
+											className="h-16 w-16 md:h-40 md:w-40"
 										/>
 									) : (
 										<span className="text-4xl text-[#1E3A6E] md:text-5xl">
@@ -369,7 +369,7 @@ export default function LetterPage({
 										<img
 											src={item.image}
 											alt={`تمرين ${item.type}`}
-											className="h-30 w-20 opacity-50"
+											className="h-40 w-40 opacity-50"
 										/>
 									) : (
 										<span className="text-6xl text-[#1E3A6E] opacity-50">

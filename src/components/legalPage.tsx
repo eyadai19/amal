@@ -346,7 +346,7 @@ export default function LegalSupport({
 
 	return (
 		<div className="flex h-screen flex-col bg-gray-50 pt-24">
-			<AmalNavbar backgroundColor={"#D66E45FF"} activeSection={"legal"} />
+			<AmalNavbar backgroundColor={"#CA5A29FF"} activeSection={"legal"} />
 
 			{/* Messages container */}
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
