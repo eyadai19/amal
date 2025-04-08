@@ -7,12 +7,12 @@ import hash from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 export default function RegisterPage() {
 	return <RegisterForm registerAction={RegisterAction} />;
 }
+
 export async function RegisterAction(
 	input: z.infer<typeof registerFormSchema>,
 	photoUrl: string | null,
@@ -20,13 +20,19 @@ export async function RegisterAction(
 	"use server";
 
 	try {
-		const { ...data } = await registerFormSchema.parseAsync(input);
+		const { confirmPassword, releaseDate, sentenceDuration, ...data } =
+			await registerFormSchema.parseAsync(input);
 
 		const newUser = {
 			id: nanoid(),
 			...data,
 			password: hash(data.password),
 			photo: null,
+			age: data.age ? parseInt(data.age.toString()) : null,
+			releaseDate: releaseDate ? new Date(releaseDate) : null,
+			sentenceDuration: sentenceDuration
+				? parseInt(sentenceDuration.toString())
+				: null,
 		};
 
 		try {
@@ -46,34 +52,9 @@ export async function RegisterAction(
 					"An error occurred while uploading the photo:",
 					uploadError,
 				);
-				return { field: "photo", message: "Failed to upload profile photo" };
+				return { field: "root", message: "Failed to upload profile photo" };
 			}
 		}
-
-		// const alphaBitStageIndex = await db.query.TB_alphaBit_level.findFirst({
-		// 	where: (stage, { eq }) => eq(stage.index, 0),
-		// });
-
-		// if (!alphaBitStageIndex) return;
-
-		// const digitStageIndex = await db.query.TB_digit_level.findFirst({
-		// 	where: (stage, { eq }) => eq(stage.index, 0),
-		// });
-
-		// if (!digitStageIndex) return;
-
-		// const newUserT3 = {
-		// 	id: nanoid(),
-		// 	userId: newUser.id,
-		// 	alphaBitId: alphaBitStageIndex.id,
-		// 	digitId: digitStageIndex.id,
-		// };
-
-		// try {
-		// 	await db.insert(TB_user_t3).values(newUserT3);
-		// } catch {
-		// 	return { field: "root", message: "" };
-		// }
 
 		const session = await lucia.createSession(newUser.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
@@ -82,8 +63,6 @@ export async function RegisterAction(
 			sessionCookie.value,
 			sessionCookie.attributes,
 		);
-
-		redirect("/home");
 	} catch (e) {
 		console.error("Unexpected error:", e);
 		return {

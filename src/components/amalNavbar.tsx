@@ -60,12 +60,13 @@ export default function AmalNavbar({
 	activeSection?: SectionType;
 	logoutAction: () => Promise<void>;
 }) {
+	const router = useRouter();
+
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [userLoggedIn, setUserLoggedIn] = useState(true);
 	const pathname = usePathname();
 	const isHomePage = pathname === "/home" || pathname === "/";
 	const [isLoading, setIsLoading] = useState(false);
-	const router = useRouter();
 
 	const toggleMenu = () => {
 		setIsMenuOpen(!isMenuOpen);
@@ -92,6 +93,7 @@ export default function AmalNavbar({
 		await logoutAction();
 		await checkLoginStatus();
 		setIsLoading(false);
+		router.push("/home");
 	};
 	return (
 		<nav
