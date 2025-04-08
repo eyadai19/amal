@@ -48,10 +48,6 @@ export async function RegisterAction(
 					.set({ photo: photoUrl })
 					.where(eq(TB_user.id, newUser.id));
 			} catch (uploadError) {
-				console.error(
-					"An error occurred while uploading the photo:",
-					uploadError,
-				);
 				return { field: "root", message: "Failed to upload profile photo" };
 			}
 		}
@@ -64,7 +60,6 @@ export async function RegisterAction(
 			sessionCookie.attributes,
 		);
 	} catch (e) {
-		console.error("Unexpected error:", e);
 		return {
 			field: "root",
 			message: "An unexpected error occurred, please try again later",

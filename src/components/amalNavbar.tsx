@@ -75,7 +75,6 @@ export default function AmalNavbar({
 		try {
 			const response = await fetch("/api/is_logged_in");
 			if (!response.ok) {
-				console.error("Failed to fetch login status:", response.statusText);
 				setUserLoggedIn(false);
 				return;
 			} else setUserLoggedIn(true);

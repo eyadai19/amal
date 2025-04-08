@@ -73,7 +73,6 @@ export default function ArabicCanvasCom() {
 				alert("❌ لم يتم التعرف على الرقم!");
 			}
 		} catch (error) {
-			console.error("Error:", error);
 			alert("حدث خطأ أثناء الاتصال بالخادم");
 		} finally {
 			setIsLoading(false);

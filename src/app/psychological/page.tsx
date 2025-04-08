@@ -29,7 +29,8 @@ export async function savePsychologicalConversationEntryAction(
 		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const lastEntry = await db.query.TB_psychological_history.findFirst({
-			where: (history, { eq }) => eq(history.sessionId, sessionId),
+			where: (history, { eq, and }) =>
+				and(eq(history.sessionId, sessionId), eq(history.userId, user.id)),
 			orderBy: (history, { desc }) => [desc(history.questionIndex)],
 		});
 
@@ -134,7 +135,6 @@ export async function fetchAllPsychologicalSessionsAction(): Promise<
 
 		return { sessions };
 	} catch (error) {
-		console.error("Error fetching psychological sessions:", error);
 		return {
 			field: "root",
 			message: "Failed to fetch psychological sessions. Please try again.",
@@ -161,7 +161,6 @@ export async function deletePsychologicalSessionAction(
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error deleting session:", error);
 		return { field: "root", message: "Failed to delete session." };
 	}
 }

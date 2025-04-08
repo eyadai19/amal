@@ -1,6 +1,7 @@
 "use client";
 
 import { UserInfo } from "@/app/Profile/page";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
 
@@ -31,6 +32,7 @@ export default function Profile({
 		sessionId: string,
 	) => Promise<{ success: boolean } | { field: string; message: string }>;
 }) {
+	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,7 @@ export default function Profile({
 
 				if ("field" in userResult) {
 					setError(userResult.message);
+					router.push("/home");
 				} else {
 					setUser(userResult);
 				}
@@ -94,7 +97,6 @@ export default function Profile({
 				}
 			} catch (err) {
 				setError("Failed to fetch user data");
-				console.error("Error fetching user data:", err);
 			} finally {
 				setLoading(false);
 			}
@@ -121,7 +123,6 @@ export default function Profile({
 			}
 		} catch (err) {
 			setError("Failed to delete session");
-			console.error("Error deleting session:", err);
 		}
 	};
 
@@ -139,7 +140,6 @@ export default function Profile({
 			}
 		} catch (err) {
 			setError("Failed to delete session");
-			console.error("Error deleting session:", err);
 		}
 	};
 
@@ -208,7 +208,7 @@ export default function Profile({
 								</div>
 								{user.age && (
 									<span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-800">
-										{user.age} سنة
+										سنة {user.age}
 									</span>
 								)}
 							</div>
@@ -230,7 +230,7 @@ export default function Profile({
 											مدة الحكم
 										</h3>
 										<p className="mt-1 text-sm text-gray-900">
-											{user.sentenceDuration} سنة
+											سنة {user.sentenceDuration}
 										</p>
 									</div>
 								)}

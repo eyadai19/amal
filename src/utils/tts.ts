@@ -41,7 +41,6 @@ export const textToSpeech = async (text: string) => {
 	return new Promise<void>((resolve) => {
 		utterance.onend = () => resolve();
 		utterance.onerror = (event) => {
-			console.error("حدث خطأ في تحويل النص إلى كلام:", event);
 			resolve();
 		};
 

@@ -31,7 +31,8 @@ export async function saveQuestionLegalAction(
 		if (!user) return { field: "root", message: "User not authenticated." };
 
 		const lastEntry = await db.query.TB_legal_history.findFirst({
-			where: (history, { eq }) => eq(history.sessionId, sessionId),
+			where: (history, { eq, and }) =>
+				and(eq(history.sessionId, sessionId), eq(history.userId, user.id)),
 			orderBy: (history, { desc }) => [desc(history.questionIndex)],
 		});
 
@@ -125,7 +126,6 @@ export async function fetchLegalConversationHistory(sessionId: string): Promise<
 			exception: lastAnswer.exception || null, // الاستثناء (إن وجد)
 		};
 	} catch (error) {
-		console.error("Error fetching conversation history:", error);
 		return {
 			field: "root",
 			message: "Failed to fetch conversation history. Please try again.",
@@ -178,7 +178,6 @@ export async function fetchAllLegalSessionsAction(): Promise<
 
 		return { sessions };
 	} catch (error) {
-		console.error("Error fetching sessions:", error);
 		return {
 			field: "root",
 			message: "Failed to fetch sessions. Please try again.",
@@ -215,7 +214,6 @@ export async function deleteLegalSessionAction(
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error deleting session:", error);
 		return { field: "root", message: "Failed to delete session." };
 	}
 }

@@ -59,7 +59,6 @@ export default function RegisterForm({
 			try {
 				const response = await fetch("/api/is_logged_in");
 				if (!response.ok) {
-					console.error("Failed to fetch login status:", response.statusText);
 					setIsLoading(false);
 					return;
 				}
@@ -70,7 +69,6 @@ export default function RegisterForm({
 					setIsLoading(false);
 				}
 			} catch (error) {
-				console.error("An error occurred while checking login status:", error);
 				setIsLoading(false);
 			}
 		}
@@ -130,7 +128,7 @@ export default function RegisterForm({
 												setPhotoUrl(uploadedFile.url);
 											}}
 											onUploadError={(error) => {
-												console.error("Upload failed", error);
+												console.error("Upload failed", error); // set error
 											}}
 										/>
 									</div>

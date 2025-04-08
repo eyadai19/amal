@@ -66,7 +66,6 @@ export async function getUserInfoAction(): Promise<
 			lastUpdateTime: userInfo.lastUpdateTime,
 		};
 	} catch (error) {
-		console.error("Error fetching user info:", error);
 		return { field: "root", message: "Failed to fetch user info." };
 	}
 }

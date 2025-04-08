@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json({ isLoggedIn: true }, { status: 200 });
 	} catch (error) {
-		console.error("Error in API route:", error);
 		return NextResponse.json(
 			{ error: "An unexpected error occurred" },
 			{ status: 500 },

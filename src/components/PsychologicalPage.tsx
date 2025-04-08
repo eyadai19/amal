@@ -139,7 +139,6 @@ export default function PsychologicalSupport({
 			setInputText(transcript);
 		} catch (err) {
 			setError("يجب منح الإذن لاستخدام الميكروفون");
-			console.error("خطأ في الوصول للميكروفون:", err);
 		} finally {
 			setIsRecording(false);
 			setIsVoiceRecognizing(false);

@@ -163,7 +163,6 @@ export default function LetterPage({
 			setPrediction(predictedDigit);
 			setConfidence(predictionConfidence);
 		} catch (error) {
-			console.error("Error:", error);
 			setAccuracyResult({
 				correct: false,
 				accuracy: 0,

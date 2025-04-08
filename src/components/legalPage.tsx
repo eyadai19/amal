@@ -1,81 +1,85 @@
 "use client";
 
+import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import {
-  FaCheck,
-  FaExclamationTriangle,
-  FaMicrophone,
-  FaPause,
-  FaPlay,
-  FaRedo,
-  FaSearch,
+	FaCheck,
+	FaExclamationTriangle,
+	FaMicrophone,
+	FaPause,
+	FaPlay,
+	FaRedo,
+	FaSearch,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 
 // Speech recognition function
 const startVoiceRecognition = async (): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    const recognition = new (window.SpeechRecognition ||
-      window.webkitSpeechRecognition)();
-    recognition.lang = "ar-SA";
+	return new Promise<string>((resolve, reject) => {
+		const recognition = new (window.SpeechRecognition ||
+			window.webkitSpeechRecognition)();
+		recognition.lang = "ar-SA";
 
-    recognition.start();
+		recognition.start();
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      resolve(transcript);
-    };
+		recognition.onresult = (event: any) => {
+			const transcript = event.results[0][0].transcript;
+			resolve(transcript);
+		};
 
-    recognition.onerror = (event) => {
-      reject(event.error);
-    };
-  });
+		recognition.onerror = (event) => {
+			reject(event.error);
+		};
+	});
 };
 
 type Message = {
-  id: string;
-  text: string;
-  sender: "user" | "bot";
-  timestamp: Date;
-  answers?: string[];
-  isFinalAnswer?: boolean;
-  isException?: boolean;
-  // Add new type for search results
-  isSearchResult?: boolean;
-  searchResults?: {
-    question: string;
-    answer: string;
-    score: number;
-  }[];
+	id: string;
+	text: string;
+	sender: "user" | "bot";
+	timestamp: Date;
+	answers?: string[];
+	isFinalAnswer?: boolean;
+	isException?: boolean;
+	// Add new type for search results
+	isSearchResult?: boolean;
+	searchResults?: {
+		question: string;
+		answer: string;
+		score: number;
+	}[];
 };
 
 const colors = {
-  primary: "#D78448",
-  secondary: "#FFCB99",
-  accent: "#D78448",
-  text: "#333333",
-  lightText: "#FFFFFF",
-  playButtonColor: "#D78448",
-  pauseButtonColor: "#FF4C4C",
+	primary: "#D78448",
+	secondary: "#FFCB99",
+	accent: "#D78448",
+	text: "#333333",
+	lightText: "#FFFFFF",
+	playButtonColor: "#D78448",
+	pauseButtonColor: "#FF4C4C",
 };
 
 // Hardcoded knowledge base
 const knowledgeBase = [
-  {
-    question: "ما هي مدة التقادم في الدعاوى التجارية؟",
-    answer: "مدة التقادم في الدعاوى التجارية هي 10 سنوات وفقًا لنظام القانون التجاري السعودي",
-    similarity_score: 0.95
-  },
-  {
-    question: "كيف يمكنني رفع دعوى قضائية؟",
-    answer: "يمكنك رفع دعوى قضائية عن طريق تقديم صحيفة الدعوى إلى المحكمة المختصة مع المستندات المطلوبة",
-    similarity_score: 0.87
-  },
-  {
-    question: "ما هي حقوق المستأجر في السعودية؟",
-    answer: "للمستأجر حق الانتفاع بالمأجور وفقاً لشروط العقد وحق المطالبة بالإصلاحات الضرورية",
-    similarity_score: 0.78
-  }
+	{
+		question: "ما هي مدة التقادم في الدعاوى التجارية؟",
+		answer:
+			"مدة التقادم في الدعاوى التجارية هي 10 سنوات وفقًا لنظام القانون التجاري السعودي",
+		similarity_score: 0.95,
+	},
+	{
+		question: "كيف يمكنني رفع دعوى قضائية؟",
+		answer:
+			"يمكنك رفع دعوى قضائية عن طريق تقديم صحيفة الدعوى إلى المحكمة المختصة مع المستندات المطلوبة",
+		similarity_score: 0.87,
+	},
+	{
+		question: "ما هي حقوق المستأجر في السعودية؟",
+		answer:
+			"للمستأجر حق الانتفاع بالمأجور وفقاً لشروط العقد وحق المطالبة بالإصلاحات الضرورية",
+		similarity_score: 0.78,
+	},
 ];
 export default function LegalSupport({
 	logoutAction,
@@ -104,36 +108,39 @@ export default function LegalSupport({
 		sessionId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
 }) {
+	const [sessionId, setSessionId] = useState<string>(nanoid());
 	const [messages, setMessages] = useState<Message[]>([]);
-  	const [isBotTyping, setIsBotTyping] = useState(false);
+	const [isBotTyping, setIsBotTyping] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(new Set());
+	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(
+		new Set(),
+	);
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [speechInstance, setSpeechInstance] = useState<SpeechSynthesisUtterance | null>(null);
+	const [speechInstance, setSpeechInstance] =
+		useState<SpeechSynthesisUtterance | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const [activeQuestions, setActiveQuestions] = useState<Set<string>>(new Set());
-	const [audioStates, setAudioStates] = useState<Map<string, boolean>>(new Map());
+	const [activeQuestions, setActiveQuestions] = useState<Set<string>>(
+		new Set(),
+	);
+	const [audioStates, setAudioStates] = useState<Map<string, boolean>>(
+		new Map(),
+	);
 	const [activeAudioId, setActiveAudioId] = useState<string | null>(null);
-	
+
 	useEffect(() => {
 		scrollToBottom();
-    	startConversation();
-  	}, []);
-	
+		startConversation();
+	}, []);
+
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
 	const handleAnswerSelection = async (answer: string, questionId: string) => {
-		// التوقف إذا كان السؤال غير نشط أو الإجابة مختارة مسبقاً
-		if (!activeQuestions.has(questionId) || selectedAnswers.has(answer)) {
-			return;
-		}
+		if (!activeQuestions.has(questionId)) return;
 
-		// تأمين الإجابة المختارة لمنع التكرار
 		setSelectedAnswers((prev) => new Set([...prev, answer]));
 
-		// إنشاء رسالة المستخدم
 		const userMessage: Message = {
 			id: `${questionId}-${Date.now()}`,
 			text: answer,
@@ -141,19 +148,7 @@ export default function LegalSupport({
 			timestamp: new Date(),
 		};
 
-		// تحديث الرسائل مع منع التكرار
-		setMessages((prev) => {
-			const lastUserMessage = [...prev]
-				.reverse()
-				.find((m) => m.sender === "user");
-
-			if (lastUserMessage?.text === answer) {
-				return prev;
-			}
-			return [...prev, userMessage];
-		});
-
-		// تعطيل السؤال الحالي
+		setMessages((prev) => [...prev, userMessage]);
 		setActiveQuestions((prev) => {
 			const newSet = new Set(prev);
 			newSet.delete(questionId);
@@ -161,7 +156,15 @@ export default function LegalSupport({
 		});
 
 		setIsBotTyping(true);
+
 		try {
+			// حفظ السؤال والإجابة
+			await saveQuestionLegalAction(
+				messages.find((m) => m.id === questionId)?.text || "",
+				answer,
+				sessionId,
+			);
+
 			const botResponse = await ChatbotExpAction(
 				messages.find((m) => m.id === questionId)?.text || "",
 				answer,
@@ -176,10 +179,15 @@ export default function LegalSupport({
 					isFinalAnswer: true,
 				};
 
-				// إضافة رسالة البوت النهائية
 				setMessages((prev) => [...prev, botMessage]);
 
-				// معالجة الاستثناءات إذا وجدت
+				// حفظ الإجابة النهائية والاستثناء
+				await saveAnswerLegalAction(
+					"exception" in botResponse ? botResponse.exception : null,
+					botResponse.answer,
+					sessionId,
+				);
+
 				if ("exception" in botResponse && botResponse.exception) {
 					setMessages((prev) => [
 						...prev,
@@ -201,16 +209,14 @@ export default function LegalSupport({
 					answers: botResponse.answers,
 				};
 
-				// إضافة سؤال البوت الجديد
 				setMessages((prev) => [...prev, botMessage]);
-				setActiveQuestions((prev) => new Set([...prev, botMessage.id]));
+				setActiveQuestions(new Set([botMessage.id]));
 			}
 		} finally {
 			setIsBotTyping(false);
-			scrollToBottom(); // التأكد من التمرير للأسفل
+			scrollToBottom();
 		}
 	};
-
 
 	const startConversation = async () => {
 		setIsBotTyping(true);
@@ -218,20 +224,22 @@ export default function LegalSupport({
 		setIsBotTyping(false);
 
 		if ("question" in initialResponse) {
-		const initialMessage: Message = {
-			id: Date.now().toString(),
-			text: initialResponse.question,
-			sender: "bot",
-			timestamp: new Date(),
-			answers: initialResponse.answers,
-		};
+			const initialMessage: Message = {
+				id: Date.now().toString(),
+				text: initialResponse.question,
+				sender: "bot",
+				timestamp: new Date(),
+				answers: initialResponse.answers,
+			};
 
-		setMessages([initialMessage]);
-		setActiveQuestions(new Set([initialMessage.id]));
+			setMessages([initialMessage]);
+			setActiveQuestions(new Set([initialMessage.id]));
 		}
 	};
 
-  	const handleResetConversation = () => {
+	const handleResetConversation = () => {
+		const newSessionId = nanoid();
+		setSessionId(newSessionId);
 		window.speechSynthesis.cancel();
 		setMessages([]);
 		setSelectedAnswers(new Set());
@@ -242,42 +250,43 @@ export default function LegalSupport({
 		startConversation();
 	};
 
-  	const handleSearch = async () => {
-    	if (!searchQuery.trim()) return;
-    
+	const handleSearch = async () => {
+		if (!searchQuery.trim()) return;
+
 		// Add user's search query as a message
 		const userMessage: Message = {
-		id: Date.now().toString(),
-		text: searchQuery,
-		sender: "user",
-		timestamp: new Date(),
+			id: Date.now().toString(),
+			text: searchQuery,
+			sender: "user",
+			timestamp: new Date(),
 		};
-    
-		setMessages(prev => [...prev, userMessage]);
-		
+
+		setMessages((prev) => [...prev, userMessage]);
+
 		// Simulate API call with hardcoded results
 		setIsBotTyping(true);
-		setTimeout(() => { // Simulate network delay
-		const searchResults = knowledgeBase.map(item => ({
-			question: item.question,
-			answer: item.answer,
-			score: item.similarity_score
-		}));
-		
-		const botMessage: Message = {
-			id: Date.now().toString(),
-			text: "إليك أهم الأسئلة المشابهة لبحثك:",
-			sender: "bot",
-			timestamp: new Date(),
-			isSearchResult: true,
-			searchResults: searchResults
-		};
-		
-		setMessages(prev => [...prev, botMessage]);
-		setIsBotTyping(false);
-		scrollToBottom();
+		setTimeout(() => {
+			// Simulate network delay
+			const searchResults = knowledgeBase.map((item) => ({
+				question: item.question,
+				answer: item.answer,
+				score: item.similarity_score,
+			}));
+
+			const botMessage: Message = {
+				id: Date.now().toString(),
+				text: "إليك أهم الأسئلة المشابهة لبحثك:",
+				sender: "bot",
+				timestamp: new Date(),
+				isSearchResult: true,
+				searchResults: searchResults,
+			};
+
+			setMessages((prev) => [...prev, botMessage]);
+			setIsBotTyping(false);
+			scrollToBottom();
 		}, 1500);
-  	};
+	};
 
 	const toggleAudioPlayback = async (audioId: string, text: string) => {
 		// إيقاف أي صوت قيد التشغيل حالياً
@@ -345,7 +354,7 @@ export default function LegalSupport({
 					setMessages((prev) => [...prev, botMessage]);
 				}
 			} catch (err) {
-				console.error("Error with voice recognition:", err);
+				console.error("Error with voice recognition:", err); //setError
 			} finally {
 				setIsRecording(false);
 			}
