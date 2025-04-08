@@ -1,11 +1,28 @@
 import Profile from "@/components/ProfilePage";
-import { getUser } from "@/lib/auth";
+import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
+import {
+	deleteLegalSessionAction,
+	fetchAllLegalSessionsAction,
+} from "../legal/page";
+import {
+	deletePsychologicalSessionAction,
+	fetchAllPsychologicalSessionsAction,
+} from "../psychological/page";
 
 export default function ProfilePage() {
 	return (
 		<div>
-			<Profile getUserInfoAction={getUserInfoAction} />
+			<Profile
+				logoutAction={logoutAction}
+				getUserInfoAction={getUserInfoAction}
+				fetchAllPsychologicalSessionsAction={
+					fetchAllPsychologicalSessionsAction
+				}
+				fetchAllLegalSessionsAction={fetchAllLegalSessionsAction}
+				deleteLegalSessionAction={deleteLegalSessionAction}
+				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
+			/>
 		</div>
 	);
 }

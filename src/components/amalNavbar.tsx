@@ -3,7 +3,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type SectionType = "literacy" | "career" | "psychological" | "legal" | null;
+type SectionType =
+	| "literacy"
+	| "career"
+	| "psychological"
+	| "legal"
+	| "profile"
+	| null;
 
 const sectionColors: Record<
 	string,
@@ -36,6 +42,12 @@ const sectionColors: Record<
 		text: "#FFFFFF",
 		light: "#FFD1A8",
 		hover: "#FF9E5E",
+	},
+	profile: {
+		bg: "#4CAF50",
+		text: "#FFFFFF",
+		light: "#A5D6A7",
+		hover: "#66BB6A",
 	},
 };
 
@@ -236,8 +248,20 @@ export default function AmalNavbar({
 							<>
 								<Link
 									href="/Profile"
-									className="rounded-full p-2 transition hover:bg-white/10"
-									title="معلومات الحساب"
+									className={`rounded-full p-2 transition ${
+										activeSection === "profile"
+											? "bg-white/10"
+											: "hover:bg-white/10"
+									}`}
+									title="الملف الشخصي"
+									style={
+										activeSection === "profile"
+											? {
+													backgroundColor: sectionColors.profile.bg,
+													color: sectionColors.profile.text,
+												}
+											: {}
+									}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -509,7 +533,19 @@ export default function AmalNavbar({
 							<>
 								<Link
 									href="/Profile"
-									className="flex items-center py-2 text-lg font-medium hover:text-[#D8E5F0]"
+									className={`flex items-center py-2 text-lg font-medium ${
+										activeSection === "profile"
+											? "bg-white/10 font-bold"
+											: "hover:text-[#D8E5F0]"
+									}`}
+									style={
+										activeSection === "profile"
+											? {
+													color: sectionColors.profile.bg,
+													borderLeft: `4px solid ${sectionColors.profile.bg}`,
+												}
+											: {}
+									}
 									onClick={() => setIsMenuOpen(false)}
 								>
 									<svg
@@ -518,6 +554,11 @@ export default function AmalNavbar({
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
+										style={
+											activeSection === "profile"
+												? { stroke: sectionColors.profile.bg }
+												: {}
+										}
 									>
 										<path
 											strokeLinecap="round"

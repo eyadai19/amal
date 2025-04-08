@@ -90,7 +90,7 @@ export async function fetchPsychologicalConversationHistory(
 	}
 }
 
-export async function fetchAllPsychologicalSessions(): Promise<
+export async function fetchAllPsychologicalSessionsAction(): Promise<
 	| { sessions: { sessionId: string; lastQuestion: string }[] }
 	| { field: string; message: string }
 > {
@@ -142,7 +142,7 @@ export async function fetchAllPsychologicalSessions(): Promise<
 	}
 }
 
-export async function deleteConversationSession(
+export async function deletePsychologicalSessionAction(
 	sessionId: string,
 ): Promise<{ success: boolean } | { field: string; message: string }> {
 	"use server";

@@ -134,7 +134,7 @@ export async function fetchLegalConversationHistory(sessionId: string): Promise<
 }
 
 //  إرجاع أرقام الجلسات وآخر سؤال في كل جلسة
-export async function fetchAllLegalSessions(): Promise<
+export async function fetchAllLegalSessionsAction(): Promise<
 	| { sessions: { sessionId: string; lastQuestion: string }[] }
 	| { field: string; message: string }
 > {
@@ -187,7 +187,7 @@ export async function fetchAllLegalSessions(): Promise<
 }
 
 // حذف جميع البيانات المرتبطة بجلسة معينة للمستخدم الحالي
-export async function deleteSession(
+export async function deleteLegalSessionAction(
 	sessionId: string,
 ): Promise<{ success: boolean } | { field: string; message: string }> {
 	"use server";

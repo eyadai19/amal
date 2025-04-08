@@ -2,17 +2,44 @@
 
 import { UserInfo } from "@/app/Profile/page";
 import { useEffect, useState } from "react";
+import AmalNavbar from "./amalNavbar";
 
 export default function Profile({
+	logoutAction,
 	getUserInfoAction,
+	fetchAllPsychologicalSessionsAction,
+	fetchAllLegalSessionsAction,
+	deletePsychologicalSessionAction,
+	deleteLegalSessionAction,
 }: {
+	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
 		UserInfo | { field: string; message: string }
 	>;
+	fetchAllPsychologicalSessionsAction: () => Promise<
+		| { sessions: { sessionId: string; lastQuestion: string }[] }
+		| { field: string; message: string }
+	>;
+	fetchAllLegalSessionsAction: () => Promise<
+		| { sessions: { sessionId: string; lastQuestion: string }[] }
+		| { field: string; message: string }
+	>;
+	deletePsychologicalSessionAction: (
+		sessionId: string,
+	) => Promise<{ success: boolean } | { field: string; message: string }>;
+	deleteLegalSessionAction: (
+		sessionId: string,
+	) => Promise<{ success: boolean } | { field: string; message: string }>;
 }) {
 	const [user, setUser] = useState<UserInfo | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [psychologicalSessions, setPsychologicalSessions] = useState<
+		{ lastQuestion: string; sessionId: string }[]
+	>([]);
+	const [legalSessions, setLegalSessions] = useState<
+		{ lastQuestion: string; sessionId: string }[]
+	>([]);
 
 	// تقدم الحروف الافتراضي
 	const alphaProgress = [
@@ -36,12 +63,34 @@ export default function Profile({
 		const fetchUserData = async () => {
 			try {
 				setLoading(true);
-				const result = await getUserInfoAction();
+				const [userResult, psychResult, legalResult] = await Promise.all([
+					getUserInfoAction(),
+					fetchAllPsychologicalSessionsAction(),
+					fetchAllLegalSessionsAction(),
+				]);
 
-				if ("field" in result) {
-					setError(result.message);
+				if ("field" in userResult) {
+					setError(userResult.message);
 				} else {
-					setUser(result);
+					setUser(userResult);
+				}
+
+				if (!("field" in psychResult)) {
+					setPsychologicalSessions(
+						psychResult.sessions.map((session) => ({
+							lastQuestion: session.lastQuestion,
+							sessionId: session.sessionId,
+						})),
+					);
+				}
+
+				if (!("field" in legalResult)) {
+					setLegalSessions(
+						legalResult.sessions.map((session) => ({
+							lastQuestion: session.lastQuestion,
+							sessionId: session.sessionId,
+						})),
+					);
 				}
 			} catch (err) {
 				setError("Failed to fetch user data");
@@ -52,7 +101,47 @@ export default function Profile({
 		};
 
 		fetchUserData();
-	}, [getUserInfoAction]);
+	}, [
+		getUserInfoAction,
+		fetchAllPsychologicalSessionsAction,
+		fetchAllLegalSessionsAction,
+	]);
+
+	const handleDeleteLegalSession = async (sessionId: string) => {
+		try {
+			const result = await deleteLegalSessionAction(sessionId);
+			if ("success" in result) {
+				// تحديث القائمة بعد الحذف
+				const newSessions = legalSessions.filter(
+					(_, i) => legalSessions[i].sessionId !== sessionId,
+				);
+				setLegalSessions(newSessions);
+			} else {
+				setError(result.message);
+			}
+		} catch (err) {
+			setError("Failed to delete session");
+			console.error("Error deleting session:", err);
+		}
+	};
+
+	const handleDeletePsychologicalSession = async (sessionId: string) => {
+		try {
+			const result = await deletePsychologicalSessionAction(sessionId);
+			if ("success" in result) {
+				// تحديث القائمة بعد الحذف
+				const newSessions = psychologicalSessions.filter(
+					(_, i) => psychologicalSessions[i].sessionId !== sessionId,
+				);
+				setPsychologicalSessions(newSessions);
+			} else {
+				setError(result.message);
+			}
+		} catch (err) {
+			setError("Failed to delete session");
+			console.error("Error deleting session:", err);
+		}
+	};
 
 	if (loading) {
 		return (
@@ -93,7 +182,12 @@ export default function Profile({
 
 	return (
 		<div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
-			<div className="mx-auto max-w-4xl">
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#166534" // 047857  -  0F766E
+				activeSection={"profile"}
+			/>
+			<div className="mx-auto mt-16 max-w-4xl">
 				{/* بطاقة المعلومات الشخصية */}
 				<div className="mb-8 overflow-hidden rounded-lg bg-white shadow">
 					<div className="sm:flex">
@@ -160,6 +254,89 @@ export default function Profile({
 						</div>
 					</div>
 				</div>
+
+				{psychologicalSessions.length > 0 && (
+					<div className="mb-8 overflow-hidden rounded-lg bg-white shadow">
+						<div className="border-b border-gray-200 px-6 py-5">
+							<h3 className="text-lg leading-6 font-medium text-gray-900">
+								الجلسات النفسية
+							</h3>
+						</div>
+						<div className="divide-y divide-gray-200">
+							{psychologicalSessions.map((session, index) => (
+								<div key={index} className="p-4 hover:bg-gray-50">
+									<div className="flex items-start justify-between">
+										<div className="flex items-start">
+											<div className="flex-shrink-0 pt-0.5">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200">
+													<span className="text-xs text-indigo-800">
+														{index + 1}
+													</span>
+												</div>
+											</div>
+											<div className="ml-3 flex-1">
+												<p className="text-sm text-gray-800">
+													{session.lastQuestion}
+												</p>
+											</div>
+										</div>
+										<button
+											onClick={() =>
+												handleDeletePsychologicalSession(session.sessionId)
+											}
+											className="text-sm font-medium text-red-600 hover:text-red-800"
+											title="حذف الجلسة"
+										>
+											حذف
+										</button>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* قسم الجلسات القانونية */}
+				{legalSessions.length > 0 && (
+					<div className="mb-8 overflow-hidden rounded-lg bg-white shadow">
+						<div className="border-b border-gray-200 px-6 py-5">
+							<h3 className="text-lg leading-6 font-medium text-gray-900">
+								السجل القانوني
+							</h3>
+						</div>
+						<div className="divide-y divide-gray-200">
+							{legalSessions.map((session, index) => (
+								<div key={index} className="p-4 hover:bg-gray-50">
+									<div className="flex items-start justify-between">
+										<div className="flex items-start">
+											<div className="flex-shrink-0 pt-0.5">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-200">
+													<span className="text-xs text-green-800">
+														{index + 1}
+													</span>
+												</div>
+											</div>
+											<div className="ml-3 flex-1">
+												<p className="text-sm text-gray-800">
+													{session.lastQuestion}
+												</p>
+											</div>
+										</div>
+										<button
+											onClick={() =>
+												handleDeleteLegalSession(session.sessionId)
+											}
+											className="text-sm font-medium text-red-600 hover:text-red-800"
+											title="حذف الجلسة"
+										>
+											حذف
+										</button>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
 
 				{/* تقدم تعلم الحروف */}
 				<div className="mb-8 overflow-hidden rounded-lg bg-white shadow">
