@@ -143,7 +143,7 @@ export default function LetterPage({
 
 			const data = await response.json();
 			const predictedDigit = data.character;
-			const predictionConfidence = data.execution_time; // confidence - line 501
+			const predictionConfidence = data.confidence; // confidence - line 501
 
 			const isCorrect =
 				predictedDigit === currentLetter!.title ||
@@ -498,7 +498,7 @@ export default function LetterPage({
 									{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
 								</p>
 								<p className="text-gray-600">
-									{/* الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}% */}
+									الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}%
 								</p>
 								<p className="text-gray-600">الحرف المتوقع: {prediction}</p>
 								{accuracyResult.feedback && (
