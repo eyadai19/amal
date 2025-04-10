@@ -1,5 +1,6 @@
 "use client";
 
+import { legalSearchApi } from "@/utils/api";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -44,10 +45,12 @@ type Message = {
 	// Add new type for search results
 	isSearchResult?: boolean;
 	searchResults?: {
+		id: string; // أضف هذا
 		question: string;
 		answer: string;
-		score: number;
+		similarity_score: number;
 	}[];
+	selectedQuestion?: string;
 };
 
 const colors = {
@@ -60,27 +63,6 @@ const colors = {
 	pauseButtonColor: "#FF4C4C",
 };
 
-// Hardcoded knowledge base
-const knowledgeBase = [
-	{
-		question: "ما هي مدة التقادم في الدعاوى التجارية؟",
-		answer:
-			"مدة التقادم في الدعاوى التجارية هي 10 سنوات وفقًا لنظام القانون التجاري السعودي",
-		similarity_score: 0.95,
-	},
-	{
-		question: "كيف يمكنني رفع دعوى قضائية؟",
-		answer:
-			"يمكنك رفع دعوى قضائية عن طريق تقديم صحيفة الدعوى إلى المحكمة المختصة مع المستندات المطلوبة",
-		similarity_score: 0.87,
-	},
-	{
-		question: "ما هي حقوق المستأجر في السعودية؟",
-		answer:
-			"للمستأجر حق الانتفاع بالمأجور وفقاً لشروط العقد وحق المطالبة بالإصلاحات الضرورية",
-		similarity_score: 0.78,
-	},
-];
 export default function LegalSupport({
 	logoutAction,
 	ChatbotExpAction,
@@ -111,6 +93,7 @@ export default function LegalSupport({
 	const [sessionId, setSessionId] = useState<string>(nanoid());
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isBotTyping, setIsBotTyping] = useState(false);
+	const [hasFinalAnswer, setHasFinalAnswer] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(
@@ -136,11 +119,15 @@ export default function LegalSupport({
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	};
+
 	const handleAnswerSelection = async (answer: string, questionId: string) => {
+		// إذا لم يكن السؤال نشطًا (غير موجود في activeQuestions) نخرج من الدالة
 		if (!activeQuestions.has(questionId)) return;
 
+		// إضافة الإجابة المختارة إلى مجموعة الإجابات المحددة
 		setSelectedAnswers((prev) => new Set([...prev, answer]));
 
+		// إنشاء رسالة المستخدم
 		const userMessage: Message = {
 			id: `${questionId}-${Date.now()}`,
 			text: answer,
@@ -148,28 +135,127 @@ export default function LegalSupport({
 			timestamp: new Date(),
 		};
 
+		// تحديث حالة الرسائل بإضافة رسالة المستخدم
 		setMessages((prev) => [...prev, userMessage]);
+
+		// إزالة السؤال من الأسئلة النشطة
 		setActiveQuestions((prev) => {
 			const newSet = new Set(prev);
 			newSet.delete(questionId);
 			return newSet;
 		});
 
+		// تفعيل حالة الكتابة للبوت
 		setIsBotTyping(true);
 
 		try {
-			// حفظ السؤال والإجابة
-			await saveQuestionLegalAction(
-				messages.find((m) => m.id === questionId)?.text || "",
-				answer,
-				sessionId,
-			);
+			// البحث عن الرسالة الأصلية (السؤال)
+			let originalQuestion = "";
 
-			const botResponse = await ChatbotExpAction(
-				messages.find((m) => m.id === questionId)?.text || "",
-				answer,
-			);
+			// البحث في نتائج البحث أولاً
+			const searchResult = messages
+				.flatMap(
+					(msg) =>
+						msg.searchResults?.find((res) => res.id === questionId) || [],
+				)
+				.find(Boolean);
 
+			if (searchResult) {
+				originalQuestion = searchResult.question;
+			} else {
+				// إذا لم يكن من نتائج البحث، نبحث في الرسائل العادية
+				const originalMessage = messages.find((m) => m.id === questionId);
+				originalQuestion = originalMessage?.text || "";
+			}
+
+			// حفظ السؤال والإجابة في السجل
+			await saveQuestionLegalAction(originalQuestion, answer, sessionId);
+
+			// الحصول على رد البوت
+			const botResponse = await ChatbotExpAction(originalQuestion, answer);
+
+			// معالجة رد البوت حسب نوعه
+			if ("answer" in botResponse) {
+				// إذا كانت إجابة نهائية
+				setHasFinalAnswer(true);
+				const botMessage: Message = {
+					id: Date.now().toString(),
+					text: botResponse.answer,
+					sender: "bot",
+					timestamp: new Date(),
+					isFinalAnswer: true,
+				};
+
+				setMessages((prev) => [...prev, botMessage]);
+
+				// حفظ الإجابة النهائية والاستثناء إن وجد
+				await saveAnswerLegalAction(
+					"exception" in botResponse ? botResponse.exception : null,
+					botResponse.answer,
+					sessionId,
+				);
+
+				// إذا كان هناك استثناء، نضيف رسالة الاستثناء
+				if ("exception" in botResponse && botResponse.exception) {
+					setMessages((prev) => [
+						...prev,
+						{
+							id: (Date.now() + 1).toString(),
+							text: botResponse.exception,
+							sender: "bot",
+							timestamp: new Date(),
+							isException: true,
+						},
+					]);
+				}
+			} else if ("question" in botResponse) {
+				// إذا كان هناك سؤال متابعة
+				const botMessage: Message = {
+					id: Date.now().toString(),
+					text: botResponse.question,
+					sender: "bot",
+					timestamp: new Date(),
+					answers: botResponse.answers,
+				};
+
+				setMessages((prev) => [...prev, botMessage]);
+				setActiveQuestions(new Set([botMessage.id])); // تعيين السؤال الجديد كسؤال نشط
+			}
+		} catch (error) {
+			console.error("Error in handleAnswerSelection:", error);
+
+			// في حالة حدوث خطأ، نعرض رسالة خطأ للمستخدم
+			const errorMessage: Message = {
+				id: Date.now().toString(),
+				text: "حدث خطأ أثناء معالجة إجابتك. يرجى المحاولة مرة أخرى.",
+				sender: "bot",
+				timestamp: new Date(),
+				isException: true,
+			};
+
+			setMessages((prev) => [...prev, errorMessage]);
+		} finally {
+			// إيقاف حالة الكتابة للبوت والتأكد من التمرير للأسفل
+			setIsBotTyping(false);
+			scrollToBottom();
+		}
+	};
+
+	const processSelectedQuestion = async (
+		question: string,
+		answer: string,
+		resultId: string,
+	) => {
+		setIsBotTyping(true);
+
+		try {
+			// حفظ السؤال والإجابة في السجل
+			await saveQuestionLegalAction(question, answer, sessionId);
+
+			// الحصول على رد البوت
+			const botResponse = await ChatbotExpAction(question, answer);
+
+			// معالجة رد البوت
 			if ("answer" in botResponse) {
 				const botMessage: Message = {
 					id: Date.now().toString(),
@@ -181,7 +267,7 @@ export default function LegalSupport({
 
 				setMessages((prev) => [...prev, botMessage]);
 
-				// حفظ الإجابة النهائية والاستثناء
+				// حفظ الإجابة النهائية
 				await saveAnswerLegalAction(
 					"exception" in botResponse ? botResponse.exception : null,
 					botResponse.answer,
@@ -212,6 +298,16 @@ export default function LegalSupport({
 				setMessages((prev) => [...prev, botMessage]);
 				setActiveQuestions(new Set([botMessage.id]));
 			}
+		} catch (error) {
+			console.error("Error processing selected question:", error);
+			const errorMessage: Message = {
+				id: Date.now().toString(),
+				text: "حدث خطأ أثناء معالجة السؤال المختار. يرجى المحاولة مرة أخرى.",
+				sender: "bot",
+				timestamp: new Date(),
+				isException: true,
+			};
+			setMessages((prev) => [...prev, errorMessage]);
 		} finally {
 			setIsBotTyping(false);
 			scrollToBottom();
@@ -253,7 +349,6 @@ export default function LegalSupport({
 	const handleSearch = async () => {
 		if (!searchQuery.trim()) return;
 
-		// Add user's search query as a message
 		const userMessage: Message = {
 			id: Date.now().toString(),
 			text: searchQuery,
@@ -262,16 +357,24 @@ export default function LegalSupport({
 		};
 
 		setMessages((prev) => [...prev, userMessage]);
-
-		// Simulate API call with hardcoded results
 		setIsBotTyping(true);
-		setTimeout(() => {
-			// Simulate network delay
-			const searchResults = knowledgeBase.map((item) => ({
-				question: item.question,
-				answer: item.answer,
-				score: item.similarity_score,
-			}));
+
+		try {
+			const response = await fetch(legalSearchApi, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					query: searchQuery,
+					top_n: 3,
+				}),
+			});
+
+			if (!response.ok)
+				throw new Error(`HTTP error! status: ${response.status}`);
+
+			const data = await response.json();
 
 			const botMessage: Message = {
 				id: Date.now().toString(),
@@ -279,13 +382,27 @@ export default function LegalSupport({
 				sender: "bot",
 				timestamp: new Date(),
 				isSearchResult: true,
-				searchResults: searchResults,
+				searchResults: (data.results || data).map((result: any) => ({
+					...result,
+					id: nanoid(), // إنشاء معرف فريد لكل نتيجة
+				})),
 			};
 
 			setMessages((prev) => [...prev, botMessage]);
+			setActiveQuestions(new Set([botMessage.id]));
+		} catch (error) {
+			console.error("Error fetching search results:", error);
+			const errorMessage: Message = {
+				id: Date.now().toString(),
+				text: "عذرًا، حدث خطأ أثناء جلب النتائج. يرجى المحاولة لاحقًا.",
+				sender: "bot",
+				timestamp: new Date(),
+			};
+			setMessages((prev) => [...prev, errorMessage]);
+		} finally {
 			setIsBotTyping(false);
 			scrollToBottom();
-		}, 1500);
+		}
 	};
 
 	const toggleAudioPlayback = async (audioId: string, text: string) => {
@@ -493,36 +610,102 @@ export default function LegalSupport({
 								<div className="mt-4 w-full rounded-xl border border-[#D78448] bg-[#FFCB99] p-4 text-right">
 									<h3 className="mb-3 text-lg font-medium">{message.text}</h3>
 									<div className="space-y-3">
-										{message.searchResults?.map((result, index) => (
-											<div
-												key={index}
-												className="rounded-lg bg-white p-3 shadow"
-											>
-												<p className="font-medium text-[#D78448]">
-													{result.question}
-												</p>
-												<p className="mt-1 text-gray-700">{result.answer}</p>
-												<div className="mt-1 text-sm text-gray-500">
-													درجة التطابق: {(result.score * 100).toFixed(0)}%
-												</div>
-												<button
-													onClick={() =>
-														toggleAudioPlayback(
-															`result-${index}`,
-															`${result.question} ${result.answer}`,
-														)
-													}
-													className="mt-2 text-[#D78448]"
+										{message.searchResults?.map((result, index) => {
+											const isSelected = message.selectedQuestion === result.id;
+											const isActive = activeQuestions.has(message.id);
+
+											return (
+												<div
+													key={result.id}
+													className={`rounded-lg border p-3 shadow transition-all ${isSelected ? "border-[#D78448] bg-[#FFE6CC]" : "border-transparent bg-white"} ${isActive && !isSelected ? "hover:cursor-pointer hover:border-[#D78448] hover:bg-[#FFF0E0]" : ""} ${!isActive && !isSelected ? "opacity-50" : ""} `}
+													onClick={() => {
+														if (!isActive) return;
+
+														const updatedMessages = messages.map((msg) =>
+															msg.id === message.id
+																? { ...msg, selectedQuestion: result.id }
+																: msg,
+														);
+
+														const botMessage: Message = {
+															id: `${result.id}-${Date.now()}`,
+															text: result.question,
+															sender: "bot",
+															timestamp: new Date(),
+														};
+
+														const userMessage: Message = {
+															id: `${result.id}-${Date.now() + 1}`,
+															text: result.answer,
+															sender: "user",
+															timestamp: new Date(),
+														};
+
+														setMessages([
+															...updatedMessages,
+															botMessage,
+															userMessage,
+														]);
+
+														setActiveQuestions((prev) => {
+															const newSet = new Set(prev);
+															newSet.delete(message.id);
+															return newSet;
+														});
+
+														processSelectedQuestion(
+															result.question,
+															result.answer,
+															result.id,
+														);
+													}}
 												>
-													{audioStates.get(`result-${index}`) ? (
-														<FaPause size={14} />
-													) : (
-														<FaPlay size={14} />
-													)}
-												</button>
-											</div>
-										))}
+													<div className="flex items-center justify-between">
+														<p className={`flex-1 font-medium text-[#D78448]`}>
+															{result.question}
+														</p>
+														{isSelected && (
+															<span className="ml-2 font-bold text-[#D78448]">
+																✔
+															</span>
+														)}
+													</div>
+													<p
+														className={`mt-1 ${isSelected ? "text-gray-800" : "text-gray-700"}`}
+													>
+														{result.answer}
+													</p>
+													<div
+														className={`mt-1 text-sm ${isSelected ? "text-gray-700" : "text-gray-500"}`}
+													>
+														درجة التطابق:{" "}
+														{(result.similarity_score * 100).toFixed(0)}%
+													</div>
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															toggleAudioPlayback(
+																`result-${index}`,
+																`${result.question} ${result.answer}`,
+															);
+														}}
+														className={`mt-2 text-[#D78448]`}
+													>
+														{audioStates.get(`result-${index}`) ? (
+															<FaPause size={14} />
+														) : (
+															<FaPlay size={14} />
+														)}
+													</button>
+												</div>
+											);
+										})}
 									</div>
+									{!activeQuestions.has(message.id) && (
+										<p className="mt-2 text-sm text-gray-600">
+											تم اختيار إجابة من هذه النتائج بالفعل
+										</p>
+									)}
 								</div>
 							)}
 
@@ -566,6 +749,7 @@ export default function LegalSupport({
 									</div>
 								</div>
 							)}
+
 							{/* Exception Message */}
 							{message.isException && (
 								<div className="mt-4 w-full rounded-xl border border-red-400 bg-red-50 p-4 text-right md:w-fit">
@@ -622,19 +806,44 @@ export default function LegalSupport({
 						{/* Search Bar */}
 						<div className="relative flex-1">
 							<input
+								disabled={hasFinalAnswer}
 								type="text"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								placeholder="ابحث في الأسئلة..."
-								className="w-full rounded-full bg-gray-100 py-2 pr-12 pl-4 text-right text-gray-700 transition-all outline-none focus:ring-2 focus:ring-[#D78448]"
+								className={`w-full rounded-full py-2 pr-12 pl-4 text-right transition-all outline-none ${
+									hasFinalAnswer
+										? "cursor-not-allowed bg-gray-200 text-gray-400"
+										: "bg-gray-100 text-gray-700 focus:ring-2 focus:ring-[#D78448]"
+								}`}
 							/>
+
 							<button
+								disabled={hasFinalAnswer}
 								onClick={handleSearch}
-								className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-[#D78448] p-2 text-white hover:bg-[#D78448]"
+								className={`absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-2 ${
+									hasFinalAnswer
+										? "cursor-not-allowed bg-gray-400"
+										: "bg-[#D78448] hover:bg-[#D78448]"
+								} text-white`}
 							>
 								<FaSearch size={14} />
 							</button>
 						</div>
+						{/* Voice Record Button */}
+						<button
+							onClick={toggleRecording}
+							disabled={hasFinalAnswer}
+							className={`rounded-lg p-3 transition-colors ${
+								hasFinalAnswer
+									? "cursor-not-allowed bg-gray-200 text-gray-400"
+									: isRecording
+										? "bg-red-500 text-white"
+										: "bg-[#D78448] text-white"
+							}`}
+						>
+							<FaMicrophone />
+						</button>
 						<button
 							onClick={handleResetConversation}
 							className="w-fit rounded-lg bg-[#D78448] px-3 py-2 text-white transition-colors hover:bg-[#D78448] md:w-fit"
@@ -643,17 +852,6 @@ export default function LegalSupport({
 								<FaRedo size={14} />
 								<span className="hidden sm:inline">إعادة المحادثة</span>
 							</div>
-						</button>
-						{/* Voice Record Button */}
-						<button
-							onClick={toggleRecording}
-							className={`${
-								isRecording
-									? "bg-red-500 text-white"
-									: "bg-[#D78448] text-white"
-							} rounded-lg p-3 transition-colors`}
-						>
-							<FaMicrophone />
 						</button>
 					</div>
 				</div>

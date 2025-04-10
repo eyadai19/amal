@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { numberOcrApi } from "@/utils/api";
+import { alphaBitOcrApi } from "@/utils/api";
 import { ArabicLettersKeys } from "@/utils/arabicLetters";
 import { lettersData } from "@/utils/letterData";
 import Link from "next/link";
@@ -132,7 +132,7 @@ export default function LetterPage({
 		formData.append("image", blob, "drawing.png");
 
 		try {
-			const response = await fetch(numberOcrApi, {
+			const response = await fetch(alphaBitOcrApi, {
 				method: "POST",
 				body: formData,
 			});
@@ -143,11 +143,12 @@ export default function LetterPage({
 
 			const data = await response.json();
 			const predictedDigit = data.character;
-			const predictionConfidence = data.confidence;
+			const predictionConfidence = data.execution_time; // confidence - line 501
 
-			// هنا يجب تعديل المنطق ليتناسب مع تقييم الحروف بدلاً من الأرقام
-			// هذا مثال فقط - يجب استبداله بمنطق التقييم المناسب للحروف
-			const isCorrect = predictedDigit === currentLetter!.title;
+			const isCorrect =
+				predictedDigit === currentLetter!.title ||
+				lettersData[predictedDigit as ArabicLettersKeys]?.title ===
+					currentLetter!.title;
 
 			// تعيين الدقة بناءً على صحة التوقع
 			const finalAccuracy = isCorrect ? predictionConfidence : 0;
@@ -497,7 +498,7 @@ export default function LetterPage({
 									{accuracyResult.correct ? "صحيح ✓" : "غير صحيح ✗"}
 								</p>
 								<p className="text-gray-600">
-									الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}%
+									{/* الدقة: {accuracyResult?.correct ? confidence?.toFixed(2) : 0}% */}
 								</p>
 								<p className="text-gray-600">الحرف المتوقع: {prediction}</p>
 								{accuracyResult.feedback && (
