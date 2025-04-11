@@ -24,6 +24,7 @@ export default function ProfilePage() {
 				fetchAllLegalSessionsAction={fetchAllLegalSessionsAction}
 				deleteLegalSessionAction={deleteLegalSessionAction}
 				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
+				updateProfileAction={UpdateProfileAction}
 			/>
 		</div>
 	);
@@ -72,36 +73,53 @@ export async function getUserInfoAction(): Promise<
 	}
 }
 
-async function UpdateProfileAction(
+export async function UpdateProfileAction(
 	form: FormData,
-	photo: string | null,
 ): Promise<string | { field: string; message: string } | undefined> {
 	"use server";
 
 	try {
 		const firstName = form.get("firstName")?.toString();
 		const lastName = form.get("lastName")?.toString();
+		const age = form.get("age")?.toString();
+		const releaseDate = form.get("releaseDate")?.toString();
+		const sentenceDuration = form.get("sentenceDuration")?.toString();
 
 		if (!firstName || !lastName) {
 			return {
 				field: "form",
-				message: "First name and last name are required",
+				message: "الاسم الأول والاسم الأخير مطلوبان",
 			};
 		}
 
 		const user = await getUser();
 		if (!user) {
-			return { field: "root", message: "User not authenticated." };
+			return { field: "root", message: "المستخدم غير مسجل الدخول" };
 		}
 
-		const updateData: { firstName: string; lastName: string; photo?: string } =
-			{
-				firstName,
-				lastName,
-			};
+		const updateData: {
+			firstName: string;
+			lastName: string;
+			age?: number;
+			releaseDate?: Date;
+			sentenceDuration?: number;
+			lastUpdateTime: Date;
+		} = {
+			firstName,
+			lastName,
+			lastUpdateTime: new Date(),
+		};
 
-		if (photo) {
-			updateData.photo = photo;
+		if (age) {
+			updateData.age = parseInt(age);
+		}
+
+		if (releaseDate) {
+			updateData.releaseDate = new Date(releaseDate);
+		}
+
+		if (sentenceDuration) {
+			updateData.sentenceDuration = parseInt(sentenceDuration);
 		}
 
 		// تنفيذ التحديث
@@ -111,11 +129,11 @@ async function UpdateProfileAction(
 			.where(eq(TB_user.id, user.id));
 
 		if (updatedUser) {
-			return "Profile updated successfully";
+			return "تم تحديث الملف الشخصي بنجاح";
 		} else {
-			return { field: "root", message: "Failed to update profile" };
+			return { field: "root", message: "فشل في تحديث الملف الشخصي" };
 		}
 	} catch (error) {
-		return { field: "root", message: "Error updating profile" };
+		return { field: "root", message: "حدث خطأ أثناء تحديث الملف الشخصي" };
 	}
 }

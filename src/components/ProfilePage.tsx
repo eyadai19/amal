@@ -12,6 +12,7 @@ export default function Profile({
 	fetchAllLegalSessionsAction,
 	deletePsychologicalSessionAction,
 	deleteLegalSessionAction,
+	updateProfileAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
@@ -31,6 +32,9 @@ export default function Profile({
 	deleteLegalSessionAction: (
 		sessionId: string,
 	) => Promise<{ success: boolean } | { field: string; message: string }>;
+	updateProfileAction: (
+		form: FormData,
+	) => Promise<string | { field: string; message: string } | undefined>;
 }) {
 	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
@@ -164,11 +168,39 @@ export default function Profile({
 	const handleSubmit = async () => {
 		setIsSaving(true);
 		try {
-			// TODO: Implement the update functionality
-			// await updateUserProfileAction(formData);
-			setIsEditing(false);
+			const form = new FormData();
+			form.append("firstName", formData.firstName);
+			form.append("lastName", formData.lastName);
+			if (formData.age) form.append("age", formData.age);
+			if (formData.releaseDate)
+				form.append("releaseDate", formData.releaseDate);
+			if (formData.sentenceDuration)
+				form.append("sentenceDuration", formData.sentenceDuration);
+
+			const result = await updateProfileAction(form);
+			if (typeof result === "string") {
+				// تحديث بيانات المستخدم بعد التعديل
+				const updatedUser = await getUserInfoAction();
+				if (!("field" in updatedUser)) {
+					setUser(updatedUser);
+					// تحديث formData بالبيانات الجديدة
+					setFormData({
+						firstName: updatedUser.firstName,
+						lastName: updatedUser.lastName,
+						age: updatedUser.age?.toString() || "",
+						releaseDate:
+							updatedUser.releaseDate instanceof Date
+								? updatedUser.releaseDate.toISOString().split("T")[0]
+								: updatedUser.releaseDate || "",
+						sentenceDuration: updatedUser.sentenceDuration?.toString() || "",
+					});
+					setIsEditing(false);
+				}
+			} else if (result) {
+				setError(result.message);
+			}
 		} catch (error) {
-			console.error("Error updating profile:", error);
+			setError("حدث خطأ أثناء تحديث الملف الشخصي");
 		} finally {
 			setIsSaving(false);
 		}
