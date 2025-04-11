@@ -26,7 +26,7 @@ const sectionColors: Record<
 		hover: "#3D7BC8",
 	},
 	career: {
-		bg: "#D6453D",
+		bg: "#E85C54",
 		text: "#FFFFFF",
 		light: "#FFB8B3",
 		hover: "#E85C54",

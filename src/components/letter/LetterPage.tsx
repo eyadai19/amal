@@ -34,6 +34,17 @@ export default function LetterPage({
 	const [prediction, setPrediction] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [confidence, setConfidence] = useState<number | null>(null);
+	const [isRecording, setIsRecording] = useState(false);
+	const [recordingResult, setRecordingResult] = useState<boolean | null>(null);
+	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	const chunksRef = useRef<Blob[]>([]);
+	const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [isPlayingRecorded, setIsPlayingRecorded] = useState(false);
+	const [recordingAccuracy, setRecordingAccuracy] = useState<number | null>(
+		null,
+	);
 
 	const currentLetter = lettersData[params.letter];
 
@@ -172,6 +183,61 @@ export default function LetterPage({
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const playLetterSound = () => {
+		if (audioRef.current) {
+			audioRef.current.play();
+			setIsPlaying(true);
+		}
+	};
+
+	const handleAudioEnded = () => {
+		setIsPlaying(false);
+	};
+
+	const startRecording = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			const mediaRecorder = new MediaRecorder(stream);
+			mediaRecorderRef.current = mediaRecorder;
+			chunksRef.current = [];
+
+			mediaRecorder.ondataavailable = (e) => {
+				if (e.data.size > 0) {
+					chunksRef.current.push(e.data);
+				}
+			};
+
+			mediaRecorder.onstop = () => {
+				const audioBlob = new Blob(chunksRef.current, { type: "audio/wav" });
+				const audioUrl = URL.createObjectURL(audioBlob);
+				setRecordedAudioUrl(audioUrl);
+
+				// في الواقع، هنا سيتم إرسال التسجيل للتحليل
+				// لكن لأغراض العرض، سنستخدم نتيجة عشوائية
+				const isCorrect = Math.random() > 0.5;
+				const accuracy = Math.floor(Math.random() * 20) + 80; // نسبة دقة عشوائية بين 80-100
+				setRecordingResult(isCorrect);
+				setRecordingAccuracy(accuracy);
+			};
+
+			mediaRecorder.start();
+			setIsRecording(true);
+		} catch (error) {
+			console.error("Error accessing microphone:", error);
+		}
+	};
+
+	const stopRecording = () => {
+		if (mediaRecorderRef.current && isRecording) {
+			mediaRecorderRef.current.stop();
+			setIsRecording(false);
+		}
+	};
+
+	const handleRecordedAudioEnded = () => {
+		setIsPlayingRecorded(false);
 	};
 
 	if (!currentLetter) {
@@ -401,6 +467,131 @@ export default function LetterPage({
 								</Button>
 							</div>
 						))}
+					</div>
+				</div>
+
+				{/* Pronunciation Practice Section */}
+				<div className="mb-16">
+					<h2 className="mb-8 text-center text-3xl font-bold text-[#1E3A6E]">
+						تدريب النطق
+					</h2>
+					<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+						{/* Listen Section */}
+						<div className="rounded-xl bg-white p-8 shadow-xl">
+							<h3 className="mb-4 text-2xl font-semibold text-[#1E3A6E]">
+								استمع إلى النطق الصحيح
+							</h3>
+							<p className="mb-6 text-gray-700">
+								استمع إلى نطق الحرف بشكل صحيح وكرره بعد ذلك
+							</p>
+							<div className="flex flex-col items-center gap-4">
+								<button
+									onClick={playLetterSound}
+									className={`flex items-center rounded-xl px-6 py-3 text-lg font-medium text-white transition-colors ${
+										isPlaying
+											? "bg-[#3f5680]"
+											: "bg-[#1E3A6E] hover:bg-[#3f5680]"
+									}`}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										className="mr-2 h-6 w-6"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+										/>
+									</svg>
+									{isPlaying ? "جاري التشغيل..." : "تشغيل النطق"}
+								</button>
+								<div className="w-full">
+									<audio
+										ref={audioRef}
+										src={`/letters/${currentLetter?.title}.mp3`}
+										onEnded={handleAudioEnded}
+										className="w-full"
+										controls
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Record Section */}
+						<div className="rounded-xl bg-white p-8 shadow-xl">
+							<h3 className="mb-4 text-2xl font-semibold text-[#1E3A6E]">
+								سجل نطقك
+							</h3>
+							<p className="mb-6 text-gray-700">
+								سجل نطقك للحرف وسنقيم مدى دقة نطقك
+							</p>
+							<div className="flex flex-col items-center gap-4">
+								<button
+									onClick={isRecording ? stopRecording : startRecording}
+									className={`flex items-center rounded-xl px-6 py-3 text-lg font-medium text-white transition-colors ${
+										isRecording
+											? "bg-red-500 hover:bg-red-600"
+											: "bg-[#1E3A6E] hover:bg-[#3f5680]"
+									}`}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										className="mr-2 h-6 w-6"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+										/>
+									</svg>
+									{isRecording
+										? "إيقاف التسجيل"
+										: recordingResult !== null
+											? "تجربة مرة أخرى"
+											: "بدء التسجيل"}
+								</button>
+								{recordedAudioUrl && (
+									<div className="w-full">
+										<audio
+											src={recordedAudioUrl}
+											controls
+											className="w-full"
+											onEnded={handleRecordedAudioEnded}
+											onPlay={() => setIsPlayingRecorded(true)}
+											onPause={() => setIsPlayingRecorded(false)}
+										/>
+									</div>
+								)}
+								{recordingResult !== null && (
+									<div
+										className={`mt-4 rounded-lg p-4 text-center ${
+											recordingResult
+												? "bg-green-100 text-green-800"
+												: "bg-red-100 text-red-800"
+										}`}
+									>
+										<p className="text-lg font-medium">
+											{recordingResult
+												? "نطق صحيح! أحسنت ✓"
+												: "حاول مرة أخرى، ركز على النطق الصحيح ✗"}
+										</p>
+										{recordingAccuracy !== null && (
+											<p className="mt-2 text-base">
+												نسبة الدقة: {recordingAccuracy}%
+											</p>
+										)}
+									</div>
+								)}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

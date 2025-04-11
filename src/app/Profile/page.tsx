@@ -1,6 +1,8 @@
 import Profile from "@/components/ProfilePage";
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { TB_user } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import {
 	deleteLegalSessionAction,
 	fetchAllLegalSessionsAction,
@@ -67,5 +69,53 @@ export async function getUserInfoAction(): Promise<
 		};
 	} catch (error) {
 		return { field: "root", message: "Failed to fetch user info." };
+	}
+}
+
+async function UpdateProfileAction(
+	form: FormData,
+	photo: string | null,
+): Promise<string | { field: string; message: string } | undefined> {
+	"use server";
+
+	try {
+		const firstName = form.get("firstName")?.toString();
+		const lastName = form.get("lastName")?.toString();
+
+		if (!firstName || !lastName) {
+			return {
+				field: "form",
+				message: "First name and last name are required",
+			};
+		}
+
+		const user = await getUser();
+		if (!user) {
+			return { field: "root", message: "User not authenticated." };
+		}
+
+		const updateData: { firstName: string; lastName: string; photo?: string } =
+			{
+				firstName,
+				lastName,
+			};
+
+		if (photo) {
+			updateData.photo = photo;
+		}
+
+		// تنفيذ التحديث
+		const updatedUser = await db
+			.update(TB_user)
+			.set(updateData)
+			.where(eq(TB_user.id, user.id));
+
+		if (updatedUser) {
+			return "Profile updated successfully";
+		} else {
+			return { field: "root", message: "Failed to update profile" };
+		}
+	} catch (error) {
+		return { field: "root", message: "Error updating profile" };
 	}
 }
