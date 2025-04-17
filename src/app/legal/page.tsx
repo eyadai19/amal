@@ -14,6 +14,8 @@ export default function LegalSupportPage() {
 				ChatbotExpAction={ChatbotExpAction}
 				saveAnswerLegalAction={saveAnswerLegalAction}
 				saveQuestionLegalAction={saveQuestionLegalAction}
+				deleteLegalSessionAction={deleteLegalSessionAction}
+				fetchAllLegalSessionsAction={fetchAllLegalSessionsAction}
 			/>
 		</div>
 	);
@@ -79,7 +81,9 @@ export async function saveAnswerLegalAction(
 	}
 }
 
-export async function fetchLegalConversationHistory(sessionId: string): Promise<
+export async function fetchLegalConversationHistoryAction(
+	sessionId: string,
+): Promise<
 	| {
 			questionsAndAnswers: { question: string; answer: string }[];
 			lastAnswer: string;
@@ -123,7 +127,7 @@ export async function fetchLegalConversationHistory(sessionId: string): Promise<
 		return {
 			questionsAndAnswers, // مصفوفة الأسئلة والأجوبة بعد التحويل
 			lastAnswer: lastAnswer.answer, // آخر جواب
-			exception: lastAnswer.exception || null, // الاستثناء (إن وجد)
+			exception: lastAnswer.exception,
 		};
 	} catch (error) {
 		return {

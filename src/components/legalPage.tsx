@@ -13,6 +13,7 @@ import {
 	FaSearch,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
+import SessionSidebar from "./SessionSidebar";
 
 // Speech recognition function
 const startVoiceRecognition = async (): Promise<string> => {
@@ -68,6 +69,8 @@ export default function LegalSupport({
 	ChatbotExpAction,
 	saveQuestionLegalAction,
 	saveAnswerLegalAction,
+	fetchAllLegalSessionsAction,
+	deleteLegalSessionAction,
 }: {
 	logoutAction: () => Promise<void>;
 	ChatbotExpAction: (
@@ -89,6 +92,13 @@ export default function LegalSupport({
 		answer: string,
 		sessionId: string,
 	) => Promise<{ field: string; message: string } | undefined>;
+	fetchAllLegalSessionsAction: () => Promise<
+		| { sessions: { sessionId: string; lastQuestion: string }[] }
+		| { field: string; message: string }
+	>;
+	deleteLegalSessionAction: (
+		sessionId: string,
+	) => Promise<{ success: boolean } | { field: string; message: string }>;
 }) {
 	const [sessionId, setSessionId] = useState<string>(nanoid());
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -485,8 +495,15 @@ export default function LegalSupport({
 				logoutAction={logoutAction}
 				activeSection={"legal"}
 			/>
-
-			{/* Messages container */}
+			<SessionSidebar
+				fetchSessionsAction={fetchAllLegalSessionsAction}
+				deleteSessionAction={deleteLegalSessionAction}
+				backgroundColor="blue"
+				textColor="blue"
+				hoverColor="blue"
+				title="السجل القانوني"
+				type="legal"
+			/>
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
 				{messages.map((message) => (
 					<div

@@ -12,6 +12,7 @@ import {
 	FaStop,
 } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
+import SessionSidebar from "./SessionSidebar";
 
 type Message = {
 	id: string;
@@ -23,12 +24,21 @@ type Message = {
 export default function PsychologicalSupport({
 	logoutAction,
 	savePsychologicalConversationEntryAction,
+	fetchAllPsychologicalSessionsAction,
+	deletePsychologicalSessionAction,
 }: {
 	logoutAction: () => Promise<void>;
 	savePsychologicalConversationEntryAction: (
 		sessionId: string,
 		question: string,
 		answer: string,
+	) => Promise<{ success: boolean } | { field: string; message: string }>;
+	fetchAllPsychologicalSessionsAction: () => Promise<
+		| { sessions: { sessionId: string; lastQuestion: string }[] }
+		| { field: string; message: string }
+	>;
+	deletePsychologicalSessionAction: (
+		sessionId: string,
 	) => Promise<{ success: boolean } | { field: string; message: string }>;
 }) {
 	const [sessionId, setSessionId] = useState<string>(nanoid());
@@ -194,7 +204,15 @@ export default function PsychologicalSupport({
 				backgroundColor="#582C5E"
 				activeSection={"psychological"}
 			/>
-
+			<SessionSidebar
+				fetchSessionsAction={fetchAllPsychologicalSessionsAction}
+				deleteSessionAction={deletePsychologicalSessionAction}
+				backgroundColor="emerald"
+				textColor="emerald"
+				hoverColor="emerald"
+				title="الجلسات النفسية"
+				type="psychological"
+			/>
 			<div className="flex-1 space-y-4 overflow-y-auto p-4">
 				{messages.map((message) => (
 					<div
@@ -248,48 +266,53 @@ export default function PsychologicalSupport({
 			</div>
 
 			<div className="border-t border-gray-300 bg-white p-6 shadow-md">
-				<div className="flex items-center rounded-lg bg-[#F1F0F0] p-3 shadow-lg transition-all">
-					<button
-						onClick={toggleRecording}
-						className={`mr-3 rounded-full p-2 ${
-							isRecording
-								? "bg-[#582C5E] text-white"
-								: "bg-white text-[#582C5E]"
-						}`}
-					>
-						{isRecording ? <FaStop size={16} /> : <FaMicrophone size={16} />}
-					</button>
-					<textarea
-						value={inputText}
-						onChange={(e) => setInputText(e.target.value)}
-						onKeyPress={handleKeyPress}
-						placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
-						className="flex-1 resize-none rounded-lg bg-transparent p-3 font-serif text-lg text-[#582C5E] placeholder-[#E2C8D3] shadow-md transition-all outline-none focus:ring-2 focus:ring-[#582C5E]"
-						rows={1}
-					/>
-					<button
-						onClick={handleSendMessage}
-						disabled={!inputText.trim()}
-						className={`ml-3 rounded-full p-2 ${
-							inputText.trim()
-								? "bg-[#582C5E] text-white hover:bg-[#4F2345]"
-								: "cursor-not-allowed bg-gray-300 text-gray-500"
-						}`}
-					>
-						<FaPaperPlane size={16} />
-					</button>
-				</div>
-				{error && <p className="mt-2 text-sm text-red-500">{error}</p>}
-
-				<div className="mt-4 flex justify-end">
+				<div className="flex flex-col items-center gap-3 sm:flex-row">
+					<div className="w-full flex-1 rounded-lg bg-[#F1F0F0] p-3 shadow-lg transition-all sm:w-auto">
+						<div className="flex items-center">
+							<button
+								onClick={toggleRecording}
+								className={`mr-3 rounded-full p-2 ${
+									isRecording
+										? "bg-[#582C5E] text-white"
+										: "bg-white text-[#582C5E]"
+								}`}
+							>
+								{isRecording ? (
+									<FaStop size={16} />
+								) : (
+									<FaMicrophone size={16} />
+								)}
+							</button>
+							<textarea
+								value={inputText}
+								onChange={(e) => setInputText(e.target.value)}
+								onKeyPress={handleKeyPress}
+								placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
+								className="flex-1 resize-none rounded-lg bg-transparent p-3 font-serif text-lg text-[#582C5E] placeholder-[#E2C8D3] shadow-md transition-all outline-none focus:ring-2 focus:ring-[#582C5E]"
+								rows={1}
+							/>
+							<button
+								onClick={handleSendMessage}
+								disabled={!inputText.trim()}
+								className={`ml-3 rounded-full p-2 ${
+									inputText.trim()
+										? "bg-[#582C5E] text-white hover:bg-[#4F2345]"
+										: "cursor-not-allowed bg-gray-300 text-gray-500"
+								}`}
+							>
+								<FaPaperPlane size={16} />
+							</button>
+						</div>
+					</div>
 					<button
 						onClick={handleResetConversation}
-						className="rounded-full bg-red-500 px-4 py-2 text-white shadow-lg transition-all hover:bg-red-600"
+						className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#582C5E] px-4 py-2 text-white shadow-lg transition-all hover:bg-[#4F2345] sm:w-auto"
 					>
+						<FaPaperPlane size={16} />
 						محادثة جديدة
 					</button>
 				</div>
-
+				{error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 				{isVoiceRecognizing && <div className="spinner">...</div>}
 			</div>
 		</div>

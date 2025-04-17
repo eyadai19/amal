@@ -13,6 +13,10 @@ export default function PsychologicalPage() {
 					savePsychologicalConversationEntryAction
 				}
 				logoutAction={logoutAction}
+				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
+				fetchAllPsychologicalSessionsAction={
+					fetchAllPsychologicalSessionsAction
+				}
 			/>
 		</div>
 	);
@@ -51,7 +55,7 @@ export async function savePsychologicalConversationEntryAction(
 	}
 }
 
-export async function fetchPsychologicalConversationHistory(
+export async function fetchPsychologicalConversationHistoryAction(
 	sessionId: string,
 ): Promise<
 	| {

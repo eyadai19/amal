@@ -1,6 +1,7 @@
 "use client";
 
 import { UserInfo } from "@/app/Profile/page";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
@@ -597,7 +598,11 @@ export default function Profile({
 						</div>
 						<div className="divide-y divide-gray-200">
 							{psychologicalSessions.map((session, index) => (
-								<div key={index} className="p-4 hover:bg-emerald-50">
+								<Link
+									key={index}
+									href={`/psychological/${session.sessionId}`}
+									className="block cursor-pointer p-4 hover:bg-emerald-50"
+								>
 									<div className="flex items-start justify-between">
 										<div className="flex items-start">
 											<div className="flex-shrink-0 pt-0.5">
@@ -614,16 +619,17 @@ export default function Profile({
 											</div>
 										</div>
 										<button
-											onClick={() =>
-												handleDeletePsychologicalSession(session.sessionId)
-											}
+											onClick={(e) => {
+												e.preventDefault();
+												handleDeletePsychologicalSession(session.sessionId);
+											}}
 											className="text-sm font-medium text-red-600 hover:text-red-800"
 											title="حذف الجلسة"
 										>
 											حذف
 										</button>
 									</div>
-								</div>
+								</Link>
 							))}
 						</div>
 					</div>
@@ -639,7 +645,11 @@ export default function Profile({
 						</div>
 						<div className="divide-y divide-gray-200">
 							{legalSessions.map((session, index) => (
-								<div key={index} className="p-4 hover:bg-emerald-50">
+								<Link
+									key={index}
+									href={`/legal/${session.sessionId}`}
+									className="block cursor-pointer p-4 hover:bg-emerald-50"
+								>
 									<div className="flex items-start justify-between">
 										<div className="flex items-start">
 											<div className="flex-shrink-0 pt-0.5">
@@ -656,16 +666,17 @@ export default function Profile({
 											</div>
 										</div>
 										<button
-											onClick={() =>
-												handleDeleteLegalSession(session.sessionId)
-											}
+											onClick={(e) => {
+												e.preventDefault();
+												handleDeleteLegalSession(session.sessionId);
+											}}
 											className="text-sm font-medium text-red-600 hover:text-red-800"
 											title="حذف الجلسة"
 										>
 											حذف
 										</button>
 									</div>
-								</div>
+								</Link>
 							))}
 						</div>
 					</div>
