@@ -120,7 +120,6 @@ export const TB_user_alpha_progress = pgTable("user_alpha_progress", {
 	alphaBitId: text("alphaBit_id")
 		.notNull()
 		.references(() => TB_alphaBit_level.id, { onDelete: "cascade" }),
-	score: integer("score").notNull().default(0),
 	accuracy: integer("accuracy").notNull().default(0),
 	attempts: integer("attempts").notNull().default(0),
 });
@@ -133,7 +132,6 @@ export const TB_user_digit_progress = pgTable("user_digit_progress", {
 	digitId: text("digit_id")
 		.notNull()
 		.references(() => TB_digit_level.id, { onDelete: "cascade" }),
-	score: integer("score").notNull().default(0),
 	accuracy: integer("accuracy").notNull().default(0),
 	attempts: integer("attempts").notNull().default(0),
 });
@@ -170,6 +168,7 @@ export const TB_psychological_history = pgTable("psychological_history", {
 	question: text("question").notNull(),
 	answer: text("answer").notNull(),
 	questionIndex: integer("question_index").notNull(),
+	// date: date("date").notNull(),
 });
 
 export const RE_psychological_history = relations(

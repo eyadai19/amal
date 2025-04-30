@@ -15,6 +15,13 @@
       "when": 1744030274501,
       "tag": "0001_rare_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1746011061653,
+      "tag": "0002_thick_infant_terrible",
+      "breakpoints": true
     }
   ]
 }
