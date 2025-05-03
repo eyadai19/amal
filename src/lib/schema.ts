@@ -309,3 +309,163 @@ export const RE_user_digit_progress = relations(
 // 		// تمت إزالة العلاقة مع legal_history
 // 	}),
 // );
+
+
+////////// تابع إضافة تقدم المستخدم للحرف (addUserAlphaProgress)
+
+import { db } from "@/lib/db";
+import { eq, and } from "drizzle-orm";
+
+export async function addUserAlphaProgress(userId: string, bit: string, accuracy: number) {
+  // جلب alphaBitId بناءً على الحرف
+  const [alphaBit] = await db
+    .select()
+    .from(TB_alphaBit_level)
+    .where(eq(TB_alphaBit_level.bit, bit));
+
+  if (!alphaBit) {
+    throw new Error(`الحرف '${bit}' غير موجود في جدول TB_alphaBit_level`);
+  }
+
+  const alphaBitId = alphaBit.id;
+
+  // جلب المحاولات السابقة لهذا الحرف فقط
+  const previousAttempts = await db
+    .select()
+    .from(TB_user_alpha_progress)
+    .where(
+      and(
+        eq(TB_user_alpha_progress.userId, userId),
+        eq(TB_user_alpha_progress.alphaBitId, alphaBitId)
+      )
+    );
+
+  const maxAttempts = previousAttempts.length > 0
+    ? Math.max(...previousAttempts.map((p) => p.attempts))
+    : 0;
+
+  // إدراج محاولة جديدة
+  await db.insert(TB_user_alpha_progress).values({
+    id: crypto.randomUUID(),
+    userId,
+    alphaBitId,
+    accuracy,
+    attempts: maxAttempts + 1,
+  });
+}
+
+
+
+
+///////////// تابع إضافة تقدم المستخدم للرقم (addUserDigitProgress)
+
+
+
+
+export async function addUserDigitProgress(userId: string, digit: string, accuracy: number) {
+  // جلب digitId بناءً على الرقم
+  const [digitEntry] = await db
+    .select()
+    .from(TB_digit_level)
+    .where(eq(TB_digit_level.digit, digit));
+
+  if (!digitEntry) {
+    throw new Error(`الرقم '${digit}' غير موجود في جدول TB_digit_level`);
+  }
+
+  const digitId = digitEntry.id;
+
+  // جلب المحاولات السابقة لهذا الرقم فقط
+  const previousAttempts = await db
+    .select()
+    .from(TB_user_digit_progress)
+    .where(
+      and(
+        eq(TB_user_digit_progress.userId, userId),
+        eq(TB_user_digit_progress.digitId, digitId)
+      )
+    );
+
+  const maxAttempts = previousAttempts.length > 0
+    ? Math.max(...previousAttempts.map((p) => p.attempts))
+    : 0;
+
+  // إدراج محاولة جديدة
+  await db.insert(TB_user_digit_progress).values({
+    id: crypto.randomUUID(),
+    userId,
+    digitId,
+    accuracy,
+    attempts: maxAttempts + 1,
+  });
+}
+
+
+
+///////////تابع يرجع كائن فيه مصفوفتين (alpha,digits)
+
+
+export async function getUserOCRProgress(userId: string) {
+  //  الحروف
+  const alphaProgressRaw = await db
+    .select({
+      bit: TB_alphaBit_level.bit,
+      accuracy: TB_user_alpha_progress.accuracy,
+      attempts: TB_user_alpha_progress.attempts,
+    })
+    .from(TB_user_alpha_progress)
+    .innerJoin(
+      TB_alphaBit_level,
+      eq(TB_user_alpha_progress.alphaBitId, TB_alphaBit_level.id)
+    )
+    .where(eq(TB_user_alpha_progress.userId, userId))
+  // نأخذ آخر محاولة فقط لكل حرف
+  const alphaMap = new Map<string, { accuracy: number; attempts: number }>();
+  for (const row of alphaProgressRaw) {
+    if (!alphaMap.has(row.bit)) {
+      alphaMap.set(row.bit, {
+        accuracy: row.accuracy,
+        attempts: row.attempts,
+      });
+    }
+  }
+
+  const alphas = Array.from(alphaMap.entries()).map(([bit, data]) => ({
+    bit,
+    ...data,
+  }));
+
+  //  الأرقام
+  const digitProgressRaw = await db
+    .select({
+      digit: TB_digit_level.digit,
+      accuracy: TB_user_digit_progress.accuracy,
+      attempts: TB_user_digit_progress.attempts,
+    })
+    .from(TB_user_digit_progress)
+    .innerJoin(
+      TB_digit_level,
+      eq(TB_user_digit_progress.digitId, TB_digit_level.id)
+    )
+    .where(eq(TB_user_digit_progress.userId, userId))
+
+  const digitMap = new Map<string, { accuracy: number; attempts: number }>();
+  for (const row of digitProgressRaw) {
+    if (!digitMap.has(row.digit)) {
+      digitMap.set(row.digit, {
+        accuracy: row.accuracy,
+        attempts: row.attempts,
+      });
+    }
+  }
+
+  const digits = Array.from(digitMap.entries()).map(([digit, data]) => ({
+    digit,
+    ...data,
+  }));
+
+  return {
+    alphas,
+    digits,
+  };
+}
