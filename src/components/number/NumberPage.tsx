@@ -5,7 +5,7 @@ import { numberOcrApi } from "@/utils/api";
 import { ArabicNumeralsKeys } from "@/utils/arabicNumerals";
 import { numbersData } from "@/utils/numbersData";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
 	FaArrowLeft,
 	FaEraser,
@@ -18,9 +18,14 @@ import AmalNavbar from "../amalNavbar";
 export default function NumberPage({
 	params,
 	logoutAction,
+	addUserDigitProgressAction,
 }: {
 	params: { number: ArabicNumeralsKeys };
 	logoutAction: () => Promise<void>;
+	addUserDigitProgressAction: (
+		digit: number,
+		accuracy: number,
+	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [showPad, setShowPad] = useState(false);
 	const [isErasing, setIsErasing] = useState(false);
@@ -150,6 +155,14 @@ export default function NumberPage({
 
 			// تعيين الدقة بناءً على صحة التوقع
 			const finalAccuracy = isCorrect ? predictionConfidence : 0;
+
+			// تحديث تقدم المستخدم
+			if (finalAccuracy > 0) {
+				const result = await addUserDigitProgressAction(
+					currentNumber!.value,
+					finalAccuracy,
+				);
+			}
 
 			setAccuracyResult({
 				correct: isCorrect,

@@ -1,239 +1,429 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { UserCvInfo } from "@/app/cvbuilder/page";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import AmalNavbar from "./amalNavbar";
+
+const formSchema = z.object({
+	name: z.string().min(2, "الاسم يجب أن يكون أكثر من حرفين"),
+	age: z.string().regex(/^\d+$/, "العمر يجب أن يكون رقماً"),
+	email: z.string().email("البريد الإلكتروني غير صالح"),
+	phone: z.string().min(10, "رقم الهاتف يجب أن يكون 10 أرقام على الأقل"),
+	address: z.string().min(5, "العنوان يجب أن يكون أكثر من 5 أحرف"),
+	summary: z.string().min(10, "الملخص يجب أن يكون أكثر من 10 أحرف"),
+	skills: z.string().min(5, "المهارات يجب أن تكون أكثر من 5 أحرف"),
+	languages: z.string().min(2, "اللغات يجب أن تكون أكثر من حرفين"),
+});
 
 type UserInfo = {
-  name?: string;
-  age?: number;
-  email?: string;
-  phone?: string;
+	name?: string;
+	age?: number;
+	email?: string;
+	phone?: string;
+	photo?: string | null;
 };
 
-export default function CVForm() {
-  const [userInfo, setUserInfo] = useState<UserInfo>({});
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    summary: "",
-    skills: "",
-    languages: "",
-  });
+export default function CVForm({
+	getUserCvInfoAction,
+	logoutAction,
+}: {
+	getUserCvInfoAction: () => Promise<
+		UserCvInfo | { field: string; message: string }
+	>;
+	logoutAction: () => Promise<void>;
+}) {
+	const [userInfo, setUserInfo] = useState<UserInfo>({});
+	const [experienceInput, setExperienceInput] = useState("");
+	const router = useRouter();
 
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [showWarning, setShowWarning] = useState(false);
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: "",
+			age: "",
+			email: "",
+			phone: "",
+			address: "",
+			summary: "",
+			skills: "",
+			languages: "",
+		},
+	});
 
-  // State to handle work experience input
-  const [experienceInput, setExperienceInput] = useState("");
-  const [cvExperiences, setCvExperiences] = useState<string[]>([]);
+	useEffect(() => {
+		const fetchUserInfo = async () => {
+			try {
+				const info = await getUserCvInfoAction();
+				if ("field" in info) {
+					console.error("Failed to fetch user info:", info.message);
+					return;
+				}
+				setUserInfo(info);
+				form.reset({
+					name: info.name || "",
+					age: info.age?.toString() || "",
+					email: "",
+					phone: "",
+					address: "",
+					summary: "",
+					skills: "",
+					languages: "",
+				});
+			} catch (error) {
+				console.error("Failed to fetch user info:", error);
+			}
+		};
 
-  useEffect(() => {
-    const getUserInfoAction = async (): Promise<UserInfo> => {
-      return {
-        name: "محمد أحمد",
-        age: 30,
-        email: "example@email.com",
-        phone: "0912345678"
-      };
-    };
+		fetchUserInfo();
+	}, [getUserCvInfoAction, form]);
 
-    const fetchUserInfo = async () => {
-      try {
-        const info = await getUserInfoAction();
-        setUserInfo(info);
-        setFormData(prev => ({
-          ...prev,
-          name: info.name || prev.name,
-          email: info.email || prev.email,
-          phone: info.phone || prev.phone
-        }));
-      } catch (error) {
-        console.error("Failed to fetch user info:", error);
-      }
-    };
-    
-    fetchUserInfo();
-  }, []);
+	const handleAddExperience = () => {
+		if (experienceInput.trim() !== "") {
+			const currentSkills = form.getValues("skills");
+			const newSkills = currentSkills
+				? `${currentSkills}\n${experienceInput}`
+				: experienceInput;
+			form.setValue("skills", newSkills);
+			setExperienceInput("");
+		}
+	};
 
-  const sectionLabels: Record<keyof typeof formData, string> = {
-    name: "الاسم الكامل",
-    email: "البريد الإلكتروني",
-    phone: "رقم الهاتف",
-    address: "العنوان",
-    summary: "الملخص المهني",
-    skills: "المهارات",
-    languages: "اللغات",
-  };
+	const handleReset = () => {
+		const name = form.getValues("name");
+		const age = form.getValues("age");
+		form.reset({
+			name,
+			age,
+			email: "",
+			phone: "",
+			address: "",
+			summary: "",
+			skills: "",
+			languages: "",
+		});
+	};
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: false }));
-    setShowWarning(false);
-  };
+	const onSubmit = (values: z.infer<typeof formSchema>) => {
+		// Save CV data to localStorage
+		localStorage.setItem("cvData", JSON.stringify(values));
+		// Navigate to preview page
+		router.push("/cv-preview");
+	};
 
-  const handleSave = () => {
-    const missingFields = Object.entries(formData).filter(
-      ([, value]) => value.trim() === ""
-    );
+	return (
+		<>
+			<AmalNavbar
+				logoutAction={logoutAction}
+				backgroundColor="#7D1B14FF"
+				activeSection={"career"}
+			/>
+			<div
+				className="min-h-screen bg-gradient-to-b from-red-50 to-white px-4 py-8 pt-24 sm:px-6 lg:px-10"
+				dir="rtl"
+			>
+				<div className="mx-auto max-w-4xl">
+					{/* Shorter Red Header */}
+					<div className="rounded-t-xl bg-[#761515] p-4 text-white shadow-md">
+						<h1 className="mb-1 text-center text-2xl font-bold">
+							السيرة الذاتية
+						</h1>
+						<p className="text-center text-sm text-red-100">
+							املأ البيانات لإنشاء سيرتك الذاتية
+						</p>
+					</div>
 
-    if (missingFields.length > 0) {
-      const newErrors: Record<string, boolean> = {};
-      missingFields.forEach(([key]) => {
-        newErrors[key] = true;
-      });
-      setErrors(newErrors);
-      setShowWarning(true);
-      return;
-    }
+					{/* CV Form Container */}
+					<div className="overflow-hidden rounded-b-xl border border-gray-200 bg-white shadow-lg">
+						{/* Professional Header Section */}
+						<div className="border-b border-gray-200 bg-gradient-to-r from-red-50 to-white p-6 text-center">
+							<div className="mt-4 mb-3 inline-block rounded-full border-4 border-red-100 bg-white p-3 shadow-sm">
+								{userInfo.photo ? (
+									<img
+										src={userInfo.photo}
+										alt={userInfo.name || "صورة المستخدم"}
+										className="h-20 w-20 rounded-full object-cover"
+									/>
+								) : (
+									<div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-600">
+										{form.getValues("name")
+											? form.getValues("name").charAt(0)
+											: "?"}
+									</div>
+								)}
+							</div>
 
-    console.log("تم حفظ السيرة الذاتية:", formData);
-    alert("✅ تم حفظ السيرة الذاتية بنجاح!");
-  };
+							<h2 className="mb-1 text-xl font-bold text-gray-800">
+								{form.getValues("name") || userInfo.name || "الاسم الكامل"}
+							</h2>
+						</div>
 
-  const handleProfessionalize = () => {
-    console.log("تحويل إلى صيغة رسمية:", formData);
-  };
+						<Form {...form}>
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className="space-y-8 p-6"
+							>
+								{/* Personal Information Section */}
+								<div className="rounded-xl bg-red-50/50 p-6">
+									<div className="grid gap-6 md:grid-cols-2">
+										<FormField
+											control={form.control}
+											name="name"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-semibold text-gray-700">
+														الاسم الكامل
+													</FormLabel>
+													<FormControl>
+														<Input {...field} dir="rtl" />
+													</FormControl>
+													<FormMessage className="text-red-500" />
+												</FormItem>
+											)}
+										/>
 
-  // Function to handle adding experience to CV
-  const handleAddExperience = () => {
-    if (experienceInput.trim() !== "") {
-      setCvExperiences([...cvExperiences, experienceInput]);
-      setExperienceInput(""); // Clear the input after adding
-    }
-  };
+										<FormField
+											control={form.control}
+											name="age"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-semibold text-gray-700">
+														العمر
+													</FormLabel>
+													<FormControl>
+														<Input {...field} dir="rtl" type="number" />
+													</FormControl>
+													<FormMessage className="text-red-500" />
+												</FormItem>
+											)}
+										/>
+									</div>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-white py-8 px-4 sm:px-6 lg:px-10" dir="rtl">
-      <div className="max-w-4xl mx-auto">
-        {/* Shorter Red Header */}
-        <div className="bg-[#761515] text-white rounded-t-xl p-4 shadow-md">
-          <h1 className="text-2xl font-bold text-center mb-1">السيرة الذاتية</h1>
-          <p className="text-center text-red-100 text-sm">املأ البيانات لإنشاء سيرتك الذاتية</p>
-        </div>
+									<div className="mt-6 grid gap-6 md:grid-cols-2">
+										<FormField
+											control={form.control}
+											name="email"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-semibold text-gray-700">
+														البريد الإلكتروني
+													</FormLabel>
+													<FormControl>
+														<Input {...field} dir="rtl" type="email" />
+													</FormControl>
+													<FormMessage className="text-red-500" />
+												</FormItem>
+											)}
+										/>
 
-        {/* CV Form Container */}
-        <div className="bg-white shadow-lg rounded-b-xl overflow-hidden border border-gray-200">
-          {/* Professional Header Section */}
-          <div className="bg-gradient-to-r from-red-50 to-white p-6 border-b border-gray-200 text-center">
-            <div className="inline-block bg-white p-3 rounded-full shadow-sm mt-4 mb-3 border-4 border-red-100">
-              <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-2xl font-bold">
-                {formData.name ? formData.name.charAt(0) : "?"}
-              </div>
-            </div>
+										<FormField
+											control={form.control}
+											name="phone"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-semibold text-gray-700">
+														رقم الهاتف
+													</FormLabel>
+													<FormControl>
+														<Input {...field} dir="rtl" />
+													</FormControl>
+													<FormMessage className="text-red-500" />
+												</FormItem>
+											)}
+										/>
+									</div>
 
-            <h2 className="text-xl font-bold text-gray-800 mb-1">
-              {formData.name || userInfo.name || "الاسم الكامل"}
-            </h2>
-            {userInfo.age && (
-              <p className="text-gray-600 mb-3">العمر: {userInfo.age} سنة</p>
-            )}
-          </div>
+									<div className="mt-6">
+										<FormField
+											control={form.control}
+											name="address"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-lg font-semibold text-gray-700">
+														العنوان
+													</FormLabel>
+													<FormControl>
+														<Input {...field} dir="rtl" />
+													</FormControl>
+													<FormMessage className="text-red-500" />
+												</FormItem>
+											)}
+										/>
+									</div>
+								</div>
 
-          
+								{/* Professional Summary Section */}
+								<div className="rounded-xl bg-red-50/50 p-6">
+									<FormField
+										control={form.control}
+										name="summary"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-lg font-semibold text-gray-700">
+													الملخص المهني
+												</FormLabel>
+												<FormControl>
+													<textarea
+														{...field}
+														className="w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
+														rows={4}
+														dir="rtl"
+													/>
+												</FormControl>
+												<FormMessage className="text-red-500" />
+											</FormItem>
+										)}
+									/>
+								</div>
 
-          <form className="p-6 space-y-6">
-            {Object.entries(sectionLabels).map(([key, label]) => {
-              const isTextarea = ["summary", "skills", "languages"].includes(key);
-              const errorStyle = errors[key] ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-red-300";
-              
-              if (key === "experience") return null;  
+								{/* Skills and Experience Section */}
+								<div className="rounded-xl bg-red-50/50 p-6">
+									<FormField
+										control={form.control}
+										name="skills"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-lg font-semibold text-gray-700">
+													المهارات والخبرات
+												</FormLabel>
+												<div className="grid gap-6 md:grid-cols-3">
+													<div className="md:col-span-2">
+														<FormControl>
+															<textarea
+																{...field}
+																className="h-full w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
+																rows={6}
+																dir="rtl"
+															/>
+														</FormControl>
+													</div>
+													<div className="flex flex-col gap-4">
+														<Input
+															type="text"
+															value={experienceInput}
+															onChange={(e) =>
+																setExperienceInput(e.target.value)
+															}
+															placeholder="النص المراد تحويله "
+															className="h-[42px] w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
+															dir="rtl"
+														/>
+														<Button
+															onClick={handleAddExperience}
+															type="button"
+															className="h-[42px] rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
+														>
+															تحويل النص الى صيغة رسمية
+														</Button>
+														<Dialog>
+															<DialogTrigger asChild>
+																<Button
+																	type="button"
+																	variant="outline"
+																	className="h-[42px] rounded-lg border border-red-600 bg-white px-6 py-2 text-base font-semibold text-red-600 shadow-sm transition-all hover:bg-red-50"
+																>
+																	ما هذا؟
+																</Button>
+															</DialogTrigger>
+															<DialogContent className="sm:max-w-[425px]">
+																<DialogHeader>
+																	<DialogTitle className="text-right">
+																		مثال على التحويل
+																	</DialogTitle>
+																</DialogHeader>
+																<div className="mt-4 space-y-4 text-right">
+																	<div className="rounded-lg bg-red-50 p-4">
+																		<p className="font-semibold text-red-800">
+																			النص الأصلي:
+																		</p>
+																		<p className="mt-2">
+																			كنت أتعلم كيفية إدارة الوقت
+																		</p>
+																	</div>
+																	<div className="rounded-lg bg-green-50 p-4">
+																		<p className="font-semibold text-green-800">
+																			بعد التحويل:
+																		</p>
+																		<p className="mt-2">
+																			مهارات في تنظيم الوقت وتنظيم المهام
+																			اليومية
+																		</p>
+																	</div>
+																</div>
+															</DialogContent>
+														</Dialog>
+													</div>
+												</div>
+												<FormMessage className="text-red-500" />
+											</FormItem>
+										)}
+									/>
+								</div>
 
-              return (
-                <div key={key} className="space-y-2">
-                  <div className="flex items-center justify-start gap-4">
-                    <Label htmlFor={key} className="text-gray-700 font-medium w-32 text-right">
-                      {label}
-                      <span className={`w-2 h-2 rounded-full ml-2 ${errors[key] ? "bg-[#b11f1f]" : "bg-red-300"}`}></span>
-                    </Label>
+								{/* Languages Section */}
+								<div className="rounded-xl bg-red-50/50 p-6">
+									<FormField
+										control={form.control}
+										name="languages"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-lg font-semibold text-gray-700">
+													اللغات
+												</FormLabel>
+												<FormControl>
+													<textarea
+														{...field}
+														className="w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
+														rows={4}
+														dir="rtl"
+													/>
+												</FormControl>
+												<FormMessage className="text-red-500" />
+											</FormItem>
+										)}
+									/>
+								</div>
 
-                    {isTextarea ? (
-                      <textarea
-                        id={key}
-                        name={key}
-                        value={formData[key as keyof typeof formData]}
-                        onChange={handleChange}
-                        placeholder={`أدخل ${label.toLowerCase()}`}
-                        className={`w-full p-3 text-right border rounded-lg focus:ring-2 focus:ring-red-300 focus:border-red-300 focus:outline-none transition ${errorStyle}`}
-                        rows={4}
-                        dir="rtl"
-                      />
-                    ) : (
-                      <Input
-                        id={key}
-                        name={key}
-                        value={formData[key as keyof typeof formData]}
-                        onChange={handleChange}
-                        placeholder={`أدخل ${label.toLowerCase()}`}
-                        className={`text-right border rounded-lg focus:ring-2 focus:ring-red-300 focus:border-red-300 focus:outline-none transition ${errorStyle}`}
-                        dir="rtl"
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {/* Work Experience Section */}
-          <div className="p-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">الخبرات العملية</h3>
-
-            {/* Work Experience Input */}
-            <Input
-              type="text"
-              value={experienceInput}
-              onChange={(e) => setExperienceInput(e.target.value)}
-              placeholder="أدخل الخبرة العملية"
-              className="w-full p-3 text-right border rounded-lg focus:ring-2 focus:ring-red-300 focus:border-red-300 focus:outline-none transition"
-              dir="rtl"
-            />
-
-            {/* Add Experience Button */}
-            <Button
-              onClick={handleAddExperience}
-              type="button"
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm hover:shadow-md mt-4"
-            >
-              إضافة خبرة
-            </Button>
-
-            {/* Display added experiences */}
-            <div className="space-y-2 mt-4">
-              {cvExperiences.length > 0 ? (
-                cvExperiences.map((experience, index) => (
-                  <div key={index} className="text-gray-600">{experience}</div>
-                ))
-              ) : (
-                <div className="text-gray-600">لم تتم إضافة خبرات بعد.</div>
-              )}
-            </div>
-          </div>
-
-            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-6">
-              <Button
-                onClick={handleProfessionalize}
-                type="button"
-                variant="outline"
-                className="border-[#b11f1f] text-[#b11f1f] hover:bg-red-50 hover:text-red-600 px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm hover:shadow-md"
-              >
-                تحويل إلى صيغة رسمية
-              </Button>
-
-              <Button
-                onClick={handleSave}
-                type="button"
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm hover:shadow-md"
-              >
-                حفظ السيرة الذاتية
-              </Button>
-            </div>
-          </form>
-          
-        </div>
-      </div>
-    </div>
-  );
+								<div className="flex flex-col justify-center gap-4 pt-6 sm:flex-row">
+									<Button
+										type="submit"
+										className="rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
+									>
+										حفظ السيرة الذاتية
+									</Button>
+									<Button
+										type="button"
+										onClick={handleReset}
+										className="rounded-lg border border-red-600 bg-white px-6 py-2 text-base font-semibold text-red-600 shadow-sm transition-all hover:bg-red-50"
+									>
+										إفراغ البيانات
+									</Button>
+								</div>
+							</form>
+						</Form>
+					</div>
+				</div>
+			</div>
+		</>
+	);
 }

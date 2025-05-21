@@ -3,7 +3,7 @@
 import { UserInfo } from "@/app/Profile/page";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
 
 export default function Profile({
@@ -14,6 +14,7 @@ export default function Profile({
 	deletePsychologicalSessionAction,
 	deleteLegalSessionAction,
 	updateProfileAction,
+	getUserOCRProgressAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
@@ -36,6 +37,13 @@ export default function Profile({
 	updateProfileAction: (
 		form: FormData,
 	) => Promise<string | { field: string; message: string } | undefined>;
+	getUserOCRProgressAction: () => Promise<
+		| {
+				alphas: { accuracy: number; attempts: number; bit: string }[];
+				digits: { accuracy: number; attempts: number; digit: string }[];
+		  }
+		| { field: string; message: string }
+	>;
 }) {
 	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
@@ -49,6 +57,10 @@ export default function Profile({
 	>([]);
 	const [isEditing, setIsEditing] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+	const [ocrProgress, setOcrProgress] = useState<{
+		alphas: { accuracy: number; attempts: number; bit: string }[];
+		digits: { accuracy: number; attempts: number; digit: string }[];
+	} | null>(null);
 	const [formData, setFormData] = useState({
 		firstName: "",
 		lastName: "",
@@ -57,33 +69,17 @@ export default function Profile({
 		sentenceDuration: "",
 	});
 
-	// تقدم الحروف الافتراضي
-	const alphaProgress = [
-		{ alphaBit: { bit: "أ", id: "alpha-1" }, accuracy: 85, attempts: 12 },
-		{ alphaBit: { bit: "ب", id: "alpha-2" }, accuracy: 72, attempts: 8 },
-		{ alphaBit: { bit: "ت", id: "alpha-3" }, accuracy: 65, attempts: 10 },
-		{ alphaBit: { bit: "ث", id: "alpha-4" }, accuracy: 90, attempts: 15 },
-		{ alphaBit: { bit: "ج", id: "alpha-5" }, accuracy: 45, attempts: 5 },
-		{ alphaBit: { bit: "ح", id: "alpha-6" }, accuracy: 78, attempts: 9 },
-	];
-
-	// تقدم الأرقام الافتراضي
-	const digitProgress = [
-		{ digit: { digit: "١", id: "digit-1" }, accuracy: 95, attempts: 7 },
-		{ digit: { digit: "٢", id: "digit-2" }, accuracy: 88, attempts: 6 },
-		{ digit: { digit: "٣", id: "digit-3" }, accuracy: 72, attempts: 5 },
-		{ digit: { digit: "٤", id: "digit-4" }, accuracy: 60, attempts: 4 },
-	];
-
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
 				setLoading(true);
-				const [userResult, psychResult, legalResult] = await Promise.all([
-					getUserInfoAction(),
-					fetchAllPsychologicalSessionsAction(),
-					fetchAllLegalSessionsAction(),
-				]);
+				const [userResult, psychResult, legalResult, ocrResult] =
+					await Promise.all([
+						getUserInfoAction(),
+						fetchAllPsychologicalSessionsAction(),
+						fetchAllLegalSessionsAction(),
+						getUserOCRProgressAction(),
+					]);
 
 				if ("field" in userResult) {
 					setError(userResult.message);
@@ -109,6 +105,10 @@ export default function Profile({
 						})),
 					);
 				}
+
+				if (!("field" in ocrResult)) {
+					setOcrProgress(ocrResult);
+				}
 			} catch (err) {
 				setError("Failed to fetch user data");
 			} finally {
@@ -121,6 +121,7 @@ export default function Profile({
 		getUserInfoAction,
 		fetchAllPsychologicalSessionsAction,
 		fetchAllLegalSessionsAction,
+		getUserOCRProgressAction,
 	]);
 
 	useEffect(() => {
@@ -691,13 +692,13 @@ export default function Profile({
 					</div>
 					<div className="p-6">
 						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
-							{alphaProgress.map((progress) => (
+							{ocrProgress?.alphas.map((progress) => (
 								<div
-									key={progress.alphaBit.id}
+									key={progress.bit}
 									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
 								>
 									<span className="mb-1 text-xl font-bold text-emerald-800">
-										{progress.alphaBit.bit}
+										{progress.bit}
 									</span>
 									<div className="h-2.5 w-full rounded-full bg-emerald-100">
 										<div
@@ -723,13 +724,13 @@ export default function Profile({
 					</div>
 					<div className="p-6">
 						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
-							{digitProgress.map((progress) => (
+							{ocrProgress?.digits.map((progress) => (
 								<div
-									key={progress.digit.id}
+									key={progress.digit}
 									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
 								>
 									<span className="mb-1 text-xl font-bold text-emerald-800">
-										{progress.digit.digit}
+										{progress.digit}
 									</span>
 									<div className="h-2.5 w-full rounded-full bg-emerald-100">
 										<div

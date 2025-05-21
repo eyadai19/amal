@@ -2,6 +2,8 @@ import Profile from "@/components/ProfilePage";
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
+import { getArabicLetters } from "@/utils/arabicLetters";
+import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { eq } from "drizzle-orm";
 import {
 	deleteLegalSessionAction,
@@ -25,6 +27,7 @@ export default function ProfilePage() {
 				deleteLegalSessionAction={deleteLegalSessionAction}
 				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
 				updateProfileAction={UpdateProfileAction}
+				getUserOCRProgressAction={getUserOCRProgressAction}
 			/>
 		</div>
 	);
@@ -135,5 +138,58 @@ export async function UpdateProfileAction(
 		}
 	} catch (error) {
 		return { field: "root", message: "حدث خطأ أثناء تحديث الملف الشخصي" };
+	}
+}
+
+export async function getUserOCRProgressAction(): Promise<
+	| {
+			alphas: { accuracy: number; attempts: number; bit: string }[];
+			digits: { accuracy: number; attempts: number; digit: string }[];
+	  }
+	| { field: string; message: string }
+> {
+	"use server";
+
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const alphaProgress = await db.query.TB_user_alpha_progress.findMany({
+			where: (table, { eq }) => eq(table.userId, user.id),
+			with: {
+				alphaBit: true,
+			},
+		});
+
+		const digitProgress = await db.query.TB_user_digit_progress.findMany({
+			where: (table, { eq }) => eq(table.userId, user.id),
+			with: {
+				digit: true,
+			},
+		});
+
+		// تحويل مصفوفة alphaProgress لاستخراج البيانات المطلوبة
+		const alphas = alphaProgress.map((item) => {
+			const englishBit = item.alphaBit.bit as keyof typeof getArabicLetters;
+			return {
+				accuracy: item.accuracy,
+				attempts: item.attempts,
+				bit: getArabicLetters[englishBit] || item.alphaBit.bit,
+			};
+		});
+
+		// تحويل مصفوفة digitProgress لاستخراج البيانات المطلوبة
+		const digits = digitProgress.map((item) => {
+			const englishDigit = item.digit.digit as keyof typeof getArabicNumerals;
+			return {
+				accuracy: item.accuracy,
+				attempts: item.attempts,
+				digit: getArabicNumerals[englishDigit] || item.digit.digit,
+			};
+		});
+
+		return { alphas, digits };
+	} catch {
+		return { field: "root", message: "حدث خطأ أثناء جلب بيانات التقدم." };
 	}
 }
