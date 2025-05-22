@@ -94,7 +94,7 @@ export default function SessionSidebar({
 	const getColorClasses = (baseColor: string) => {
 		const colorMap: Record<string, string> = {
 			// Legal page colors
-			blue: "bg-[#D78448] text-white border-[#D78448] hover:bg-[#CA5A29]",
+			blue: "bg-[#14514BFF] text-white border-[#14514BFF] hover:bg-[#14514BFF]",
 			// Psychological page colors
 			emerald: "bg-[#582C5E] text-white border-[#582C5E] hover:bg-[#4F2345]",
 			// Default colors
@@ -112,7 +112,7 @@ export default function SessionSidebar({
 	const getTextColorClasses = (baseColor: string) => {
 		const colorMap: Record<string, string> = {
 			// Legal page colors
-			blue: "text-[#D78448]",
+			blue: "text-[#14514BFF]",
 			// Psychological page colors
 			emerald: "text-[#582C5E]",
 			// Default colors

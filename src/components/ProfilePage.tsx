@@ -246,7 +246,7 @@ export default function Profile({
 			<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-20 md:p-6 md:pt-20">
 				<AmalNavbar
 					logoutAction={logoutAction}
-					backgroundColor="#166534"
+					backgroundColor="#27583BFF"
 					activeSection={"profile"}
 				/>
 				<div className="mx-auto mt-7 max-w-4xl">
@@ -254,24 +254,24 @@ export default function Profile({
 					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
 						<div className="flex flex-col sm:flex-row">
 							<div className="p-4 sm:flex-shrink-0">
-								<div className="h-32 w-32 animate-pulse rounded-full bg-emerald-100"></div>
+								<div className="h-32 w-32 animate-pulse rounded-full bg-[#9cdbbc]"></div>
 							</div>
 							<div className="flex-1 p-6 sm:p-8">
 								<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
 									<div className="space-y-2">
-										<div className="h-8 w-48 animate-pulse rounded bg-emerald-100"></div>
-										<div className="h-4 w-32 animate-pulse rounded bg-emerald-100"></div>
+										<div className="h-8 w-48 animate-pulse rounded bg-[#9cdbbc]"></div>
+										<div className="h-4 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 									</div>
 									<div className="mt-4 sm:mt-0">
-										<div className="h-6 w-16 animate-pulse rounded-full bg-emerald-100"></div>
+										<div className="h-6 w-16 animate-pulse rounded-full bg-[#9cdbbc]"></div>
 									</div>
 								</div>
 
 								<div className="mt-6 grid grid-cols-2 gap-4">
 									{[1, 2, 3, 4].map((i) => (
 										<div key={i} className="space-y-2">
-											<div className="h-4 w-24 animate-pulse rounded bg-emerald-100"></div>
-											<div className="h-4 w-32 animate-pulse rounded bg-emerald-100"></div>
+											<div className="h-4 w-24 animate-pulse rounded bg-[#9cdbbc]"></div>
+											<div className="h-4 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 										</div>
 									))}
 								</div>
@@ -282,7 +282,7 @@ export default function Profile({
 					{/* سكيلتون للجلسات */}
 					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
 						<div className="border-b border-gray-200 px-6 py-5">
-							<div className="h-6 w-32 animate-pulse rounded bg-emerald-100"></div>
+							<div className="h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 						</div>
 						<div className="divide-y divide-gray-200">
 							{[1, 2, 3].map((i) => (
@@ -290,13 +290,13 @@ export default function Profile({
 									<div className="flex items-start justify-between">
 										<div className="flex items-start">
 											<div className="flex-shrink-0 pt-0.5">
-												<div className="h-5 w-5 animate-pulse rounded-full bg-emerald-100"></div>
+												<div className="h-5 w-5 animate-pulse rounded-full bg-[#9cdbbc]"></div>
 											</div>
 											<div className="ml-3 flex-1">
-												<div className="h-4 w-48 animate-pulse rounded bg-emerald-100"></div>
+												<div className="h-4 w-48 animate-pulse rounded bg-[#9cdbbc]"></div>
 											</div>
 										</div>
-										<div className="h-4 w-8 animate-pulse rounded bg-emerald-100"></div>
+										<div className="h-4 w-8 animate-pulse rounded bg-[#9cdbbc]"></div>
 									</div>
 								</div>
 							))}
@@ -306,18 +306,18 @@ export default function Profile({
 					{/* سكيلتون لتقدم تعلم الحروف */}
 					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
 						<div className="border-b border-gray-200 px-6 py-5">
-							<div className="h-6 w-32 animate-pulse rounded bg-emerald-100"></div>
+							<div className="h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 						</div>
 						<div className="p-6">
 							<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
 								{[1, 2, 3, 4, 5, 6].map((i) => (
 									<div
 										key={i}
-										className="flex flex-col items-center rounded-lg border border-emerald-100 p-3"
+										className="flex flex-col items-center rounded-lg border border-[#9cdbbc] p-3"
 									>
-										<div className="mb-1 h-6 w-6 animate-pulse rounded-full bg-emerald-100"></div>
-										<div className="h-2.5 w-full animate-pulse rounded-full bg-emerald-100"></div>
-										<div className="mt-1 h-4 w-16 animate-pulse rounded bg-emerald-100"></div>
+										<div className="mb-1 h-6 w-6 animate-pulse rounded-full bg-[#9cdbbc]"></div>
+										<div className="h-2.5 w-full animate-pulse rounded-full bg-[#9cdbbc]"></div>
+										<div className="mt-1 h-4 w-16 animate-pulse rounded bg-[#9cdbbc]"></div>
 									</div>
 								))}
 							</div>
@@ -327,18 +327,18 @@ export default function Profile({
 					{/* سكيلتون لتقدم تعلم الأرقام */}
 					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
 						<div className="border-b border-gray-200 px-6 py-5">
-							<div className="h-6 w-32 animate-pulse rounded bg-emerald-100"></div>
+							<div className="h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 						</div>
 						<div className="p-6">
 							<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
 								{[1, 2, 3, 4].map((i) => (
 									<div
 										key={i}
-										className="flex flex-col items-center rounded-lg border border-emerald-100 p-3"
+										className="flex flex-col items-center rounded-lg border border-[#9cdbbc] p-3"
 									>
-										<div className="mb-1 h-6 w-6 animate-pulse rounded-full bg-emerald-100"></div>
-										<div className="h-2.5 w-full animate-pulse rounded-full bg-emerald-100"></div>
-										<div className="mt-1 h-4 w-16 animate-pulse rounded bg-emerald-100"></div>
+										<div className="mb-1 h-6 w-6 animate-pulse rounded-full bg-[#9cdbbc]"></div>
+										<div className="h-2.5 w-full animate-pulse rounded-full bg-[#9cdbbc]"></div>
+										<div className="mt-1 h-4 w-16 animate-pulse rounded bg-[#9cdbbc]"></div>
 									</div>
 								))}
 							</div>
@@ -348,17 +348,17 @@ export default function Profile({
 					{/* سكيلتون لآخر التمارين */}
 					<div className="overflow-hidden rounded-2xl bg-white shadow-lg">
 						<div className="border-b border-gray-200 px-6 py-5">
-							<div className="h-6 w-32 animate-pulse rounded bg-emerald-100"></div>
+							<div className="h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 						</div>
 						<div className="divide-y divide-gray-200">
 							{[1, 2, 3].map((i) => (
 								<div key={i} className="p-4">
 									<div className="flex items-center justify-between">
 										<div className="space-y-2">
-											<div className="h-4 w-48 animate-pulse rounded bg-emerald-100"></div>
-											<div className="h-3 w-32 animate-pulse rounded bg-emerald-100"></div>
+											<div className="h-4 w-48 animate-pulse rounded bg-[#9cdbbc]"></div>
+											<div className="h-3 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
 										</div>
-										<div className="h-5 w-12 animate-pulse rounded-full bg-emerald-100"></div>
+										<div className="h-5 w-12 animate-pulse rounded-full bg-[#9cdbbc]"></div>
 									</div>
 								</div>
 							))}
@@ -399,7 +399,7 @@ export default function Profile({
 		<div className="min-h-screen bg-gradient-to-b from-[#D8E5F0] to-[#f0f5fa] p-4 pt-20 md:p-6 md:pt-20">
 			<AmalNavbar
 				logoutAction={logoutAction}
-				backgroundColor="#166534"
+				backgroundColor="#27583BFF"
 				activeSection={"profile"}
 			/>
 			<div className="mx-auto mt-7 max-w-4xl">
@@ -410,11 +410,11 @@ export default function Profile({
 						<div className="flex flex-col items-center p-4 sm:flex-shrink-0">
 							<div className="group relative">
 								<img
-									className="h-32 w-32 rounded-full border-4 border-emerald-100 object-cover transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-300"
+									className="h-32 w-32 rounded-full border-4 border-[#9cdbbc] object-cover transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-300"
 									src={user.photo || "/default-avatar.png"}
 									alt={`${user.firstName} ${user.lastName}`}
 								/>
-								<div className="absolute inset-0 rounded-full bg-emerald-100 opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
+								<div className="absolute inset-0 rounded-full bg-[#9cdbbc] opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
 							</div>
 						</div>
 
@@ -473,7 +473,7 @@ export default function Profile({
 											</h1>
 											<p className="mt-1 text-gray-600">@{user.username}</p>
 											{user.age && (
-												<span className="mt-2 inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
+												<span className="mt-2 inline-flex items-center rounded-full bg-[#9cdbbc] px-3 py-1 text-sm font-medium text-emerald-800">
 													سنة {user.age}
 												</span>
 											)}
@@ -563,7 +563,7 @@ export default function Profile({
 						{!isEditing ? (
 							<button
 								onClick={handleEdit}
-								className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-200"
+								className="rounded-full bg-[#9cdbbc] px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-200"
 							>
 								تعديل
 							</button>
@@ -572,7 +572,7 @@ export default function Profile({
 								<button
 									onClick={handleSubmit}
 									disabled={isSaving}
-									className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+									className="rounded-full bg-[#9cdbbc] px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-200 disabled:opacity-50"
 								>
 									{isSaving ? "جاري التعديل..." : "حفظ"}
 								</button>
@@ -606,7 +606,7 @@ export default function Profile({
 									<div className="flex items-start justify-between">
 										<div className="flex items-start">
 											<div className="flex-shrink-0 pt-0.5">
-												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-200">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9cdbbc]">
 													<span className="text-xs text-emerald-800">
 														{index + 1}
 													</span>
@@ -653,7 +653,7 @@ export default function Profile({
 									<div className="flex items-start justify-between">
 										<div className="flex items-start">
 											<div className="flex-shrink-0 pt-0.5">
-												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-200">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9cdbbc]">
 													<span className="text-xs text-emerald-800">
 														{index + 1}
 													</span>
@@ -762,7 +762,7 @@ export default function Profile({
 									</h4>
 									<p className="text-sm text-gray-500">دقة 85% - منذ ساعتين</p>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
 									كتابة
 								</span>
 							</div>
@@ -775,7 +775,7 @@ export default function Profile({
 									</h4>
 									<p className="text-sm text-gray-500">دقة 72% - منذ يوم</p>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
 									صوت
 								</span>
 							</div>
@@ -788,7 +788,7 @@ export default function Profile({
 									</h4>
 									<p className="text-sm text-gray-500">دقة 91% - منذ 3 أيام</p>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
 									كتابة
 								</span>
 							</div>

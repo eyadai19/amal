@@ -140,13 +140,13 @@ export default function LegalSessionPage({
 			<div className="min-h-screen bg-white">
 				<AmalNavbar
 					logoutAction={logoutAction}
-					backgroundColor={"#CA5A29FF"}
+					backgroundColor={"#14514BFF"}
 					activeSection={"legal"}
 				/>
 				<div className="mx-auto max-w-4xl px-4 py-8">
 					<div className="mb-8 text-center">
-						<div className="mx-auto h-8 w-48 animate-pulse rounded-lg bg-[#D78448]/10"></div>
-						<div className="mx-auto mt-4 h-4 w-64 animate-pulse rounded-lg bg-[#D78448]/10"></div>
+						<div className="mx-auto h-8 w-48 animate-pulse rounded-lg bg-[#14514BFF]/10"></div>
+						<div className="mx-auto mt-4 h-4 w-64 animate-pulse rounded-lg bg-[#14514BFF"></div>
 					</div>
 
 					<div className="space-y-6">
@@ -160,31 +160,31 @@ export default function LegalSessionPage({
 								<div
 									className={`max-w-[80%] rounded-2xl p-4 ${
 										index % 2 === 0
-											? "border border-[#D78448]/20 bg-[#D78448]/10 text-[#D78448]"
-											: "bg-[#D78448] text-white"
+											? "border border-[#14514BFF]/20 bg-[#14514BFF]/10 text-[#14514BFF]"
+											: "bg-[#14514BFF] text-white"
 									}`}
 								>
 									{index % 2 === 0 && (
 										<div className="mb-2 flex items-center justify-end gap-2">
-											<div className="h-4 w-12 animate-pulse rounded-lg bg-[#D78448]/10"></div>
-											<div className="h-2 w-2 animate-pulse rounded-full bg-[#D78448]"></div>
+											<div className="h-4 w-12 animate-pulse rounded-lg bg-[#14514BFF]/10"></div>
+											<div className="h-2 w-2 animate-pulse rounded-full bg-[#14514BFF]"></div>
 										</div>
 									)}
 									<div className="space-y-2">
 										<div
 											className={`h-4 w-3/4 animate-pulse rounded-lg ${
-												index % 2 === 0 ? "bg-[#D78448]/10" : "bg-white/10"
+												index % 2 === 0 ? "bg-[#14514BFF]/10" : "bg-white/10"
 											}`}
 										></div>
 										<div
 											className={`h-4 w-1/2 animate-pulse rounded-lg ${
-												index % 2 === 0 ? "bg-[#D78448]/10" : "bg-white/10"
+												index % 2 === 0 ? "bg-[#14514BFF]/10" : "bg-white/10"
 											}`}
 										></div>
 									</div>
 									<div
 										className={`mt-2 h-3 w-16 animate-pulse rounded-lg ${
-											index % 2 === 0 ? "bg-[#D78448]/10" : "bg-white/10"
+											index % 2 === 0 ? "bg-[#14514BFF]/10" : "bg-white/10"
 										}`}
 									></div>
 								</div>
@@ -193,7 +193,7 @@ export default function LegalSessionPage({
 					</div>
 
 					<div className="mt-8 flex justify-center">
-						<div className="h-10 w-40 animate-pulse rounded-lg bg-[#D78448]/10"></div>
+						<div className="h-10 w-40 animate-pulse rounded-lg bg-[#14514BFF]/10"></div>
 					</div>
 				</div>
 			</div>
@@ -205,11 +205,11 @@ export default function LegalSessionPage({
 			<div className="min-h-screen bg-white">
 				<AmalNavbar
 					logoutAction={logoutAction}
-					backgroundColor={"#CA5A29FF"}
+					backgroundColor={"#14514BFF"}
 					activeSection={"legal"}
 				/>
 				<div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-					<div className="text-center text-[#D78448]">
+					<div className="text-center text-[#14514BFF]">
 						<p className="text-xl">{error}</p>
 					</div>
 				</div>
@@ -221,13 +221,13 @@ export default function LegalSessionPage({
 		<div className="min-h-screen bg-white">
 			<AmalNavbar
 				logoutAction={logoutAction}
-				backgroundColor={"#CA5A29FF"}
+				backgroundColor={"#14514BFF"}
 				activeSection={"legal"}
 			/>
 			<div className="mx-auto max-w-4xl px-4 py-8">
 				<div className="mb-8 text-center">
-					<h1 className="text-3xl font-bold text-[#D78448]">سجل المحادثة</h1>
-					<p className="mt-4 text-[#D78448]/80">
+					<h1 className="text-3xl font-bold text-[#14514BFF]">سجل المحادثة</h1>
+					<p className="mt-4 text-[#14514BFF]/80">
 						محادثة الدعم القانوني بتاريخ{" "}
 						{new Date(messages[0]?.timestamp).toLocaleDateString("ar-EG")}
 					</p>
@@ -246,16 +246,16 @@ export default function LegalSessionPage({
 									message.isException
 										? "border-2 border-red-500 bg-red-50 text-red-700"
 										: message.isLastAnswer
-											? "border-2 border-[#D78448] bg-[#D78448]/20 text-[#D78448]"
+											? "border-2 border-[#14514BFF] bg-[#14514BFF]/20 text-[#14514BFF]"
 											: message.role === "user"
-												? "bg-[#D78448] text-white"
-												: "border border-[#D78448]/20 bg-[#D78448]/10 text-[#D78448]"
+												? "bg-[#14514BFF] text-white"
+												: "border border-[#14514BFF]/20 bg-[#14514BFF]/10 text-[#14514BFF]"
 								}`}
 							>
 								{message.role === "assistant" && (
 									<div className="mb-2 flex items-center justify-end gap-2">
 										<span className="text-xs font-medium">أمل</span>
-										<div className="h-2 w-2 rounded-full bg-[#D78448]"></div>
+										<div className="h-2 w-2 rounded-full bg-[#14514BFF]"></div>
 									</div>
 								)}
 								<div className="flex items-start gap-2">
@@ -305,7 +305,7 @@ export default function LegalSessionPage({
 				<div className="mt-8 flex justify-center">
 					<Link
 						href="/legal"
-						className="rounded-lg bg-[#D78448] px-6 py-3 text-white transition-colors hover:bg-[#CA5A29]"
+						className="rounded-lg bg-[#14514BFF] px-6 py-3 text-white transition-colors hover:bg-[#14514BFF]"
 					>
 						إنشاء محادثة جديدة
 					</Link>

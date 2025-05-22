@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./ui/button";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 
 export default function RegisterForm({
@@ -36,10 +36,17 @@ export default function RegisterForm({
 	const handleNumberChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		field: any,
-	) => {
+		minValue: number = 1
+	  ) => {
 		const value = e.target.value;
-		field.onChange(value === "" ? undefined : Number(value));
-	};
+		const numValue = value === "" ? undefined : Number(value);
+		
+		if (numValue !== undefined && numValue < minValue) {
+		  field.onChange(minValue);
+		} else {
+		  field.onChange(numValue);
+		}
+	  };
 
 	const handleDateChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
@@ -99,217 +106,243 @@ export default function RegisterForm({
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[#00203F] to-[#00001a]">
-			<div className="flex w-[90%] max-w-3xl items-center justify-center rounded-lg p-6 shadow-lg backdrop-blur-md">
-				<div className="flex w-full flex-col items-center">
-					<h2 className="m-3 text-3xl font-semibold text-white">Join us!</h2>
-					<div className="w-full max-w-md rounded-lg bg-gradient-to-b from-[#003a57] to-[#004a63] p-6">
-						<div className="relative mb-3 flex flex-col items-center">
-							{photoUrl ? (
-								<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#003A63]">
-									<img
-										src={photoUrl}
-										alt="Profile Preview"
-										className="h-full w-full object-cover"
-									/>
-								</div>
-							) : (
-								<div>
-									<label htmlFor="photo" className="relative cursor-pointer">
-										<div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#003A63]">
-											<span className="text-lg text-white">+</span>
-										</div>
-									</label>
-									<div className="absolute inset-0 flex items-center justify-center opacity-0">
-										<UploadButton
-											endpoint="imageUploader"
-											onClientUploadComplete={(res) => {
-												const uploadedFile = res[0];
-												setPhotoUrl(uploadedFile.url);
-											}}
-											onUploadError={(error) => {
-												console.error("Upload failed", error); // set error
-											}}
-										/>
-									</div>
-								</div>
-							)}
-						</div>
-
-						<Form {...form}>
-							<form
-								onSubmit={form.handleSubmit(onSubmit)}
-								className="space-y-4"
-							>
-								<div className="grid grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="firstName"
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														placeholder="First Name"
-														{...field}
-														className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="lastName"
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														placeholder="Last Name"
-														{...field}
-														className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								<FormField
-									control={form.control}
-									name="username"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													placeholder="Username"
-													{...field}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="age"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="number"
-													placeholder="Age"
-													value={field.value ?? ""}
-													onChange={(e) => handleNumberChange(e, field)}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="releaseDate"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="date"
-													placeholder="Release Date"
-													value={field.value ?? ""}
-													onChange={(e) => handleDateChange(e, field)}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="sentenceDuration"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="number"
-													placeholder="Sentence Duration (years)"
-													value={field.value ?? ""}
-													onChange={(e) => handleNumberChange(e, field)}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="password"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="Password"
-													{...field}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="confirmPassword"
-									render={({ field }) => (
-										<FormItem>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="Confirm Password"
-													{...field}
-													className="w-full rounded border border-gray-300 bg-gray-100 px-4 py-2 text-gray-800"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<Button
-									type="submit"
-									className="w-full bg-[#ADF0D1] text-[#00203F] hover:text-[#ADF0D1]"
-									disabled={isSubmitting}
-								>
-									{isSubmitting ? "Creating Account..." : "Create Account"}
-								</Button>
-							</form>
-						</Form>
-
-						<div className="mt-4 text-center">
-							<span className="text-sm text-white">
-								Already have an account?{" "}
-							</span>
-							<Link
-								href="/login"
-								className="text-sm font-medium text-blue-500 hover:underline"
-							>
-								Login.
-							</Link>
-						</div>
+		<div
+		  className="flex min-h-screen items-center justify-end bg-[url('/image/authImage/loginBG.png')]"
+		  style={{
+			backgroundSize: "cover",
+			backgroundPosition: "center",
+		  }}
+		>
+		  <div className="w-full max-w-2xl p-8 mr-7">
+			<div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-gray-100">
+			  {/* Welcome text */}
+			  <div className="text-center mb-6">
+				<h2 className="text-3xl font-bold text-[#0a462f] mb-2">!انشئ حساب جديد</h2>
+			  </div>
+	
+			  {/* Profile picture upload */}
+			  <div className="relative mb-6 flex flex-col items-center">
+				{photoUrl ? (
+				  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#0a462f]">
+					<img
+					  src={photoUrl}
+					  alt="Profile Preview"
+					  className="h-full w-full object-cover"
+					/>
+				  </div>
+				) : (
+				  <div className="text-center">
+					<label htmlFor="photo" className="relative cursor-pointer">
+					  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 border-[#afafaf] bg-[#0a462f] mx-auto">
+						<span className="text-lg text-white">+</span>
+					  </div>
+					</label>
+					<div className="absolute inset-0 flex items-center justify-center opacity-0">
+					  <UploadButton
+						endpoint="imageUploader"
+						onClientUploadComplete={(res) => {
+						  const uploadedFile = res[0];
+						  setPhotoUrl(uploadedFile.url);
+						}}
+						onUploadError={(error) => {
+						  console.error("Upload failed", error);
+						}}
+					  />
 					</div>
-				</div>
+					<p className="text-sm text-[#0a462f] mt-2">صورة الملف الشخصي</p>
+				  </div>
+				)}
+			  </div>
+	
+			  <Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				  {/* First Name & Last Name - Reversed columns */}
+				  <div className="grid grid-cols-2 gap-4">
+					<FormField
+					  control={form.control}
+					  name="lastName"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">الاسم الأخير</FormLabel>
+						  <FormControl>
+							<Input
+							  {...field}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+					<FormField
+					  control={form.control}
+					  name="firstName"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">الاسم الأول</FormLabel>
+						  <FormControl>
+							<Input
+							  {...field}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+				  </div>
+	
+				  {/* Username & Age - Reversed columns */}
+				  <div className="grid grid-cols-2 gap-4">
+					<FormField
+					  control={form.control}
+					  name="age"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">العمر</FormLabel>
+						  <FormControl>
+							<Input
+							  type="number"
+							  min="1"
+							  value={field.value ?? ""}
+							  onChange={(e) => handleNumberChange(e, field, 1)}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+					<FormField
+					  control={form.control}
+					  name="username"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">اسم المستخدم</FormLabel>
+						  <FormControl>
+							<Input
+							  {...field}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+				  </div>
+	
+				  {/* Release Date & Sentence Duration (months) - Reversed columns */}
+				  <div className="grid grid-cols-2 gap-4">
+					<FormField
+					  control={form.control}
+					  name="sentenceDuration"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">مدة العقوبة (أشهر)</FormLabel>
+						  <FormControl>
+							<Input
+							  type="number"
+							  min="1"
+							  value={field.value ?? ""}
+							  onChange={(e) => handleNumberChange(e, field, 1)}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+					<FormField
+					  control={form.control}
+					  name="releaseDate"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">تاريخ الإفراج</FormLabel>
+						  <FormControl>
+							<Input
+							  type="date"
+							  value={field.value ?? ""}
+							  onChange={(e) => handleDateChange(e, field)}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+				  </div>
+	
+				  {/* Password & Confirm Password - Reversed columns */}
+				  <div className="grid grid-cols-2 gap-4">
+					<FormField
+					  control={form.control}
+					  name="confirmPassword"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">تأكيد كلمة السر</FormLabel>
+						  <FormControl>
+							<Input
+							  type="password"
+							  {...field}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+					<FormField
+					  control={form.control}
+					  name="password"
+					  render={({ field }) => (
+						<FormItem className="text-right">
+						  <FormLabel className="text-gray-700 block text-right">كلمة السر</FormLabel>
+						  <FormControl>
+							<Input
+							  type="password"
+							  {...field}
+							  className="w-full rounded-lg border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-[#0a462f] focus:ring-[#0a462f] text-right"
+							/>
+						  </FormControl>
+						  <FormMessage />
+						</FormItem>
+					  )}
+					/>
+				  </div>
+	
+				  <Button
+					type="submit"
+					className="w-full rounded-lg bg-[#0a462f] py-3 text-white hover:bg-[#0d5a3d] transition-colors duration-200 mt-4"
+					disabled={isSubmitting}
+				  >
+					{isSubmitting ? (
+					  <span className="flex items-center justify-center">
+						<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+						  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						جاري التحميل...
+					  </span>
+					) : (
+					  "إنشاء حساب"
+					)}
+				  </Button>
+				</form>
+			  </Form>
+	
+			  <div className="mt-4 text-center">
+				<span className="text-sm text-gray-600">
+				  لديك حساب بالفعل؟{" "}
+				</span>
+				<Link
+				  href="/login"
+				  className="text-sm font-medium text-[#568051] hover:underline"
+				>
+				  تسجيل الدخول
+				</Link>
+			  </div>
 			</div>
+		  </div>
 		</div>
-	);
-}
+	  );
+	}
