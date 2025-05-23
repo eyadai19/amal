@@ -858,7 +858,8 @@ export default function Profile({
 								<div className="flex items-center justify-between">
 									<div>
 										<h4 className="font-medium text-emerald-800">
-											تمرين كتابة رقم &quot;{ocrProgress?.digits[0]?.digit}&quot;
+											تمرين كتابة رقم &quot;{ocrProgress?.digits[0]?.digit}
+											&quot;
 										</h4>
 										<p className="text-sm text-gray-500">
 											دقة {ocrProgress?.digits[0]?.accuracy}%
@@ -920,26 +921,28 @@ export default function Profile({
 							</h3>
 							<div className="flex gap-2">
 								{cvData && (
-									<Button
-										variant="destructive"
-										onClick={async () => {
-											const result = await deleteCvAction();
-											if (result.success) {
-												setCvData(null);
-											} else {
-												setError(result.message);
-											}
-										}}
-										className="bg-red-600 text-white hover:bg-red-700"
-									>
-										حذف
-									</Button>
+									<>
+										<Button
+											variant="destructive"
+											onClick={async () => {
+												const result = await deleteCvAction();
+												if (result.success) {
+													setCvData(null);
+												} else {
+													setError(result.message);
+												}
+											}}
+											className="bg-red-600 text-white hover:bg-red-700"
+										>
+											حذف
+										</Button>
+										<Link href="/cv-preview">
+											<Button variant="outline" className="text-emerald-800">
+												عرض كامل
+											</Button>
+										</Link>
+									</>
 								)}
-								<Link href="/cv-preview">
-									<Button variant="outline" className="text-emerald-800">
-										عرض كامل
-									</Button>
-								</Link>
 							</div>
 						</div>
 					</div>

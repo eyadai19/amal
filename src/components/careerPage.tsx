@@ -1,6 +1,7 @@
 "use client";
 import { Career, CareerQuestion } from "@/lib/ServerAction/careerExp";
-import { useState } from "react";
+import { Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
 
 type CareerResult = {
@@ -33,6 +34,8 @@ export default function CareerPage({
 	logoutAction,
 	getSectionQuestionsAction,
 	processCareerAnswersAction,
+	collectCvTextsAction,
+	hasCvAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getSectionQuestionsAction: (sectionId: string) => Promise<CareerQuestion[]>;
@@ -40,6 +43,13 @@ export default function CareerPage({
 		sectionId: string,
 		answers: { questionId: string; answer: boolean }[],
 	) => Promise<{ bestCareer: Career; allScores: Record<string, number> }>;
+	collectCvTextsAction: (
+		sectionId: string,
+		questionIds: string[],
+	) => Promise<{ success: boolean; message: string }>;
+	hasCvAction: () => Promise<{
+		hasCv: boolean;
+	}>;
 }) {
 	const [currentStep, setCurrentStep] = useState<
 		"sections" | "questions" | "result"
@@ -51,6 +61,23 @@ export default function CareerPage({
 		{ questionId: string; answer: boolean }[]
 	>([]);
 	const [result, setResult] = useState<CareerResult | null>(null);
+	const [showExperiencesModal, setShowExperiencesModal] = useState(false);
+	const [selectedExperiences, setSelectedExperiences] = useState<string[]>([]);
+	const [yesAnswers, setYesAnswers] = useState<CareerQuestion[]>([]);
+	const [isAddingToCV, setIsAddingToCV] = useState(false);
+	const [hasCv, setHasCv] = useState(false);
+
+	useEffect(() => {
+		const checkCv = async () => {
+			try {
+				const result = await hasCvAction();
+				setHasCv(result.hasCv);
+			} catch (error) {
+				console.error("Error checking CV:", error);
+			}
+		};
+		checkCv();
+	}, [hasCvAction]);
 
 	const careerSteps: CareerStep[] = [
 		{
@@ -155,6 +182,10 @@ export default function CareerPage({
 		];
 		setAnswers(newAnswers);
 
+		if (answer) {
+			setYesAnswers((prev) => [...prev, questions[currentQuestion]]);
+		}
+
 		if (currentQuestion < questions.length - 1) {
 			setCurrentQuestion(currentQuestion + 1);
 		} else {
@@ -169,6 +200,42 @@ export default function CareerPage({
 				console.error("Error processing answers:", error);
 			}
 		}
+	};
+
+	const handleAddToCV = async () => {
+		try {
+			setIsAddingToCV(true);
+			const result = await collectCvTextsAction(
+				selectedSection,
+				selectedExperiences,
+			);
+			if (result.success) {
+				setShowExperiencesModal(false);
+			} else {
+				alert(result.message);
+			}
+		} catch (error) {
+			console.error("Error adding experiences to CV:", error);
+			alert("حدث خطأ أثناء إضافة الخبرات إلى السيرة الذاتية");
+		} finally {
+			setIsAddingToCV(false);
+		}
+	};
+
+	const toggleExperience = (questionId: string) => {
+		setSelectedExperiences((prev) =>
+			prev.includes(questionId)
+				? prev.filter((id) => id !== questionId)
+				: [...prev, questionId],
+		);
+	};
+
+	const selectAllExperiences = () => {
+		setSelectedExperiences(yesAnswers.map((q) => q.id));
+	};
+
+	const deselectAllExperiences = () => {
+		setSelectedExperiences([]);
 	};
 
 	const resetAssessment = () => {
@@ -285,18 +352,26 @@ export default function CareerPage({
 									</h3>
 								</div>
 							</div>
-							<div className="mt-8 flex justify-end">
+							<div className="mt-8 flex flex-col items-end space-y-4 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-4">
 								<button
 									onClick={resetAssessment}
-									className="rounded-lg bg-[#972820FF] px-6 py-2 text-white hover:bg-red-600"
+									className="w-full rounded-lg bg-[#972820FF] px-6 py-2 text-white hover:bg-red-600 sm:w-auto"
 								>
 									إعادة الاختبار
 								</button>
+								{hasCv && (
+									<button
+										onClick={() => setShowExperiencesModal(true)}
+										className="w-full rounded-lg bg-[#972820FF] px-6 py-2 text-white hover:bg-red-600 sm:w-auto"
+									>
+										إضافة خبراتك إلى السيرة الذاتية
+									</button>
+								)}
 								<button
 									onClick={() => {
 										window.location.href = "/cvbuilder";
 									}}
-									className="ml-4 rounded-lg border border-[#972820FF] bg-white px-6 py-2 text-[#972820FF] transition-all hover:bg-[#ffd4d482]"
+									className="w-full rounded-lg border border-[#972820FF] bg-white px-6 py-2 text-[#972820FF] transition-all hover:bg-[#ffd4d482] sm:w-auto"
 								>
 									انشئ السيرة الذاتية خاصتك
 								</button>
@@ -371,6 +446,82 @@ export default function CareerPage({
 					</div>
 				</div>
 			</div>
+
+			{/* Modal for selecting experiences */}
+			{showExperiencesModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<div
+						className="fixed inset-0 bg-black/50"
+						onClick={() => setShowExperiencesModal(false)}
+					/>
+					<div className="relative z-50 w-full max-w-2xl rounded-lg bg-white p-6">
+						<div className="mb-4 flex items-center justify-between">
+							<h3 className="text-2xl font-bold text-gray-800">
+								اختر الخبرات لإضافتها إلى السيرة الذاتية
+							</h3>
+							<button
+								onClick={() => setShowExperiencesModal(false)}
+								className="text-gray-500 hover:text-gray-700"
+							>
+								<X size={24} />
+							</button>
+						</div>
+						<div className="mb-4 flex justify-end space-x-2">
+							<button
+								onClick={selectAllExperiences}
+								className="rounded-lg bg-[#972820FF] px-4 py-2 text-sm text-white hover:bg-red-600"
+							>
+								تحديد الكل
+							</button>
+							<button
+								onClick={deselectAllExperiences}
+								className="rounded-lg border border-[#972820FF] px-4 py-2 text-sm text-[#972820FF] hover:bg-[#ffd4d482]"
+							>
+								إلغاء التحديد
+							</button>
+						</div>
+						<div className="mb-4 max-h-96 overflow-y-auto">
+							{yesAnswers.map((question) => (
+								<div
+									key={question.id}
+									className="mb-2 flex items-center justify-end space-x-2 rounded-lg border border-gray-200 p-3"
+								>
+									<input
+										type="checkbox"
+										checked={selectedExperiences.includes(question.id)}
+										onChange={() => toggleExperience(question.id)}
+										className="h-5 w-5 rounded border-gray-300 text-[#972820FF] focus:ring-[#972820FF]"
+									/>
+									<span className="text-gray-700">{question.text}</span>
+								</div>
+							))}
+						</div>
+						<div className="flex justify-end space-x-2">
+							<button
+								onClick={() => setShowExperiencesModal(false)}
+								className="rounded-lg border border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50"
+								disabled={isAddingToCV}
+							>
+								إلغاء
+							</button>
+							<button
+								onClick={handleAddToCV}
+								className="flex items-center rounded-lg bg-[#972820FF] px-6 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+								disabled={isAddingToCV}
+							>
+								{isAddingToCV ? (
+									<>
+										<Loader2 className="ml-2 h-5 w-5 animate-spin" />
+										جاري الإضافة...
+									</>
+								) : (
+									"إضافة إلى السيرة الذاتية"
+								)}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

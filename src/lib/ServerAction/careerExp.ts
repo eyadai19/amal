@@ -1,4 +1,8 @@
+import { getUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { TB_user_cv } from "@/lib/schema";
 import { sections } from "@/utils/sectionsCareer";
+import { eq } from "drizzle-orm";
 
 // Define the career section type
 export type CareerSection = {
@@ -89,4 +93,57 @@ export async function processCareerAnswersAction(
 		bestCareer,
 		allScores: careerScores,
 	};
+}
+
+// Function to collect CV texts from selected questions and combine with existing text
+export async function collectCvTextsAction(
+	sectionId: string,
+	questionIds: string[],
+): Promise<{ success: boolean; message: string }> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) {
+			return { success: false, message: "User not authenticated" };
+		}
+
+		// جلب السيرة الذاتية الحالية
+		const existingCv = await db.query.TB_user_cv.findFirst({
+			where: (table, { eq }) => eq(table.userId, user.id),
+		});
+
+		if (!existingCv) {
+			return { success: false, message: "CV not found" };
+		}
+
+		const section = sections.find((s) => s.id === sectionId);
+		if (!section) {
+			return { success: false, message: "Section not found" };
+		}
+
+		// جمع نصوص CV من الأسئلة المحددة
+		const cvTexts = questionIds
+			.map((questionId) => {
+				const question = section.questions.find((q) => q.id === questionId);
+				return question?.cvText || "";
+			})
+			.filter((text) => text !== ""); // إزالة النصوص الفارغة
+
+		// دمج النصوص مع النص الموجود
+		const existingSkills = existingCv.skills || "";
+		const combinedText = [existingSkills, ...cvTexts]
+			.filter((text) => text !== "") // إزالة النصوص الفارغة
+			.join("\n\n"); // فصل النصوص بأسطر فارغة
+
+		// تحديث النص في قاعدة البيانات
+		await db
+			.update(TB_user_cv)
+			.set({ skills: combinedText })
+			.where(eq(TB_user_cv.userId, user.id));
+
+		return { success: true, message: "تم تحديث المهارات بنجاح" };
+	} catch (error) {
+		console.error("Error updating CV skills:", error);
+		return { success: false, message: "حدث خطأ أثناء تحديث المهارات" };
+	}
 }
