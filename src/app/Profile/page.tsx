@@ -1,9 +1,8 @@
+import { CVData } from "@/components/cv-preview";
 import Profile from "@/components/ProfilePage";
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
-import { getArabicLetters } from "@/utils/arabicLetters";
-import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { eq } from "drizzle-orm";
 import {
 	deleteLegalSessionAction,
@@ -27,7 +26,11 @@ export default function ProfilePage() {
 				deleteLegalSessionAction={deleteLegalSessionAction}
 				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
 				updateProfileAction={UpdateProfileAction}
+<<<<<<< Updated upstream
+=======
 				getUserOCRProgressAction={getUserOCRProgressAction}
+				getUserCvAction={getUserCvAction}
+>>>>>>> Stashed changes
 			/>
 		</div>
 	);
@@ -140,6 +143,8 @@ export async function UpdateProfileAction(
 		return { field: "root", message: "حدث خطأ أثناء تحديث الملف الشخصي" };
 	}
 }
+<<<<<<< Updated upstream
+=======
 
 export async function getUserOCRProgressAction(): Promise<
 	| {
@@ -193,3 +198,33 @@ export async function getUserOCRProgressAction(): Promise<
 		return { field: "root", message: "حدث خطأ أثناء جلب بيانات التقدم." };
 	}
 }
+
+export async function getUserCvAction(): Promise<
+	CVData | { field: string; message: string }
+> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) return { field: "root", message: "User not authenticated." };
+
+		const cvData = await db.query.TB_user_cv.findFirst({
+			where: (table, { eq }) => eq(table.userId, user.id),
+		});
+
+		if (!cvData) return { field: "root", message: "CV not found." };
+
+		return {
+			name: cvData.name,
+			age: cvData.age,
+			email: cvData.email,
+			phone: cvData.phone,
+			address: cvData.address,
+			summary: cvData.summary,
+			skills: cvData.skills,
+			languages: cvData.languages,
+		};
+	} catch (error) {
+		return { field: "root", message: "Failed to fetch CV data." };
+	}
+}
+>>>>>>> Stashed changes

@@ -19,5 +19,7 @@ export const config = {
 		"/literacy/:path*",
 		"/letters/:path*",
 		"/career/:path*",
+		"/cvbuilder/:path*",
+		"/cv-preview/:path*",
 	],
 };

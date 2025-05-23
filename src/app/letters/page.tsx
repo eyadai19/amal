@@ -1,8 +1,5 @@
 import LettersPage from "@/components/letter/lettersPage";
-import { getUser, logoutAction } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { TB_user_digit_progress } from "@/lib/schema";
-import { nanoid } from "nanoid";
+import { logoutAction } from "@/lib/auth";
 
 export default function lettersPage() {
 	return (
@@ -11,4 +8,3 @@ export default function lettersPage() {
 		</div>
 	);
 }
-

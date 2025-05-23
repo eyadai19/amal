@@ -17,14 +17,9 @@ import AmalNavbar from "../amalNavbar";
 export default function LetterPage({
 	params,
 	logoutAction,
-	addUserAlphaProgressAction,
 }: {
 	params: { letter: ArabicLettersKeys };
 	logoutAction: () => Promise<void>;
-	addUserAlphaProgressAction: (
-		bit: string,
-		accuracy: number,
-	) => Promise<{ field: string; message: string } | undefined>;
 }) {
 	const [showPad, setShowPad] = useState(false);
 	const [isErasing, setIsErasing] = useState(false);
@@ -159,7 +154,7 @@ export default function LetterPage({
 
 			const data = await response.json();
 			const predictedDigit = data.character;
-			const predictionConfidence = data.confidence;
+			const predictionConfidence = data.confidence; // confidence - line 501
 
 			const isCorrect =
 				predictedDigit === currentLetter!.title ||
@@ -168,11 +163,6 @@ export default function LetterPage({
 
 			// تعيين الدقة بناءً على صحة التوقع
 			const finalAccuracy = isCorrect ? predictionConfidence : 0;
-
-			// تحديث تقدم المستخدم
-			if (finalAccuracy > 0) {
-				await addUserAlphaProgressAction(params.letter, finalAccuracy);
-			}
 
 			setAccuracyResult({
 				correct: isCorrect,

@@ -10,13 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
 
-interface CVData {
+export interface CVData {
 	name: string;
 	age: string;
 	email: string;
@@ -36,7 +37,18 @@ export default function CVPreview({
 	const [cvData, setCvData] = useState<CVData | null>(null);
 	const [editingField, setEditingField] = useState<keyof CVData | null>(null);
 	const [editValue, setEditValue] = useState("");
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [dialogStates, setDialogStates] = useState<
+		Record<keyof CVData, boolean>
+	>({
+		name: false,
+		age: false,
+		email: false,
+		phone: false,
+		address: false,
+		summary: false,
+		skills: false,
+		languages: false,
+	});
 
 	useEffect(() => {
 		// Get CV data from localStorage
@@ -48,26 +60,40 @@ export default function CVPreview({
 		}
 	}, [router]);
 
-	const handleDownloadPDF = () => {
+	const handleDownloadPDF = async () => {
 		const element = document.getElementById("cv-content");
 		if (!element) return;
 
-		const opt = {
-			margin: 1,
-			filename: "السيرة_الذاتية.pdf",
-			image: { type: "jpeg", quality: 0.98 },
-			html2canvas: { scale: 2 },
-			jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-		};
+		try {
+			const canvas = await html2canvas(element, {
+				scale: 2,
+				useCORS: true,
+				logging: false,
+				backgroundColor: "#ffffff",
+			});
 
-		html2pdf().set(opt).from(element).save();
+			const imgData = canvas.toDataURL("image/png");
+			const pdf = new jsPDF({
+				orientation: "portrait",
+				unit: "mm",
+				format: "a4",
+			});
+
+			const imgWidth = 210; // A4 width in mm
+			const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+			pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+			pdf.save("السيرة_الذاتية.pdf");
+		} catch (error) {
+			console.error("Error generating PDF:", error);
+		}
 	};
 
 	const handleEdit = (field: keyof CVData) => {
 		if (!cvData) return;
 		setEditingField(field);
 		setEditValue(cvData[field]);
-		setIsDialogOpen(true);
+		setDialogStates((prev) => ({ ...prev, [field]: true }));
 	};
 
 	const handleSaveEdit = () => {
@@ -76,7 +102,12 @@ export default function CVPreview({
 		setCvData(newData);
 		localStorage.setItem("cvData", JSON.stringify(newData));
 		setEditingField(null);
-		setIsDialogOpen(false);
+		setDialogStates((prev) => ({ ...prev, [editingField]: false }));
+	};
+
+	const handleCloseDialog = (field: keyof CVData) => {
+		setDialogStates((prev) => ({ ...prev, [field]: false }));
+		setEditingField(null);
 	};
 
 	if (!cvData) return null;
@@ -89,7 +120,7 @@ export default function CVPreview({
 				activeSection={"career"}
 			/>
 			<div
-				className="lg-pt-24 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
+				className="lg-pt-24 mt-20 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
 				dir="rtl"
 			>
 				<div className="mx-auto max-w-4xl">
@@ -119,7 +150,12 @@ export default function CVPreview({
 								<h1 className="mb-2 text-2xl font-bold text-gray-800 sm:text-3xl">
 									{cvData.name}
 								</h1>
-								<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+								<Dialog
+									open={dialogStates.name}
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("name");
+									}}
+								>
 									<DialogTrigger asChild>
 										<button
 											onClick={() => handleEdit("name")}
@@ -151,7 +187,12 @@ export default function CVPreview({
 							<div className="mt-4 space-y-2 text-gray-600">
 								<div className="relative">
 									<p>{cvData.age} سنة</p>
-									<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+									<Dialog
+										open={dialogStates.age}
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("age");
+										}}
+									>
 										<DialogTrigger asChild>
 											<button
 												onClick={() => handleEdit("age")}
@@ -183,7 +224,12 @@ export default function CVPreview({
 								</div>
 								<div className="relative">
 									<p>{cvData.email}</p>
-									<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+									<Dialog
+										open={dialogStates.email}
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("email");
+										}}
+									>
 										<DialogTrigger asChild>
 											<button
 												onClick={() => handleEdit("email")}
@@ -215,7 +261,12 @@ export default function CVPreview({
 								</div>
 								<div className="relative">
 									<p>{cvData.phone}</p>
-									<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+									<Dialog
+										open={dialogStates.phone}
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("phone");
+										}}
+									>
 										<DialogTrigger asChild>
 											<button
 												onClick={() => handleEdit("phone")}
@@ -246,7 +297,12 @@ export default function CVPreview({
 								</div>
 								<div className="relative">
 									<p>{cvData.address}</p>
-									<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+									<Dialog
+										open={dialogStates.address}
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("address");
+										}}
+									>
 										<DialogTrigger asChild>
 											<button
 												onClick={() => handleEdit("address")}
@@ -284,7 +340,12 @@ export default function CVPreview({
 								<h2 className="mb-4 text-xl font-bold text-gray-800">
 									الملخص المهني
 								</h2>
-								<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+								<Dialog
+									open={dialogStates.summary}
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("summary");
+									}}
+								>
 									<DialogTrigger asChild>
 										<button
 											onClick={() => handleEdit("summary")}
@@ -323,7 +384,12 @@ export default function CVPreview({
 								<h2 className="mb-4 text-xl font-bold text-gray-800">
 									المهارات والخبرات
 								</h2>
-								<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+								<Dialog
+									open={dialogStates.skills}
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("skills");
+									}}
+								>
 									<DialogTrigger asChild>
 										<button
 											onClick={() => handleEdit("skills")}
@@ -362,7 +428,12 @@ export default function CVPreview({
 						<div className="rounded-lg bg-red-50/30 p-6">
 							<div className="relative">
 								<h2 className="mb-4 text-xl font-bold text-gray-800">اللغات</h2>
-								<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+								<Dialog
+									open={dialogStates.languages}
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("languages");
+									}}
+								>
 									<DialogTrigger asChild>
 										<button
 											onClick={() => handleEdit("languages")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { UserCvInfo } from "@/app/cvbuilder/page";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,127 +9,106 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Textarea } from "@/components/ui/textarea";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import AmalNavbar from "./amalNavbar";
 
-const formSchema = z.object({
-	name: z.string().min(2, "الاسم يجب أن يكون أكثر من حرفين"),
-	age: z.string().regex(/^\d+$/, "العمر يجب أن يكون رقماً"),
-	email: z.string().email("البريد الإلكتروني غير صالح"),
-	phone: z.string().min(10, "رقم الهاتف يجب أن يكون 10 أرقام على الأقل"),
-	address: z.string().min(5, "العنوان يجب أن يكون أكثر من 5 أحرف"),
-	summary: z.string().min(10, "الملخص يجب أن يكون أكثر من 10 أحرف"),
-	skills: z.string().min(5, "المهارات يجب أن تكون أكثر من 5 أحرف"),
-	languages: z.string().min(2, "اللغات يجب أن تكون أكثر من حرفين"),
-});
+interface CVData {
+	name: string;
+	age: string;
+	email: string;
+	phone: string;
+	address: string;
+	summary: string;
+	skills: string;
+	languages: string;
+}
 
-type UserInfo = {
-	name?: string;
-	age?: number;
-	email?: string;
-	phone?: string;
-	photo?: string | null;
-};
-
-export default function CVForm({
-	getUserCvInfoAction,
+export default function CVPreview({
 	logoutAction,
 }: {
-	getUserCvInfoAction: () => Promise<
-		UserCvInfo | { field: string; message: string }
-	>;
 	logoutAction: () => Promise<void>;
 }) {
-	const [userInfo, setUserInfo] = useState<UserInfo>({});
-	const [experienceInput, setExperienceInput] = useState("");
 	const router = useRouter();
-
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: "",
-			age: "",
-			email: "",
-			phone: "",
-			address: "",
-			summary: "",
-			skills: "",
-			languages: "",
-		},
+	const [cvData, setCvData] = useState<CVData | null>(null);
+	const [editingField, setEditingField] = useState<keyof CVData | null>(null);
+	const [editValue, setEditValue] = useState("");
+	const [dialogStates, setDialogStates] = useState<Record<keyof CVData, boolean>>({
+		name: false,
+		age: false,
+		email: false,
+		phone: false,
+		address: false,
+		summary: false,
+		skills: false,
+		languages: false,
 	});
 
 	useEffect(() => {
-		const fetchUserInfo = async () => {
-			try {
-				const info = await getUserCvInfoAction();
-				if ("field" in info) {
-					console.error("Failed to fetch user info:", info.message);
-					return;
-				}
-				setUserInfo(info);
-				form.reset({
-					name: info.name || "",
-					age: info.age?.toString() || "",
-					email: "",
-					phone: "",
-					address: "",
-					summary: "",
-					skills: "",
-					languages: "",
-				});
-			} catch (error) {
-				console.error("Failed to fetch user info:", error);
-			}
-		};
+		const storedData = localStorage.getItem("cvData");
+		if (storedData) {
+			setCvData(JSON.parse(storedData));
+		} else {
+			router.push("/cvbuilder");
+		}
+	}, [router]);
 
-		fetchUserInfo();
-	}, [getUserCvInfoAction, form]);
+	const handleDownloadPDF = async () => {
+		const element = document.getElementById("cv-content");
+		if (!element) return;
 
-	const handleAddExperience = () => {
-		if (experienceInput.trim() !== "") {
-			const currentSkills = form.getValues("skills");
-			const newSkills = currentSkills
-				? `${currentSkills}\n${experienceInput}`
-				: experienceInput;
-			form.setValue("skills", newSkills);
-			setExperienceInput("");
+		try {
+			const canvas = await html2canvas(element, {
+				scale: 2,
+				useCORS: true,
+				logging: false,
+				backgroundColor: "#ffffff",
+			});
+
+			const imgData = canvas.toDataURL("image/png");
+			const pdf = new jsPDF({
+				orientation: "portrait",
+				unit: "mm",
+				format: "a4",
+			});
+
+			const imgWidth = 210;
+			const imgHeight = (canvas.height * imgWidth) / canvas.width;
+			
+			pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+			pdf.save("السيرة_الذاتية.pdf");
+		} catch (error) {
+			console.error("Error generating PDF:", error);
 		}
 	};
 
-	const handleReset = () => {
-		const name = form.getValues("name");
-		const age = form.getValues("age");
-		form.reset({
-			name,
-			age,
-			email: "",
-			phone: "",
-			address: "",
-			summary: "",
-			skills: "",
-			languages: "",
-		});
+	const handleEdit = (field: keyof CVData) => {
+		if (!cvData) return;
+		setEditingField(field);
+		setEditValue(cvData[field]);
+		setDialogStates(prev => ({ ...prev, [field]: true }));
 	};
 
-	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		// Save CV data to localStorage
-		localStorage.setItem("cvData", JSON.stringify(values));
-		// Navigate to preview page
-		router.push("/cv-preview");
+	const handleSaveEdit = () => {
+		if (!cvData || !editingField) return;
+		const newData = { ...cvData, [editingField]: editValue };
+		setCvData(newData);
+		localStorage.setItem("cvData", JSON.stringify(newData));
+		setEditingField(null);
+		setDialogStates(prev => ({ ...prev, [editingField]: false }));
 	};
+
+	const handleCloseDialog = (field: keyof CVData) => {
+		setDialogStates(prev => ({ ...prev, [field]: false }));
+		setEditingField(null);
+	};
+
+	if (!cvData) return null;
 
 	return (
 		<>
@@ -139,288 +118,353 @@ export default function CVForm({
 				activeSection={"career"}
 			/>
 			<div
-				className="min-h-screen bg-gradient-to-b from-red-50 to-white px-4 py-8 pt-24 sm:px-6 lg:px-10"
+				className="lg-pt-24 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
 				dir="rtl"
 			>
 				<div className="mx-auto max-w-4xl">
-					{/* Shorter Red Header */}
-					<div className="rounded-t-xl bg-[#761515] p-4 text-white shadow-md">
-						<h1 className="mb-1 text-center text-2xl font-bold">
-							السيرة الذاتية
-						</h1>
-						<p className="text-center text-sm text-red-100">
-							املأ البيانات لإنشاء سيرتك الذاتية
-						</p>
+					<div className="mb-8 flex flex-col gap-4 sm:flex-row sm:justify-between">
+						<Button
+							onClick={() => router.push("/cvbuilder")}
+							variant="outline"
+							className="border-red-600 text-red-600 hover:bg-red-50"
+						>
+							العودة للتعديل
+						</Button>
+						<Button
+							onClick={handleDownloadPDF}
+							className="bg-red-600 text-white hover:bg-red-700"
+						>
+							تحميل PDF
+						</Button>
 					</div>
 
-					{/* CV Form Container */}
-					<div className="overflow-hidden rounded-b-xl border border-gray-200 bg-white shadow-lg">
-						{/* Professional Header Section */}
-						<div className="border-b border-gray-200 bg-gradient-to-r from-red-50 to-white p-6 text-center">
-							<div className="mt-4 mb-3 inline-block rounded-full border-4 border-red-100 bg-white p-3 shadow-sm">
-								{userInfo.photo ? (
-									<img
-										src={userInfo.photo}
-										alt={userInfo.name || "صورة المستخدم"}
-										className="h-20 w-20 rounded-full object-cover"
-									/>
-								) : (
-									<div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-2xl font-bold text-red-600">
-										{form.getValues("name")
-											? form.getValues("name").charAt(0)
-											: "?"}
-									</div>
-								)}
+					<div
+						id="cv-content"
+						className="rounded-xl bg-white p-4 shadow-lg sm:p-8"
+					>
+						{/* Header */}
+						<div className="mb-8 rounded-lg bg-red-50/30 p-6 text-center">
+							<div className="relative">
+								<h1 className="mb-2 text-2xl font-bold text-gray-800 sm:text-3xl">
+									{cvData.name}
+								</h1>
+								<Dialog 
+									open={dialogStates.name} 
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("name");
+									}}
+								>
+									<DialogTrigger asChild>
+										<button
+											onClick={() => handleEdit("name")}
+											className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+										>
+											<Pencil size={16} />
+										</button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>تعديل الاسم</DialogTitle>
+										</DialogHeader>
+										<div className="mt-4">
+											<Input
+												value={editValue}
+												onChange={(e) => setEditValue(e.target.value)}
+												dir="rtl"
+											/>
+											<Button
+												onClick={handleSaveEdit}
+												className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+											>
+												حفظ
+											</Button>
+										</div>
+									</DialogContent>
+								</Dialog>
 							</div>
-
-							<h2 className="mb-1 text-xl font-bold text-gray-800">
-								{form.getValues("name") || userInfo.name || "الاسم الكامل"}
-							</h2>
+							<div className="mt-4 space-y-2 text-gray-600">
+								<div className="relative">
+									<p>{cvData.age} سنة</p>
+									<Dialog 
+										open={dialogStates.age} 
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("age");
+										}}
+									>
+										<DialogTrigger asChild>
+											<button
+												onClick={() => handleEdit("age")}
+												className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+											>
+												<Pencil size={16} />
+											</button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>تعديل العمر</DialogTitle>
+											</DialogHeader>
+											<div className="mt-4">
+												<Input
+													value={editValue}
+													onChange={(e) => setEditValue(e.target.value)}
+													type="number"
+													dir="rtl"
+												/>
+												<Button
+													onClick={handleSaveEdit}
+													className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+												>
+													حفظ
+												</Button>
+											</div>
+										</DialogContent>
+									</Dialog>
+								</div>
+								<div className="relative">
+									<p>{cvData.email}</p>
+									<Dialog 
+										open={dialogStates.email} 
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("email");
+										}}
+									>
+										<DialogTrigger asChild>
+											<button
+												onClick={() => handleEdit("email")}
+												className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+											>
+												<Pencil size={16} />
+											</button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>تعديل البريد الإلكتروني</DialogTitle>
+											</DialogHeader>
+											<div className="mt-4">
+												<Input
+													value={editValue}
+													onChange={(e) => setEditValue(e.target.value)}
+													type="email"
+													dir="rtl"
+												/>
+												<Button
+													onClick={handleSaveEdit}
+													className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+												>
+													حفظ
+												</Button>
+											</div>
+										</DialogContent>
+									</Dialog>
+								</div>
+								<div className="relative">
+									<p>{cvData.phone}</p>
+									<Dialog 
+										open={dialogStates.phone} 
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("phone");
+										}}
+									>
+										<DialogTrigger asChild>
+											<button
+												onClick={() => handleEdit("phone")}
+												className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+											>
+												<Pencil size={16} />
+											</button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>تعديل رقم الهاتف</DialogTitle>
+											</DialogHeader>
+											<div className="mt-4">
+												<Input
+													value={editValue}
+													onChange={(e) => setEditValue(e.target.value)}
+													dir="rtl"
+												/>
+												<Button
+													onClick={handleSaveEdit}
+													className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+												>
+													حفظ
+												</Button>
+											</div>
+										</DialogContent>
+									</Dialog>
+								</div>
+								<div className="relative">
+									<p>{cvData.address}</p>
+									<Dialog 
+										open={dialogStates.address} 
+										onOpenChange={(open) => {
+											if (!open) handleCloseDialog("address");
+										}}
+									>
+										<DialogTrigger asChild>
+											<button
+												onClick={() => handleEdit("address")}
+												className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+											>
+												<Pencil size={16} />
+											</button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>تعديل العنوان</DialogTitle>
+											</DialogHeader>
+											<div className="mt-4">
+												<Input
+													value={editValue}
+													onChange={(e) => setEditValue(e.target.value)}
+													dir="rtl"
+												/>
+												<Button
+													onClick={handleSaveEdit}
+													className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+												>
+													حفظ
+												</Button>
+											</div>
+										</DialogContent>
+									</Dialog>
+								</div>
+							</div>
 						</div>
 
-						<Form {...form}>
-							<form
-								onSubmit={form.handleSubmit(onSubmit)}
-								className="space-y-8 p-6"
-							>
-								{/* Personal Information Section */}
-								<div className="rounded-xl bg-red-50/50 p-6">
-									<div className="grid gap-6 md:grid-cols-2">
-										<FormField
-											control={form.control}
-											name="name"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="text-lg font-semibold text-gray-700">
-														الاسم الكامل
-													</FormLabel>
-													<FormControl>
-														<Input {...field} dir="rtl" />
-													</FormControl>
-													<FormMessage className="text-red-500" />
-												</FormItem>
-											)}
-										/>
+						{/* Summary */}
+						<div className="mb-8 rounded-lg bg-red-50/30 p-6">
+							<div className="relative">
+								<h2 className="mb-4 text-xl font-bold text-gray-800">
+									الملخص المهني
+								</h2>
+								<Dialog 
+									open={dialogStates.summary} 
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("summary");
+									}}
+								>
+									<DialogTrigger asChild>
+										<button
+											onClick={() => handleEdit("summary")}
+											className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+										>
+											<Pencil size={16} />
+										</button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>تعديل الملخص المهني</DialogTitle>
+										</DialogHeader>
+										<div className="mt-4">
+											<Textarea
+												value={editValue}
+												onChange={(e) => setEditValue(e.target.value)}
+												rows={6}
+												dir="rtl"
+											/>
+											<Button
+												onClick={handleSaveEdit}
+												className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+											>
+												حفظ
+											</Button>
+										</div>
+									</DialogContent>
+								</Dialog>
+							</div>
+							<p className="text-gray-600">{cvData.summary}</p>
+						</div>
 
-										<FormField
-											control={form.control}
-											name="age"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="text-lg font-semibold text-gray-700">
-														العمر
-													</FormLabel>
-													<FormControl>
-														<Input {...field} dir="rtl" type="number" />
-													</FormControl>
-													<FormMessage className="text-red-500" />
-												</FormItem>
-											)}
-										/>
-									</div>
+						{/* Skills */}
+						<div className="mb-8 rounded-lg bg-red-50/30 p-6">
+							<div className="relative">
+								<h2 className="mb-4 text-xl font-bold text-gray-800">
+									المهارات والخبرات
+								</h2>
+								<Dialog 
+									open={dialogStates.skills} 
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("skills");
+									}}
+								>
+									<DialogTrigger asChild>
+										<button
+											onClick={() => handleEdit("skills")}
+											className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+										>
+											<Pencil size={16} />
+										</button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>تعديل المهارات والخبرات</DialogTitle>
+										</DialogHeader>
+										<div className="mt-4">
+											<Textarea
+												value={editValue}
+												onChange={(e) => setEditValue(e.target.value)}
+												rows={6}
+												dir="rtl"
+											/>
+											<Button
+												onClick={handleSaveEdit}
+												className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+											>
+												حفظ
+											</Button>
+										</div>
+									</DialogContent>
+								</Dialog>
+							</div>
+							<div className="whitespace-pre-line text-gray-600">
+								{cvData.skills}
+							</div>
+						</div>
 
-									<div className="mt-6 grid gap-6 md:grid-cols-2">
-										<FormField
-											control={form.control}
-											name="email"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="text-lg font-semibold text-gray-700">
-														البريد الإلكتروني
-													</FormLabel>
-													<FormControl>
-														<Input {...field} dir="rtl" type="email" />
-													</FormControl>
-													<FormMessage className="text-red-500" />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="phone"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="text-lg font-semibold text-gray-700">
-														رقم الهاتف
-													</FormLabel>
-													<FormControl>
-														<Input {...field} dir="rtl" />
-													</FormControl>
-													<FormMessage className="text-red-500" />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="mt-6">
-										<FormField
-											control={form.control}
-											name="address"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel className="text-lg font-semibold text-gray-700">
-														العنوان
-													</FormLabel>
-													<FormControl>
-														<Input {...field} dir="rtl" />
-													</FormControl>
-													<FormMessage className="text-red-500" />
-												</FormItem>
-											)}
-										/>
-									</div>
-								</div>
-
-								{/* Professional Summary Section */}
-								<div className="rounded-xl bg-red-50/50 p-6">
-									<FormField
-										control={form.control}
-										name="summary"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-lg font-semibold text-gray-700">
-													الملخص المهني
-												</FormLabel>
-												<FormControl>
-													<textarea
-														{...field}
-														className="w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
-														rows={4}
-														dir="rtl"
-													/>
-												</FormControl>
-												<FormMessage className="text-red-500" />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								{/* Skills and Experience Section */}
-								<div className="rounded-xl bg-red-50/50 p-6">
-									<FormField
-										control={form.control}
-										name="skills"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-lg font-semibold text-gray-700">
-													المهارات والخبرات
-												</FormLabel>
-												<div className="grid gap-6 md:grid-cols-3">
-													<div className="md:col-span-2">
-														<FormControl>
-															<textarea
-																{...field}
-																className="h-full w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
-																rows={6}
-																dir="rtl"
-															/>
-														</FormControl>
-													</div>
-													<div className="flex flex-col gap-4">
-														<Input
-															type="text"
-															value={experienceInput}
-															onChange={(e) =>
-																setExperienceInput(e.target.value)
-															}
-															placeholder="النص المراد تحويله "
-															className="h-[42px] w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
-															dir="rtl"
-														/>
-														<Button
-															onClick={handleAddExperience}
-															type="button"
-															className="h-[42px] rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
-														>
-															تحويل النص الى صيغة رسمية
-														</Button>
-														<Dialog>
-															<DialogTrigger asChild>
-																<Button
-																	type="button"
-																	variant="outline"
-																	className="h-[42px] rounded-lg border border-red-600 bg-white px-6 py-2 text-base font-semibold text-red-600 shadow-sm transition-all hover:bg-red-50"
-																>
-																	ما هذا؟
-																</Button>
-															</DialogTrigger>
-															<DialogContent className="sm:max-w-[425px]">
-																<DialogHeader>
-																	<DialogTitle className="text-right">
-																		مثال على التحويل
-																	</DialogTitle>
-																</DialogHeader>
-																<div className="mt-4 space-y-4 text-right">
-																	<div className="rounded-lg bg-red-50 p-4">
-																		<p className="font-semibold text-red-800">
-																			النص الأصلي:
-																		</p>
-																		<p className="mt-2">
-																			كنت أتعلم كيفية إدارة الوقت
-																		</p>
-																	</div>
-																	<div className="rounded-lg bg-green-50 p-4">
-																		<p className="font-semibold text-green-800">
-																			بعد التحويل:
-																		</p>
-																		<p className="mt-2">
-																			مهارات في تنظيم الوقت وتنظيم المهام
-																			اليومية
-																		</p>
-																	</div>
-																</div>
-															</DialogContent>
-														</Dialog>
-													</div>
-												</div>
-												<FormMessage className="text-red-500" />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								{/* Languages Section */}
-								<div className="rounded-xl bg-red-50/50 p-6">
-									<FormField
-										control={form.control}
-										name="languages"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-lg font-semibold text-gray-700">
-													اللغات
-												</FormLabel>
-												<FormControl>
-													<textarea
-														{...field}
-														className="w-full rounded-lg border p-3 text-right transition focus:border-red-300 focus:ring-2 focus:ring-red-300 focus:outline-none"
-														rows={4}
-														dir="rtl"
-													/>
-												</FormControl>
-												<FormMessage className="text-red-500" />
-											</FormItem>
-										)}
-									/>
-								</div>
-
-								<div className="flex flex-col justify-center gap-4 pt-6 sm:flex-row">
-									<Button
-										type="submit"
-										className="rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
-									>
-										حفظ السيرة الذاتية
-									</Button>
-									<Button
-										type="button"
-										onClick={handleReset}
-										className="rounded-lg border border-red-600 bg-white px-6 py-2 text-base font-semibold text-red-600 shadow-sm transition-all hover:bg-red-50"
-									>
-										إفراغ البيانات
-									</Button>
-								</div>
-							</form>
-						</Form>
+						{/* Languages */}
+						<div className="rounded-lg bg-red-50/30 p-6">
+							<div className="relative">
+								<h2 className="mb-4 text-xl font-bold text-gray-800">اللغات</h2>
+								<Dialog 
+									open={dialogStates.languages} 
+									onOpenChange={(open) => {
+										if (!open) handleCloseDialog("languages");
+									}}
+								>
+									<DialogTrigger asChild>
+										<button
+											onClick={() => handleEdit("languages")}
+											className="absolute top-0 left-0 text-gray-400 hover:text-red-600"
+										>
+											<Pencil size={16} />
+										</button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>تعديل اللغات</DialogTitle>
+										</DialogHeader>
+										<div className="mt-4">
+											<Textarea
+												value={editValue}
+												onChange={(e) => setEditValue(e.target.value)}
+												rows={6}
+												dir="rtl"
+											/>
+											<Button
+												onClick={handleSaveEdit}
+												className="mt-4 w-full bg-red-600 text-white hover:bg-red-700"
+											>
+												حفظ
+											</Button>
+										</div>
+									</DialogContent>
+								</Dialog>
+							</div>
+							<div className="whitespace-pre-line text-gray-600">
+								{cvData.languages}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
