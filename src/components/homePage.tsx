@@ -50,9 +50,9 @@ export default function HomePage({
 		{
 			title: "القسم القانوني",
 			description: "!ثق بنا واسألنا ما تريد",
-			bgColor: "bg-gradient-to-br from-[#FFCB99] to-[#FFB570]",
-			textColor: "text-[#D78448]",
-			hoverColor: "hover:shadow-[#D78448]/40",
+			bgColor: "bg-gradient-to-br from-[#C7E7E4FF] to-[#85C0BAFF]",
+			textColor: "text-[#14514BFF]",
+			hoverColor: "hover:shadow-[#14514BFF]/40",
 			href: "/legal",
 			audio: "../audio/home/4.mp3",
 			icon: "⚖️",
@@ -115,7 +115,7 @@ export default function HomePage({
 		<div className="min-h-screen bg-gradient-to-b from-[#F5F0EA] to-[#E1D9D1]">
 			<AmalNavbar
 				logoutAction={logoutAction}
-				backgroundColor="#234330"
+				backgroundColor="#27583BFF"
 				activeSection={null}
 			/>
 

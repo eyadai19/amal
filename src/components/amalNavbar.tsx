@@ -18,7 +18,7 @@ const sectionColors: Record<
 	// literacy: { bg: "#4CAF50", text: "#ffffff", light: "#A5D6A7" },
 	// career: { bg: "#2196F3", text: "#ffffff", light: "#90CAF9" },
 	// psychological: { bg: "#9C27B0", text: "#ffffff", light: "#CE93D8" },
-	// legal: { bg: "#FF9800", text: "#ffffff", light: "#FFCC80" },
+	// legal: { bg: "#00FFE5FF", text: "#ffffff", light: "#FFCC80" },
 	literacy: {
 		bg: "#2A5C9A",
 		text: "#FFFFFF",
@@ -38,10 +38,10 @@ const sectionColors: Record<
 		hover: "#9257AD",
 	},
 	legal: {
-		bg: "#FF8C42",
+		bg: "#0C8A7DFF",
 		text: "#FFFFFF",
-		light: "#FFD1A8",
-		hover: "#FF9E5E",
+		light: "#a2d7d2",
+		hover: "#14514BFF",
 	},
 	profile: {
 		bg: "#4CAF50",

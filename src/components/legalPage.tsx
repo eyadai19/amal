@@ -55,12 +55,12 @@ type Message = {
 };
 
 const colors = {
-	primary: "#D78448",
-	secondary: "#FFCB99",
-	accent: "#D78448",
+	primary: "#14514BFF",
+	secondary: "#a2d7d2",
+	accent: "#14514BFF",
 	text: "#333333",
 	lightText: "#FFFFFF",
-	playButtonColor: "#D78448",
+	playButtonColor: "#14514BFF",
 	pauseButtonColor: "#FF4C4C",
 };
 
@@ -491,7 +491,7 @@ export default function LegalSupport({
 	return (
 		<div className="flex h-screen flex-col bg-gray-50 pt-24">
 			<AmalNavbar
-				backgroundColor={"#CA5A29FF"}
+				backgroundColor={"#14514BFF"}
 				logoutAction={logoutAction}
 				activeSection={"legal"}
 			/>
@@ -519,7 +519,7 @@ export default function LegalSupport({
 									<div className="mb-4 space-y-3 text-right">
 										<div className="inline-block max-w-fit transform rounded-xl bg-white p-4 shadow-lg transition-all duration-500 hover:scale-105">
 											<div className="flex flex-col items-start gap-1">
-												<p className="text-lg font-medium text-gray-800">
+												<p className="text-lg font-medium text-[#14514BFF]">
 													{message.text}
 												</p>
 												<button
@@ -556,8 +556,8 @@ export default function LegalSupport({
 															key={`${message.id}-${index}`}
 															className={`flex items-center gap-2 rounded-lg px-4 py-2 ${
 																selectedAnswers.has(answer)
-																	? "bg-[#D78448] text-white"
-																	: "bg-[#FFCB99] hover:bg-[#FFB37D]"
+																	? "bg-[#14514BFF] text-[#a2d7d2]"
+																	: "bg-[#a2d7d2] hover:bg-[#669792]"
 															} transition-all duration-300`}
 														>
 															<button
@@ -596,8 +596,8 @@ export default function LegalSupport({
 							{/* User Answer */}
 							{message.sender === "user" && !message.isSearchResult && (
 								<div className="flex justify-start">
-									<div className="relative max-w-[80%] transform rounded-xl rounded-bl-none bg-[#FFCB99] p-3 shadow-sm transition-all duration-300 hover:scale-105">
-										<p className="font-medium text-[#D78448]">
+									<div className="relative max-w-[80%] transform rounded-xl rounded-bl-none bg-[#a2d7d2] p-3 shadow-sm transition-all duration-300 hover:scale-105">
+										<p className="font-medium text-[#14514BFF]">
 											{message.text}
 											<button
 												onClick={() =>
@@ -624,7 +624,7 @@ export default function LegalSupport({
 							)}
 
 							{message.isSearchResult && (
-								<div className="mt-4 w-full rounded-xl border border-[#D78448] bg-[#FFCB99] p-4 text-right">
+								<div className="mt-4 w-full rounded-xl border border-[#14514BFF] bg-[#a2d7d2] p-4 text-right">
 									<h3 className="mb-3 text-lg font-medium">{message.text}</h3>
 									<div className="space-y-3">
 										{message.searchResults?.map((result, index) => {
@@ -634,7 +634,7 @@ export default function LegalSupport({
 											return (
 												<div
 													key={result.id}
-													className={`rounded-lg border p-3 shadow transition-all ${isSelected ? "border-[#D78448] bg-[#FFE6CC]" : "border-transparent bg-white"} ${isActive && !isSelected ? "hover:cursor-pointer hover:border-[#D78448] hover:bg-[#FFF0E0]" : ""} ${!isActive && !isSelected ? "opacity-50" : ""} `}
+													className={`rounded-lg border p-3 shadow transition-all ${isSelected ? "border-[#14514BFF] bg-[#a2d7d2]" : "border-transparent bg-white"} ${isActive && !isSelected ? "hover:cursor-pointer hover:border-[#14514BFF] hover:bg-[#a2d7d2]" : ""} ${!isActive && !isSelected ? "opacity-50" : ""} `}
 													onClick={() => {
 														if (!isActive) return;
 
@@ -678,11 +678,11 @@ export default function LegalSupport({
 													}}
 												>
 													<div className="flex items-center justify-between">
-														<p className={`flex-1 font-medium text-[#D78448]`}>
+														<p className={`flex-1 font-medium text-[#14514BFF]`}>
 															{result.question}
 														</p>
 														{isSelected && (
-															<span className="ml-2 font-bold text-[#D78448]">
+															<span className="ml-2 font-bold text-[#14514BFF]">
 																✔
 															</span>
 														)}
@@ -706,7 +706,7 @@ export default function LegalSupport({
 																`${result.question} ${result.answer}`,
 															);
 														}}
-														className={`mt-2 text-[#D78448]`}
+														className={`mt-2 text-[#14514BFF]`}
 													>
 														{audioStates.get(`result-${index}`) ? (
 															<FaPause size={14} />
@@ -728,12 +728,12 @@ export default function LegalSupport({
 
 							{/* Final Answer */}
 							{message.isFinalAnswer && (
-								<div className="mt-4 w-full rounded-xl border border-[#D78448] bg-[#FFCB99] p-4 text-right md:w-fit">
+								<div className="mt-4 w-full rounded-xl border border-[#14514BFF] bg-[#a2d7d2] p-4 text-right md:w-fit">
 									<div className="flex flex-col items-end gap-3 md:flex-row md:items-center md:justify-end">
 										{/* النص وعناصر التحكم */}
 										<div className="flex w-full items-center justify-end gap-2 md:w-auto">
-											<FaCheck className="hidden shrink-0 text-[#D78448] md:block" />
-											<p className="flex-1 font-medium text-[#D78448] md:flex-none">
+											<FaCheck className="hidden shrink-0 text-[#14514BFF] md:block" />
+											<p className="flex-1 font-medium text-[#14514BFF] md:flex-none">
 												{message.text}
 											</p>
 											<button
@@ -743,7 +743,7 @@ export default function LegalSupport({
 														message.text,
 													)
 												}
-												className="text-[#D78448] transition-colors duration-300 hover:text-[#D78448]"
+												className="text-[#14514BFF] transition-colors duration-300 hover:text-[#14514BFF]"
 											>
 												{audioStates.get(`final-${message.id}`) ? (
 													<FaPause size={14} />
@@ -756,7 +756,7 @@ export default function LegalSupport({
 										{/* زر إعادة المحادثة */}
 										<button
 											onClick={handleResetConversation}
-											className="w-full rounded-lg bg-[#D78448] px-3 py-2 text-white transition-colors hover:bg-[#D78448] md:w-auto"
+											className="w-full rounded-lg bg-[#14514BFF] px-3 py-2 text-white transition-colors hover:bg-[#14514BFF] md:w-auto"
 										>
 											<div className="flex items-center justify-center gap-2">
 												<FaRedo size={14} />
@@ -831,7 +831,7 @@ export default function LegalSupport({
 								className={`w-full rounded-full py-2 pr-12 pl-4 text-right transition-all outline-none ${
 									hasFinalAnswer
 										? "cursor-not-allowed bg-gray-200 text-gray-400"
-										: "bg-gray-100 text-gray-700 focus:ring-2 focus:ring-[#D78448]"
+										: "bg-gray-100 text-gray-700 focus:ring-2 focus:ring-[#14514BFF]"
 								}`}
 							/>
 
@@ -841,7 +841,7 @@ export default function LegalSupport({
 								className={`absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-2 ${
 									hasFinalAnswer
 										? "cursor-not-allowed bg-gray-400"
-										: "bg-[#D78448] hover:bg-[#D78448]"
+										: "bg-[#14514BFF] hover:bg-[#14514BFF]"
 								} text-white`}
 							>
 								<FaSearch size={14} />
@@ -856,14 +856,14 @@ export default function LegalSupport({
 									? "cursor-not-allowed bg-gray-200 text-gray-400"
 									: isRecording
 										? "bg-red-500 text-white"
-										: "bg-[#D78448] text-white"
+										: "bg-[#14514BFF] text-white"
 							}`}
 						>
 							<FaMicrophone />
 						</button>
 						<button
 							onClick={handleResetConversation}
-							className="w-fit rounded-lg bg-[#D78448] px-3 py-2 text-white transition-colors hover:bg-[#D78448] md:w-fit"
+							className="w-fit rounded-lg bg-[#14514BFF] px-3 py-2 text-white transition-colors hover:bg-[#14514BFF] md:w-fit"
 						>
 							<div className="flex items-center justify-center gap-2">
 								<FaRedo size={14} />
