@@ -19,6 +19,7 @@ export default function Profile({
 	updateProfileAction,
 	getUserOCRProgressAction,
 	getUserCvAction,
+	deleteCvAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
@@ -49,6 +50,10 @@ export default function Profile({
 		| { field: string; message: string }
 	>;
 	getUserCvAction: () => Promise<CVData | { field: string; message: string }>;
+	deleteCvAction: () => Promise<{
+		success: boolean;
+		message: string;
+	}>;
 }) {
 	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
@@ -828,45 +833,81 @@ export default function Profile({
 						</h3>
 					</div>
 					<div className="divide-y divide-gray-200">
-						<div className="p-4 hover:bg-emerald-50">
-							<div className="flex items-center justify-between">
-								<div>
-									<h4 className="font-medium text-emerald-800">
-										تمرين كتابة حرف &quot;أ&quot;
-									</h4>
-									<p className="text-sm text-gray-500">دقة 85% - منذ ساعتين</p>
+						{/* آخر تمرين حروف */}
+						{ocrProgress?.alphas && ocrProgress.alphas.length > 0 && (
+							<div className="p-4 hover:bg-emerald-50">
+								<div className="flex items-center justify-between">
+									<div>
+										<h4 className="font-medium text-emerald-800">
+											تمرين كتابة حرف &quot;{ocrProgress?.alphas[0]?.bit}&quot;
+										</h4>
+										<p className="text-sm text-gray-500">
+											دقة {ocrProgress?.alphas[0]?.accuracy}%
+										</p>
+									</div>
+									<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+										كتابة
+									</span>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-									كتابة
-								</span>
 							</div>
-						</div>
-						<div className="p-4 hover:bg-emerald-50">
-							<div className="flex items-center justify-between">
-								<div>
-									<h4 className="font-medium text-emerald-800">
-										تمرين نطق حرف &quot;ب&quot;
-									</h4>
-									<p className="text-sm text-gray-500">دقة 72% - منذ يوم</p>
+						)}
+
+						{/* آخر تمرين أرقام */}
+						{ocrProgress?.digits && ocrProgress.digits.length > 0 && (
+							<div className="p-4 hover:bg-emerald-50">
+								<div className="flex items-center justify-between">
+									<div>
+										<h4 className="font-medium text-emerald-800">
+											تمرين كتابة رقم &quot;{ocrProgress?.digits[0]?.digit}&quot;
+										</h4>
+										<p className="text-sm text-gray-500">
+											دقة {ocrProgress?.digits[0]?.accuracy}%
+										</p>
+									</div>
+									<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+										كتابة
+									</span>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-									صوت
-								</span>
 							</div>
-						</div>
-						<div className="p-4 hover:bg-emerald-50">
-							<div className="flex items-center justify-between">
-								<div>
-									<h4 className="font-medium text-emerald-800">
-										تمرين كتابة رقم &quot;5&quot;
-									</h4>
-									<p className="text-sm text-gray-500">دقة 91% - منذ 3 أيام</p>
+						)}
+
+						{/* آخر جلسة قانونية */}
+						{legalSessions.length > 0 && (
+							<div className="p-4 hover:bg-emerald-50">
+								<div className="flex items-center justify-between">
+									<div>
+										<h4 className="font-medium text-emerald-800">
+											آخر جلسة قانونية
+										</h4>
+										<p className="text-sm text-gray-500">
+											{legalSessions[0].lastQuestion}
+										</p>
+									</div>
+									<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+										قانوني
+									</span>
 								</div>
-								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-									كتابة
-								</span>
 							</div>
-						</div>
+						)}
+
+						{/* آخر جلسة نفسية */}
+						{psychologicalSessions.length > 0 && (
+							<div className="p-4 hover:bg-emerald-50">
+								<div className="flex items-center justify-between">
+									<div>
+										<h4 className="font-medium text-emerald-800">
+											آخر جلسة نفسية
+										</h4>
+										<p className="text-sm text-gray-500">
+											{psychologicalSessions[0].lastQuestion}
+										</p>
+									</div>
+									<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+										نفسي
+									</span>
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -877,11 +918,29 @@ export default function Profile({
 							<h3 className="text-lg font-semibold text-emerald-800">
 								السيرة الذاتية
 							</h3>
-							<Link href="/cv-preview">
-								<Button variant="outline" className="text-emerald-800">
-									عرض كامل
-								</Button>
-							</Link>
+							<div className="flex gap-2">
+								{cvData && (
+									<Button
+										variant="destructive"
+										onClick={async () => {
+											const result = await deleteCvAction();
+											if (result.success) {
+												setCvData(null);
+											} else {
+												setError(result.message);
+											}
+										}}
+										className="bg-red-600 text-white hover:bg-red-700"
+									>
+										حذف
+									</Button>
+								)}
+								<Link href="/cv-preview">
+									<Button variant="outline" className="text-emerald-800">
+										عرض كامل
+									</Button>
+								</Link>
+							</div>
 						</div>
 					</div>
 					<div className="p-6">

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { TB_user_cv } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { hasCvAction } from "../cv-preview/page";
 
 export default function CVBuilderPage() {
 	return (
@@ -13,6 +14,7 @@ export default function CVBuilderPage() {
 				getUserCvInfoAction={getUserCvInfoAction}
 				saveCvAction={saveCvAction}
 				logoutAction={logoutAction}
+				hasCvAction={hasCvAction}
 			/>
 		</div>
 	);

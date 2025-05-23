@@ -1,6 +1,6 @@
+import { relations } from "drizzle-orm";
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// جدول المستخدمين
 export const TB_user = pgTable("user", {
 	id: text("id").primaryKey(),
 	username: text("username").notNull().unique(),
@@ -52,36 +52,6 @@ export const TB_handwriting_digit_exercises = pgTable(
 	},
 );
 
-// جدول تمارين الصوت بالحروف الأبجدية
-export const TB_voice_alpha_exercises = pgTable("voice_alpha_exercises", {
-	id: text("id").primaryKey(), // المفتاح الرئيسي
-	userId: text("user_id")
-		.notNull()
-		.references(() => TB_user.id, { onDelete: "cascade" }), // علاقة مع جدول المستخدمين
-	alphaBitId: text("alphaBit_id")
-		.notNull()
-		.references(() => TB_alphaBit_level.id, { onDelete: "cascade" }), // علاقة مع جدول الحروف الأبجدية
-	accuracy: integer("accuracy").notNull().default(0), // الدقة في التمرين
-	audioUrl: text("audio_url").notNull(), // رابط ملف الصوت
-	createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
-		.notNull()
-		.defaultNow(), // وقت إنشاء التمرين
-});
-
-// جدول تمارين الصوت بالأرقام
-// export const TB_voice_digit_exercises = pgTable("voice_digit_exercises", {
-//   id: text("id").primaryKey(), // المفتاح الرئيسي
-//   userId: text("user_id")
-//     .notNull()
-//     .references(() => TB_user.id, { onDelete: "cascade" }), // علاقة مع جدول المستخدمين
-//   digitId: text("digit_id")
-//     .notNull()
-//     .references(() => TB_digit_level.id, { onDelete: "cascade" }), // علاقة مع جدول الأرقام
-//   accuracy: integer("accuracy").notNull().default(0), // الدقة في التمرين
-//   audioUrl: text("audio_url").notNull(), // رابط ملف الصوت
-//   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(), // وقت إنشاء التمرين
-// });
-
 export const TB_session = pgTable("session", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
@@ -99,7 +69,6 @@ export const TB_alphaBit_level = pgTable("alphaBit_level", {
 	index: integer("index").unique().notNull(),
 });
 
-// جدول الأرقام
 export const TB_digit_level = pgTable("digit_level", {
 	id: text("id").primaryKey(),
 	digit: text("digit").unique().notNull(),
@@ -130,7 +99,6 @@ export const TB_user_digit_progress = pgTable("user_digit_progress", {
 	attempts: integer("attempts").notNull().default(0),
 });
 
-// // جدول السجل القانوني
 export const TB_legal_history = pgTable("legal_history", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
@@ -142,7 +110,6 @@ export const TB_legal_history = pgTable("legal_history", {
 	sessionId: text("session_id").notNull(), // بدون unique
 });
 
-// جدول إجابات السجل القانوني
 export const TB_legal_history_answer = pgTable("legal_history_answer", {
 	id: text("id").primaryKey(),
 	sessionId: text("session_id").notNull(), // بدون .references()
@@ -180,6 +147,8 @@ export const TB_user_cv = pgTable("user_cv", {
 	languages: text("languages").notNull(),
 });
 
+// قسم العلاقات
+
 export const RE_psychological_history = relations(
 	TB_psychological_history,
 	({ one }) => ({
@@ -190,9 +159,6 @@ export const RE_psychological_history = relations(
 	}),
 );
 
-import { relations } from "drizzle-orm";
-
-// علاقات جدول المستخدم
 export const RE_user = relations(TB_user, ({ many, one }) => ({
 	sessions: many(TB_session),
 	alphaProgress: many(TB_user_alpha_progress),
@@ -230,21 +196,6 @@ export const RE_handwriting_digit_exercises = relations(
 	}),
 );
 
-// علاقات جدول تمارين الصوت للحروف
-export const RE_voice_alpha_exercises = relations(
-	TB_voice_alpha_exercises,
-	({ one }) => ({
-		user: one(TB_user, {
-			fields: [TB_voice_alpha_exercises.userId],
-			references: [TB_user.id],
-		}),
-		alphaBit: one(TB_alphaBit_level, {
-			fields: [TB_voice_alpha_exercises.alphaBitId],
-			references: [TB_alphaBit_level.id],
-		}),
-	}),
-);
-
 // علاقات جدول الجلسات
 export const RE_session = relations(TB_session, ({ one }) => ({
 	user: one(TB_user, {
@@ -256,7 +207,6 @@ export const RE_session = relations(TB_session, ({ one }) => ({
 // علاقات جدول مستويات الحروف
 export const RE_alphaBit_level = relations(TB_alphaBit_level, ({ many }) => ({
 	handwritingExercises: many(TB_handwriting_alpha_exercises),
-	voiceExercises: many(TB_voice_alpha_exercises),
 	userProgress: many(TB_user_alpha_progress),
 }));
 
@@ -295,27 +245,6 @@ export const RE_user_digit_progress = relations(
 		}),
 	}),
 );
-
-// العلاقات الجديدة
-
-// export const RE_legal_history = relations(TB_legal_history, ({ one }) => ({
-// 	user: one(TB_user, {
-// 		fields: [TB_legal_history.userId],
-// 		references: [TB_user.id],
-// 	}),
-// 	// تمت إزالة العلاقة مع legal_history_answer
-// }));
-
-// export const RE_legal_history_answer = relations(
-// 	TB_legal_history_answer,
-// 	({ one }) => ({
-// 		user: one(TB_user, {
-// 			fields: [TB_legal_history_answer.userId],
-// 			references: [TB_user.id],
-// 		}),
-// 		// تمت إزالة العلاقة مع legal_history
-// 	}),
-// );
 
 // علاقات جدول السيرة الذاتية
 export const RE_user_cv = relations(TB_user_cv, ({ one }) => ({

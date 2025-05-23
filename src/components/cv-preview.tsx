@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -12,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
@@ -32,6 +33,8 @@ export default function CVPreview({
 	logoutAction,
 	getUserCvAction,
 	updateCvAction,
+	deleteCvAction,
+	hasCvAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserCvAction: () => Promise<CVData | { field: string; message: string }>;
@@ -39,11 +42,19 @@ export default function CVPreview({
 		field: keyof CVData,
 		value: string,
 	) => Promise<{ success: boolean; message: string }>;
+	deleteCvAction: () => Promise<{
+		success: boolean;
+		message: string;
+	}>;
+	hasCvAction: () => Promise<{
+		hasCv: boolean;
+	}>;
 }) {
 	const router = useRouter();
 	const [cvData, setCvData] = useState<CVData | null>(null);
 	const [editingField, setEditingField] = useState<keyof CVData | null>(null);
 	const [editValue, setEditValue] = useState("");
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [dialogStates, setDialogStates] = useState<
 		Record<keyof CVData, boolean>
 	>({
@@ -59,6 +70,12 @@ export default function CVPreview({
 
 	useEffect(() => {
 		const fetchCvData = async () => {
+			const hasCv = await hasCvAction();
+			if (!hasCv.hasCv) {
+				router.push("/cvbuilder");
+				return;
+			}
+
 			const result = await getUserCvAction();
 			if (!("field" in result)) {
 				setCvData(result);
@@ -67,7 +84,7 @@ export default function CVPreview({
 			}
 		};
 		fetchCvData();
-	}, [getUserCvAction, router]);
+	}, [getUserCvAction, hasCvAction, router]);
 
 	const handleDownloadPDF = async () => {
 		const element = document.getElementById("cv-content");
@@ -125,6 +142,15 @@ export default function CVPreview({
 		setEditingField(null);
 	};
 
+	const handleDeleteCV = async () => {
+		const result = await deleteCvAction();
+		if (result.success) {
+			router.push("/cvbuilder");
+		} else {
+			console.error(result.message);
+		}
+	};
+
 	if (!cvData) return null;
 
 	return (
@@ -147,12 +173,52 @@ export default function CVPreview({
 						>
 							العودة للحساب
 						</Button>
-						<Button
-							onClick={handleDownloadPDF}
-							className="bg-red-600 text-white hover:bg-red-700"
-						>
-							تحميل PDF
-						</Button>
+						<div className="flex gap-4">
+							<Button
+								onClick={handleDownloadPDF}
+								className="bg-red-600 text-white hover:bg-red-700"
+							>
+								تحميل PDF
+							</Button>
+							<Dialog
+								open={isDeleteDialogOpen}
+								onOpenChange={setIsDeleteDialogOpen}
+							>
+								<DialogTrigger asChild>
+									<Button
+										variant="destructive"
+										className="bg-red-600 text-white hover:bg-red-700"
+									>
+										<Trash2 className="ml-2 h-4 w-4" />
+										حذف السيرة الذاتية
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>تأكيد الحذف</DialogTitle>
+									</DialogHeader>
+									<p className="py-4 text-gray-600">
+										هل أنت متأكد من رغبتك في حذف السيرة الذاتية؟ لا يمكن التراجع
+										عن هذا الإجراء.
+									</p>
+									<DialogFooter>
+										<Button
+											variant="outline"
+											onClick={() => setIsDeleteDialogOpen(false)}
+										>
+											إلغاء
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={handleDeleteCV}
+											className="bg-red-600 text-white hover:bg-red-700"
+										>
+											حذف
+										</Button>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
+						</div>
 					</div>
 
 					<div

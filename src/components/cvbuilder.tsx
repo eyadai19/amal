@@ -49,6 +49,7 @@ export default function CVForm({
 	getUserCvInfoAction,
 	logoutAction,
 	saveCvAction,
+	hasCvAction,
 }: {
 	getUserCvInfoAction: () => Promise<
 		UserCvInfo | { field: string; message: string }
@@ -57,6 +58,9 @@ export default function CVForm({
 	saveCvAction: (
 		cvData: CVData,
 	) => Promise<{ success: boolean; message: string }>;
+	hasCvAction: () => Promise<{
+		hasCv: boolean;
+	}>;
 }) {
 	const [userInfo, setUserInfo] = useState<UserInfo>({});
 	const [experienceInput, setExperienceInput] = useState("");
@@ -79,6 +83,13 @@ export default function CVForm({
 	useEffect(() => {
 		const fetchUserInfo = async () => {
 			try {
+				// التحقق من وجود سيرة ذاتية
+				const hasCv = await hasCvAction();
+				if (hasCv.hasCv) {
+					router.push("/cv-preview");
+					return;
+				}
+
 				const info = await getUserCvInfoAction();
 				if ("field" in info) {
 					console.error("Failed to fetch user info:", info.message);
@@ -101,7 +112,7 @@ export default function CVForm({
 		};
 
 		fetchUserInfo();
-	}, [getUserCvInfoAction, form]);
+	}, [getUserCvInfoAction, hasCvAction, form, router]);
 
 	const handleAddExperience = () => {
 		if (experienceInput.trim() !== "") {
