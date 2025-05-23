@@ -30,8 +30,15 @@ export interface CVData {
 
 export default function CVPreview({
 	logoutAction,
+	getUserCvAction,
+	updateCvAction,
 }: {
 	logoutAction: () => Promise<void>;
+	getUserCvAction: () => Promise<CVData | { field: string; message: string }>;
+	updateCvAction: (
+		field: keyof CVData,
+		value: string,
+	) => Promise<{ success: boolean; message: string }>;
 }) {
 	const router = useRouter();
 	const [cvData, setCvData] = useState<CVData | null>(null);
@@ -51,13 +58,16 @@ export default function CVPreview({
 	});
 
 	useEffect(() => {
-		const storedData = localStorage.getItem("cvData");
-		if (storedData) {
-			setCvData(JSON.parse(storedData));
-		} else {
-			router.push("/cvbuilder");
-		}
-	}, [router]);
+		const fetchCvData = async () => {
+			const result = await getUserCvAction();
+			if (!("field" in result)) {
+				setCvData(result);
+			} else {
+				router.push("/cvbuilder");
+			}
+		};
+		fetchCvData();
+	}, [getUserCvAction, router]);
 
 	const handleDownloadPDF = async () => {
 		const element = document.getElementById("cv-content");
@@ -95,13 +105,19 @@ export default function CVPreview({
 		setDialogStates((prev) => ({ ...prev, [field]: true }));
 	};
 
-	const handleSaveEdit = () => {
+	const handleSaveEdit = async () => {
 		if (!cvData || !editingField) return;
-		const newData = { ...cvData, [editingField]: editValue };
-		setCvData(newData);
-		localStorage.setItem("cvData", JSON.stringify(newData));
-		setEditingField(null);
-		setDialogStates((prev) => ({ ...prev, [editingField]: false }));
+
+		const result = await updateCvAction(editingField, editValue);
+		if (result.success) {
+			const newData = { ...cvData, [editingField]: editValue };
+			setCvData(newData);
+			setEditingField(null);
+			setDialogStates((prev) => ({ ...prev, [editingField]: false }));
+		} else {
+			// يمكن إضافة رسالة خطأ هنا
+			console.error(result.message);
+		}
 	};
 
 	const handleCloseDialog = (field: keyof CVData) => {
