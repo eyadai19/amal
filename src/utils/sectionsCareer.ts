@@ -64,6 +64,7 @@ export const sections: CareerSection[] = [
 				id: "2_2",
 				text: "هل لديك مهارة في الأرقام أو الجدولة؟",
 				affectsCareers: ["محاسب", "مساعد إداري"],
+				cvText: "مهارة في الأرقام أو الجدولة",
 			},
 			{
 				id: "2_3",

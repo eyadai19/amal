@@ -6,6 +6,7 @@ import { TB_user } from "@/lib/schema";
 import { getArabicLetters } from "@/utils/arabicLetters";
 import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { eq } from "drizzle-orm";
+import { deleteCvAction } from "../cv-preview/page";
 import {
 	deleteLegalSessionAction,
 	fetchAllLegalSessionsAction,
@@ -30,6 +31,7 @@ export default function ProfilePage() {
 				updateProfileAction={UpdateProfileAction}
 				getUserOCRProgressAction={getUserOCRProgressAction}
 				getUserCvAction={getUserCvAction}
+				deleteCvAction={deleteCvAction}
 			/>
 		</div>
 	);

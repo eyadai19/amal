@@ -11,8 +11,32 @@ export default function CVPreviewPage() {
 			logoutAction={logoutAction}
 			getUserCvAction={getUserCvAction}
 			updateCvAction={updateCvAction}
+			deleteCvAction={deleteCvAction}
+			hasCvAction={hasCvAction}
 		/>
 	);
+}
+
+export async function hasCvAction(): Promise<{
+	hasCv: boolean;
+}> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) {
+			return { hasCv: false };
+		}
+
+		const existingCv = await db.query.TB_user_cv.findFirst({
+			where: (table, { eq }) => eq(table.userId, user.id),
+		});
+
+		return { hasCv: !!existingCv };
+	} catch (error) {
+		return {
+			hasCv: false,
+		};
+	}
 }
 
 export async function updateCvAction(
@@ -43,5 +67,33 @@ export async function updateCvAction(
 	} catch (error) {
 		console.error("Error updating CV:", error);
 		return { success: false, message: "حدث خطأ أثناء تحديث السيرة الذاتية" };
+	}
+}
+
+export async function deleteCvAction(): Promise<{
+	success: boolean;
+	message: string;
+}> {
+	"use server";
+	try {
+		const user = await getUser();
+		if (!user) {
+			return { success: false, message: "User not authenticated." };
+		}
+
+		const existingCv = await db.query.TB_user_cv.findFirst({
+			where: (table, { eq }) => eq(table.userId, user.id),
+		});
+
+		if (!existingCv) {
+			return { success: false, message: "CV not found." };
+		}
+
+		await db.delete(TB_user_cv).where(eq(TB_user_cv.userId, user.id));
+
+		return { success: true, message: "تم حذف السيرة الذاتية بنجاح" };
+	} catch (error) {
+		console.error("Error deleting CV:", error);
+		return { success: false, message: "حدث خطأ أثناء حذف السيرة الذاتية" };
 	}
 }

@@ -275,6 +275,32 @@ export default function CareerPage({
 						</>
 					)}
 				</div>
+				{/* قسم السيرة الذاتية بالذكاء الاصطناعي */}
+				<div className="mb-16 text-center">
+					<h2 className="mb-8 text-3xl font-bold text-gray-800">
+						أنشئ سيرتك الذاتية بمساعدة الذكاء الاصطناعي
+					</h2>
+					<div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
+						<div className="mb-6 flex justify-center">
+							<span className="text-5xl">🤖</span>
+						</div>
+						<h3 className="mb-4 text-2xl font-semibold text-gray-800">
+							سيرة ذاتية احترافية في دقائق
+						</h3>
+						<p className="mb-8 text-lg text-gray-600">
+							استخدم قوة الذكاء الاصطناعي لإنشاء سيرة ذاتية احترافية تبرز
+							مهاراتك وخبراتك بشكل مثالي
+						</p>
+						<button
+							onClick={() => {
+								window.location.href = "/cvbuilder";
+							}}
+							className="rounded-lg bg-[#E85C54] px-8 py-3 text-lg font-medium text-white transition-all hover:bg-[#d44c44]"
+						>
+							ابدأ الآن
+						</button>
+					</div>
+				</div>
 
 				<div className="mb-16 text-center">
 					<h2 className="mb-8 text-3xl font-bold text-gray-800">
