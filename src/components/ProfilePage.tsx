@@ -68,6 +68,7 @@ export default function Profile({
 		releaseDate: "",
 		sentenceDuration: "",
 	});
+	const [cvData, setCvData] = useState<CVData | null>(null);
 
 	useEffect(() => {
 		const fetchUserData = async () => {

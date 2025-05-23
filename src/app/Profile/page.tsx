@@ -30,7 +30,6 @@ export default function ProfilePage() {
 =======
 				getUserOCRProgressAction={getUserOCRProgressAction}
 				getUserCvAction={getUserCvAction}
->>>>>>> Stashed changes
 			/>
 		</div>
 	);
@@ -227,4 +226,3 @@ export async function getUserCvAction(): Promise<
 		return { field: "root", message: "Failed to fetch CV data." };
 	}
 }
->>>>>>> Stashed changes

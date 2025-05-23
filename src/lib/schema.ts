@@ -22,13 +22,6 @@ export const TB_user = pgTable("user", {
 		.defaultNow(),
 });
 
-<<<<<<< Updated upstream
-export const TB_skill = pgTable("skill", {
-	id: text("id").primaryKey(),
-	name: text("name").notNull().unique(),
-	description: text("description"),
-});
-
 export const TB_handwriting_alpha_exercises = pgTable(
 	"handwriting_alpha_exercises",
 	{
@@ -205,14 +198,7 @@ export const RE_psychological_history = relations(
 import { relations } from "drizzle-orm";
 
 // علاقات جدول المستخدم
-<<<<<<< Updated upstream
-export const RE_user = relations(TB_user, ({ many }) => ({
-	handwritingAlphaExercises: many(TB_handwriting_alpha_exercises),
-	handwritingDigitExercises: many(TB_handwriting_digit_exercises),
-	voiceAlphaExercises: many(TB_voice_alpha_exercises),
-=======
 export const RE_user = relations(TB_user, ({ many, one }) => ({
->>>>>>> Stashed changes
 	sessions: many(TB_session),
 	alphaProgress: many(TB_user_alpha_progress),
 	digitProgress: many(TB_user_digit_progress),

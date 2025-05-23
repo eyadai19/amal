@@ -17,6 +17,7 @@ import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
+import { CVData } from "./cv-preview";
 
 interface CVData {
 	name: string;
@@ -31,9 +32,16 @@ interface CVData {
 
 export default function CVPreview({
 	logoutAction,
+	saveCvAction,
 }: {
 	logoutAction: () => Promise<void>;
+	saveCvAction: (
+		cvData: CVData,
+	) => Promise<{ success: boolean; message: string }>;
 }) {
+	const [userInfo, setUserInfo] = useState<UserInfo>({});
+	const [experienceInput, setExperienceInput] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const router = useRouter();
 	const [cvData, setCvData] = useState<CVData | null>(null);
 	const [editingField, setEditingField] = useState<keyof CVData | null>(null);
@@ -109,6 +117,28 @@ export default function CVPreview({
 	};
 
 	if (!cvData) return null;
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		try {
+			setIsSubmitting(true);
+			const result = await saveCvAction(values);
+
+			if (result.success) {
+				// Save CV data to localStorage for preview
+				localStorage.setItem("cvData", JSON.stringify(values));
+				// Navigate to preview page
+				router.push("/cv-preview");
+			} else {
+				// Handle error
+				console.error("Failed to save CV:", result.message);
+				// You might want to show an error message to the user here
+			}
+		} catch (error) {
+			console.error("Error saving CV:", error);
+			// Handle error
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
 	return (
 		<>
@@ -465,6 +495,25 @@ export default function CVPreview({
 								{cvData.languages}
 							</div>
 						</div>
+								<div className="flex flex-col justify-center gap-4 pt-6 sm:flex-row">
+									<Button
+										type="submit"
+										className="rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
+										disabled={isSubmitting}
+									>
+										{isSubmitting ? "جاري الحفظ..." : "حفظ السيرة الذاتية"}
+									</Button>
+									<Button
+										type="button"
+										onClick={handleReset}
+										className="rounded-lg border border-red-600 bg-white px-6 py-2 text-base font-semibold text-red-600 shadow-sm transition-all hover:bg-red-50"
+										disabled={isSubmitting}
+									>
+										إفراغ البيانات
+									</Button>
+								</div>
+							</form>
+						</Form>
 					</div>
 				</div>
 			</div>
