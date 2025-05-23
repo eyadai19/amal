@@ -13,6 +13,7 @@ export type CareerQuestion = {
 	id: string;
 	text: string;
 	affectsCareers: string[]; // Array of career IDs that this question affects
+	cvText: string;
 };
 
 // Define the career type
