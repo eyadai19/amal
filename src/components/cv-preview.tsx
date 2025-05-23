@@ -125,11 +125,11 @@ export default function CVPreview({
 				<div className="mx-auto max-w-4xl">
 					<div className="mb-8 flex flex-col gap-4 sm:flex-row sm:justify-between">
 						<Button
-							onClick={() => router.push("/cvbuilder")}
+							onClick={() => router.push("/Profile")}
 							variant="outline"
 							className="border-red-600 text-red-600 hover:bg-red-50"
 						>
-							العودة للتعديل
+							العودة للحساب
 						</Button>
 						<Button
 							onClick={handleDownloadPDF}

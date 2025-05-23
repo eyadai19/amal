@@ -1,10 +1,13 @@
 "use client";
 
 import { UserInfo } from "@/app/Profile/page";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
+import { CVData } from "./cv-preview";
 
 export default function Profile({
 	logoutAction,
@@ -14,6 +17,8 @@ export default function Profile({
 	deletePsychologicalSessionAction,
 	deleteLegalSessionAction,
 	updateProfileAction,
+	getUserOCRProgressAction,
+	getUserCvAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
@@ -36,6 +41,14 @@ export default function Profile({
 	updateProfileAction: (
 		form: FormData,
 	) => Promise<string | { field: string; message: string } | undefined>;
+	getUserOCRProgressAction: () => Promise<
+		| {
+				alphas: { accuracy: number; attempts: number; bit: string }[];
+				digits: { accuracy: number; attempts: number; digit: string }[];
+		  }
+		| { field: string; message: string }
+	>;
+	getUserCvAction: () => Promise<CVData | { field: string; message: string }>;
 }) {
 	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
@@ -49,6 +62,10 @@ export default function Profile({
 	>([]);
 	const [isEditing, setIsEditing] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+	const [ocrProgress, setOcrProgress] = useState<{
+		alphas: { accuracy: number; attempts: number; bit: string }[];
+		digits: { accuracy: number; attempts: number; digit: string }[];
+	} | null>(null);
 	const [formData, setFormData] = useState({
 		firstName: "",
 		lastName: "",
@@ -56,34 +73,20 @@ export default function Profile({
 		releaseDate: "",
 		sentenceDuration: "",
 	});
-
-	// تقدم الحروف الافتراضي
-	const alphaProgress = [
-		{ alphaBit: { bit: "أ", id: "alpha-1" }, accuracy: 85, attempts: 12 },
-		{ alphaBit: { bit: "ب", id: "alpha-2" }, accuracy: 72, attempts: 8 },
-		{ alphaBit: { bit: "ت", id: "alpha-3" }, accuracy: 65, attempts: 10 },
-		{ alphaBit: { bit: "ث", id: "alpha-4" }, accuracy: 90, attempts: 15 },
-		{ alphaBit: { bit: "ج", id: "alpha-5" }, accuracy: 45, attempts: 5 },
-		{ alphaBit: { bit: "ح", id: "alpha-6" }, accuracy: 78, attempts: 9 },
-	];
-
-	// تقدم الأرقام الافتراضي
-	const digitProgress = [
-		{ digit: { digit: "١", id: "digit-1" }, accuracy: 95, attempts: 7 },
-		{ digit: { digit: "٢", id: "digit-2" }, accuracy: 88, attempts: 6 },
-		{ digit: { digit: "٣", id: "digit-3" }, accuracy: 72, attempts: 5 },
-		{ digit: { digit: "٤", id: "digit-4" }, accuracy: 60, attempts: 4 },
-	];
+	const [cvData, setCvData] = useState<CVData | null>(null);
 
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
 				setLoading(true);
-				const [userResult, psychResult, legalResult] = await Promise.all([
-					getUserInfoAction(),
-					fetchAllPsychologicalSessionsAction(),
-					fetchAllLegalSessionsAction(),
-				]);
+				const [userResult, psychResult, legalResult, ocrResult, cvResult] =
+					await Promise.all([
+						getUserInfoAction(),
+						fetchAllPsychologicalSessionsAction(),
+						fetchAllLegalSessionsAction(),
+						getUserOCRProgressAction(),
+						getUserCvAction(),
+					]);
 
 				if ("field" in userResult) {
 					setError(userResult.message);
@@ -109,6 +112,14 @@ export default function Profile({
 						})),
 					);
 				}
+
+				if (!("field" in ocrResult)) {
+					setOcrProgress(ocrResult);
+				}
+
+				if (!("field" in cvResult)) {
+					setCvData(cvResult);
+				}
 			} catch (err) {
 				setError("Failed to fetch user data");
 			} finally {
@@ -121,6 +132,8 @@ export default function Profile({
 		getUserInfoAction,
 		fetchAllPsychologicalSessionsAction,
 		fetchAllLegalSessionsAction,
+		getUserOCRProgressAction,
+		getUserCvAction,
 	]);
 
 	useEffect(() => {
@@ -362,6 +375,67 @@ export default function Profile({
 									</div>
 								</div>
 							))}
+						</div>
+					</div>
+					{/* سكيلتون للسيرة الذاتية */}
+					<div className="mt-6 mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+						<div className="border-b border-gray-200 px-6 py-5">
+							<div className="flex items-center justify-between">
+								<div className="h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
+								<div className="h-8 w-24 animate-pulse rounded bg-[#9cdbbc]"></div>
+							</div>
+						</div>
+						<div className="p-6">
+							<div className="space-y-6">
+								{/* سكيلتون المعلومات الشخصية */}
+								<div className="rounded-lg border border-gray-200 p-4">
+									<div className="mb-4 h-6 w-40 animate-pulse rounded bg-[#9cdbbc]"></div>
+									<div className="grid grid-cols-2 gap-4">
+										{[1, 2, 3, 4, 5].map((i) => (
+											<div key={i} className="space-y-2">
+												<div className="h-4 w-24 animate-pulse rounded bg-[#9cdbbc]"></div>
+												<div className="h-4 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
+											</div>
+										))}
+									</div>
+								</div>
+
+								{/* سكيلتون الملخص المهني */}
+								<div className="rounded-lg border border-gray-200 p-4">
+									<div className="mb-4 h-6 w-40 animate-pulse rounded bg-[#9cdbbc]"></div>
+									<div className="space-y-2">
+										<div className="h-4 w-full animate-pulse rounded bg-[#9cdbbc]"></div>
+										<div className="h-4 w-3/4 animate-pulse rounded bg-[#9cdbbc]"></div>
+										<div className="h-4 w-1/2 animate-pulse rounded bg-[#9cdbbc]"></div>
+									</div>
+								</div>
+
+								{/* سكيلتون المهارات واللغات */}
+								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+									<div className="rounded-lg border border-gray-200 p-4">
+										<div className="mb-4 h-6 w-32 animate-pulse rounded bg-[#9cdbbc]"></div>
+										<div className="flex flex-wrap gap-2">
+											{[1, 2, 3, 4].map((i) => (
+												<div
+													key={i}
+													className="h-6 w-20 animate-pulse rounded-full bg-[#9cdbbc]"
+												></div>
+											))}
+										</div>
+									</div>
+									<div className="rounded-lg border border-gray-200 p-4">
+										<div className="mb-4 h-6 w-24 animate-pulse rounded bg-[#9cdbbc]"></div>
+										<div className="flex flex-wrap gap-2">
+											{[1, 2, 3].map((i) => (
+												<div
+													key={i}
+													className="h-6 w-16 animate-pulse rounded-full bg-[#9cdbbc]"
+												></div>
+											))}
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -691,13 +765,13 @@ export default function Profile({
 					</div>
 					<div className="p-6">
 						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
-							{alphaProgress.map((progress) => (
+							{ocrProgress?.alphas.map((progress) => (
 								<div
-									key={progress.alphaBit.id}
+									key={progress.bit}
 									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
 								>
 									<span className="mb-1 text-xl font-bold text-emerald-800">
-										{progress.alphaBit.bit}
+										{progress.bit}
 									</span>
 									<div className="h-2.5 w-full rounded-full bg-emerald-100">
 										<div
@@ -723,13 +797,13 @@ export default function Profile({
 					</div>
 					<div className="p-6">
 						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
-							{digitProgress.map((progress) => (
+							{ocrProgress?.digits.map((progress) => (
 								<div
-									key={progress.digit.id}
+									key={progress.digit}
 									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
 								>
 									<span className="mb-1 text-xl font-bold text-emerald-800">
-										{progress.digit.digit}
+										{progress.digit}
 									</span>
 									<div className="h-2.5 w-full rounded-full bg-emerald-100">
 										<div
@@ -793,6 +867,113 @@ export default function Profile({
 								</span>
 							</div>
 						</div>
+					</div>
+				</div>
+
+				{/* قسم السيرة الذاتية */}
+				<div className="mt-8 mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+					<div className="border-b border-gray-200 px-6 py-5">
+						<div className="flex items-center justify-between">
+							<h3 className="text-lg font-semibold text-emerald-800">
+								السيرة الذاتية
+							</h3>
+							<Link href="/cv-preview">
+								<Button variant="outline" className="text-emerald-800">
+									عرض كامل
+								</Button>
+							</Link>
+						</div>
+					</div>
+					<div className="p-6">
+						{cvData ? (
+							<div className="space-y-6">
+								<Card>
+									<CardHeader>
+										<CardTitle className="text-lg font-semibold text-emerald-800">
+											المعلومات الشخصية
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<div className="grid grid-cols-2 gap-4">
+											<div>
+												<p className="text-sm text-gray-500">الاسم</p>
+												<p className="font-medium">{cvData.name}</p>
+											</div>
+											<div>
+												<p className="text-sm text-gray-500">العمر</p>
+												<p className="font-medium">{cvData.age}</p>
+											</div>
+											<div>
+												<p className="text-sm text-gray-500">
+													البريد الإلكتروني
+												</p>
+												<p className="font-medium">{cvData.email}</p>
+											</div>
+											<div>
+												<p className="text-sm text-gray-500">رقم الهاتف</p>
+												<p className="font-medium">{cvData.phone}</p>
+											</div>
+											<div className="col-span-2">
+												<p className="text-sm text-gray-500">العنوان</p>
+												<p className="font-medium">{cvData.address}</p>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader>
+										<CardTitle className="text-lg font-semibold text-emerald-800">
+											ملخص مهني
+										</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<p className="text-gray-700">{cvData.summary}</p>
+									</CardContent>
+								</Card>
+
+								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+									<Card>
+										<CardHeader>
+											<CardTitle className="text-lg font-semibold text-emerald-800">
+												المهارات
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div className="flex flex-wrap gap-2">
+												<span className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-800">
+													{cvData.skills}
+												</span>
+											</div>
+										</CardContent>
+									</Card>
+
+									<Card>
+										<CardHeader>
+											<CardTitle className="text-lg font-semibold text-emerald-800">
+												اللغات
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div className="flex flex-wrap gap-2">
+												<span className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-800">
+													{cvData.languages}
+												</span>
+											</div>
+										</CardContent>
+									</Card>
+								</div>
+							</div>
+						) : (
+							<div className="text-center">
+								<p className="text-gray-500">لا توجد سيرة ذاتية</p>
+								<Link href="/cvbuilder">
+									<Button className="mt-4 bg-emerald-600 text-white hover:bg-emerald-700">
+										إنشاء سيرة ذاتية
+									</Button>
+								</Link>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

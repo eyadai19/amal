@@ -3,6 +3,8 @@ import Profile from "@/components/ProfilePage";
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user } from "@/lib/schema";
+import { getArabicLetters } from "@/utils/arabicLetters";
+import { getArabicNumerals } from "@/utils/arabicNumerals";
 import { eq } from "drizzle-orm";
 import {
 	deleteLegalSessionAction,
@@ -12,8 +14,6 @@ import {
 	deletePsychologicalSessionAction,
 	fetchAllPsychologicalSessionsAction,
 } from "../psychological/page";
-import { getArabicLetters } from "@/utils/arabicLetters";
-import { getArabicNumerals } from "@/utils/arabicNumerals";
 
 export default function ProfilePage() {
 	return (
