@@ -82,8 +82,6 @@ export const TB_voice_alpha_exercises = pgTable("voice_alpha_exercises", {
 //   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull().defaultNow(), // وقت إنشاء التمرين
 // });
 
-=======
->>>>>>> Stashed changes
 export const TB_session = pgTable("session", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
@@ -167,8 +165,6 @@ export const TB_psychological_history = pgTable("psychological_history", {
 	// date: date("date").notNull(),
 });
 
-<<<<<<< Updated upstream
-=======
 export const TB_user_cv = pgTable("user_cv", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
@@ -184,7 +180,6 @@ export const TB_user_cv = pgTable("user_cv", {
 	languages: text("languages").notNull(),
 });
 
->>>>>>> Stashed changes
 export const RE_psychological_history = relations(
 	TB_psychological_history,
 	({ one }) => ({

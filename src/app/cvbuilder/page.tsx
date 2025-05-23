@@ -9,11 +9,7 @@ import { nanoid } from "nanoid";
 export default function CVBuilderPage() {
 	return (
 		<div>
-			<CVBuilder
-				getUserCvInfoAction={getUserCvInfoAction}
-				saveCvAction={saveCvAction}
-				logoutAction={logoutAction}
-			/>
+			<CVBuilder saveCvAction={saveCvAction} logoutAction={logoutAction} />
 		</div>
 	);
 }

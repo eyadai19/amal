@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
 import { CVData } from "./cv-preview";
+import { UserInfo } from "@/app/Profile/page";
+import { z } from "zod";
 
 interface CVData {
 	name: string;
@@ -39,7 +41,7 @@ export default function CVPreview({
 		cvData: CVData,
 	) => Promise<{ success: boolean; message: string }>;
 }) {
-	const [userInfo, setUserInfo] = useState<UserInfo>({});
+	const [userInfo, setUserInfo] = useState<UserInfo>();
 	const [experienceInput, setExperienceInput] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const router = useRouter();

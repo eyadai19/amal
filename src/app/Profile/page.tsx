@@ -12,6 +12,8 @@ import {
 	deletePsychologicalSessionAction,
 	fetchAllPsychologicalSessionsAction,
 } from "../psychological/page";
+import { getArabicLetters } from "@/utils/arabicLetters";
+import { getArabicNumerals } from "@/utils/arabicNumerals";
 
 export default function ProfilePage() {
 	return (
@@ -26,8 +28,6 @@ export default function ProfilePage() {
 				deleteLegalSessionAction={deleteLegalSessionAction}
 				deletePsychologicalSessionAction={deletePsychologicalSessionAction}
 				updateProfileAction={UpdateProfileAction}
-<<<<<<< Updated upstream
-=======
 				getUserOCRProgressAction={getUserOCRProgressAction}
 				getUserCvAction={getUserCvAction}
 			/>
@@ -142,8 +142,6 @@ export async function UpdateProfileAction(
 		return { field: "root", message: "حدث خطأ أثناء تحديث الملف الشخصي" };
 	}
 }
-<<<<<<< Updated upstream
-=======
 
 export async function getUserOCRProgressAction(): Promise<
 	| {

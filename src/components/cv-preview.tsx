@@ -51,7 +51,6 @@ export default function CVPreview({
 	});
 
 	useEffect(() => {
-		// Get CV data from localStorage
 		const storedData = localStorage.getItem("cvData");
 		if (storedData) {
 			setCvData(JSON.parse(storedData));
@@ -79,7 +78,7 @@ export default function CVPreview({
 				format: "a4",
 			});
 
-			const imgWidth = 210; // A4 width in mm
+			const imgWidth = 210;
 			const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
 			pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
@@ -120,7 +119,7 @@ export default function CVPreview({
 				activeSection={"career"}
 			/>
 			<div
-				className="lg-pt-24 mt-20 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
+				className="lg-pt-24 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
 				dir="rtl"
 			>
 				<div className="mx-auto max-w-4xl">
