@@ -119,7 +119,7 @@ export default function CVPreview({
 				activeSection={"career"}
 			/>
 			<div
-				className="lg-pt-24 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
+				className="lg-pt-24 mt-20 min-h-screen bg-gray-50 p-4 pt-24 sm:p-8"
 				dir="rtl"
 			>
 				<div className="mx-auto max-w-4xl">

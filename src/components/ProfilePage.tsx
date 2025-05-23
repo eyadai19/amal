@@ -1,12 +1,10 @@
 "use client";
 
 import { UserInfo } from "@/app/Profile/page";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
-import { CVData } from "./cv-preview";
 
 export default function Profile({
 	logoutAction,
@@ -16,8 +14,6 @@ export default function Profile({
 	deletePsychologicalSessionAction,
 	deleteLegalSessionAction,
 	updateProfileAction,
-	getUserOCRProgressAction,
-	getUserCvAction,
 }: {
 	logoutAction: () => Promise<void>;
 	getUserInfoAction: () => Promise<
@@ -40,14 +36,6 @@ export default function Profile({
 	updateProfileAction: (
 		form: FormData,
 	) => Promise<string | { field: string; message: string } | undefined>;
-	getUserOCRProgressAction: () => Promise<
-		| {
-				alphas: { accuracy: number; attempts: number; bit: string }[];
-				digits: { accuracy: number; attempts: number; digit: string }[];
-		  }
-		| { field: string; message: string }
-	>;
-	getUserCvAction: () => Promise<CVData | { field: string; message: string }>;
 }) {
 	const router = useRouter();
 	const [user, setUser] = useState<UserInfo | null>(null);
@@ -68,7 +56,24 @@ export default function Profile({
 		releaseDate: "",
 		sentenceDuration: "",
 	});
-	const [cvData, setCvData] = useState<CVData | null>(null);
+
+	// تقدم الحروف الافتراضي
+	const alphaProgress = [
+		{ alphaBit: { bit: "أ", id: "alpha-1" }, accuracy: 85, attempts: 12 },
+		{ alphaBit: { bit: "ب", id: "alpha-2" }, accuracy: 72, attempts: 8 },
+		{ alphaBit: { bit: "ت", id: "alpha-3" }, accuracy: 65, attempts: 10 },
+		{ alphaBit: { bit: "ث", id: "alpha-4" }, accuracy: 90, attempts: 15 },
+		{ alphaBit: { bit: "ج", id: "alpha-5" }, accuracy: 45, attempts: 5 },
+		{ alphaBit: { bit: "ح", id: "alpha-6" }, accuracy: 78, attempts: 9 },
+	];
+
+	// تقدم الأرقام الافتراضي
+	const digitProgress = [
+		{ digit: { digit: "١", id: "digit-1" }, accuracy: 95, attempts: 7 },
+		{ digit: { digit: "٢", id: "digit-2" }, accuracy: 88, attempts: 6 },
+		{ digit: { digit: "٣", id: "digit-3" }, accuracy: 72, attempts: 5 },
+		{ digit: { digit: "٤", id: "digit-4" }, accuracy: 60, attempts: 4 },
+	];
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -132,17 +137,6 @@ export default function Profile({
 			});
 		}
 	}, [user]);
-
-	useEffect(() => {
-		const fetchCvData = async () => {
-			const cv = await getUserCvAction();
-			if (!("field" in cv)) {
-				setCvData(cv);
-			}
-		};
-
-		fetchCvData();
-	}, [getUserCvAction]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -411,264 +405,396 @@ export default function Profile({
 			<div className="mx-auto mt-7 max-w-4xl">
 				{/* بطاقة المعلومات الشخصية */}
 				<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
-					<div className="flex flex-col sm:flex-row">
-						<div className="p-4 sm:flex-shrink-0">
-							<img
-								src={user.photo || "/default-avatar.png"}
-								alt={`${user.firstName} ${user.lastName}`}
-								className="h-32 w-32 rounded-full border-4 border-red-100 object-cover"
-							/>
+					<div className="flex flex-col sm:flex-row-reverse">
+						{/* الصورة - تظهر في الأعلى على الشاشات الصغيرة */}
+						<div className="flex flex-col items-center p-4 sm:flex-shrink-0">
+							<div className="group relative">
+								<img
+									className="h-32 w-32 rounded-full border-4 border-[#9cdbbc] object-cover transition-all duration-300 group-hover:scale-105 group-hover:border-emerald-300"
+									src={user.photo || "/default-avatar.png"}
+									alt={`${user.firstName} ${user.lastName}`}
+								/>
+								<div className="absolute inset-0 rounded-full bg-[#9cdbbc] opacity-0 transition-opacity duration-300 group-hover:opacity-20"></div>
+							</div>
 						</div>
+
+						{/* المعلومات - تظهر في الأسفل على الشاشات الصغيرة */}
 						<div className="flex-1 p-6 sm:p-8">
-							<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-								<div>
-									<h2 className="text-2xl font-bold text-gray-900">
-										{user.firstName} {user.lastName}
-									</h2>
-									<p className="text-gray-500">@{user.username}</p>
+							<div className="flex flex-col items-end">
+								<div className="w-full text-right">
+									{isEditing ? (
+										<div className="space-y-4">
+											<div className="flex flex-col gap-4">
+												<div>
+													<label className="mb-1 block text-sm font-medium text-gray-500">
+														الاسم الأول
+													</label>
+													<input
+														type="text"
+														name="firstName"
+														value={formData.firstName}
+														onChange={handleInputChange}
+														className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+														placeholder="الاسم الأول"
+													/>
+												</div>
+												<div>
+													<label className="mb-1 block text-sm font-medium text-gray-500">
+														الاسم الأخير
+													</label>
+													<input
+														type="text"
+														name="lastName"
+														value={formData.lastName}
+														onChange={handleInputChange}
+														className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+														placeholder="الاسم الأخير"
+													/>
+												</div>
+												<div>
+													<label className="mb-1 block text-sm font-medium text-gray-500">
+														العمر
+													</label>
+													<input
+														type="number"
+														name="age"
+														value={formData.age}
+														onChange={handleInputChange}
+														className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+														placeholder="العمر"
+													/>
+												</div>
+											</div>
+										</div>
+									) : (
+										<>
+											<h1 className="text-2xl font-bold text-gray-900">
+												{user.firstName} {user.lastName}
+											</h1>
+											<p className="mt-1 text-gray-600">@{user.username}</p>
+											{user.age && (
+												<span className="mt-2 inline-flex items-center rounded-full bg-[#9cdbbc] px-3 py-1 text-sm font-medium text-emerald-800">
+													سنة {user.age}
+												</span>
+											)}
+										</>
+									)}
 								</div>
-								<Button
-									onClick={handleEdit}
-									className="mt-4 bg-red-600 hover:bg-red-700 sm:mt-0"
-								>
-									تعديل
-								</Button>
 							</div>
 
-							<div className="mt-6 grid grid-cols-2 gap-4">
-								<div>
-									<h3 className="text-sm font-medium text-gray-500">العمر</h3>
-									<p className="mt-1 text-gray-900">{user.age || "غير محدد"}</p>
-								</div>
+							<div className="mt-6 grid grid-cols-2 gap-4 text-center">
+								{isEditing ? (
+									<>
+										<div>
+											<h3 className="text-sm font-medium text-gray-500">
+												تاريخ الإفراج
+											</h3>
+											<input
+												type="date"
+												name="releaseDate"
+												value={formData.releaseDate}
+												onChange={handleInputChange}
+												className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-center"
+											/>
+										</div>
+										<div>
+											<h3 className="text-sm font-medium text-gray-500">
+												مدة الحكم
+											</h3>
+											<input
+												type="number"
+												name="sentenceDuration"
+												value={formData.sentenceDuration}
+												onChange={handleInputChange}
+												className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-center"
+												placeholder="مدة الحكم بالسنوات"
+											/>
+										</div>
+									</>
+								) : (
+									<>
+										<div>
+											<h3 className="text-sm font-medium text-gray-500">
+												تاريخ الإفراج
+											</h3>
+											<p className="mt-1 text-sm text-gray-900">
+												{user.releaseDate
+													? new Date(user.releaseDate).toLocaleDateString(
+															"ar-EG",
+														)
+													: "٢/٤/٢٠٢٥"}
+											</p>
+										</div>
+										<div>
+											<h3 className="text-sm font-medium text-gray-500">
+												مدة الحكم
+											</h3>
+											<p className="mt-1 text-sm text-gray-900">
+												{user.sentenceDuration
+													? `سنة ${user.sentenceDuration}`
+													: "سنة 10"}
+											</p>
+										</div>
+									</>
+								)}
 								<div>
 									<h3 className="text-sm font-medium text-gray-500">
-										تاريخ الإفراج
+										تاريخ التسجيل
 									</h3>
-									<p className="mt-1 text-gray-900">
-										{user.releaseDate
-											? new Date(user.releaseDate).toLocaleDateString("ar-EG")
-											: "غير محدد"}
+									<p className="mt-1 text-sm text-gray-900">
+										{new Date(user.createdTime).toLocaleDateString("ar-EG") ||
+											"٨/٤/٢٠٢٥"}
 									</p>
 								</div>
 								<div>
 									<h3 className="text-sm font-medium text-gray-500">
-										مدة الحكم
+										آخر تحديث
 									</h3>
-									<p className="mt-1 text-gray-900">
-										{user.sentenceDuration
-											? `${user.sentenceDuration} سنة`
-											: "غير محدد"}
+									<p className="mt-1 text-sm text-gray-900">
+										{new Date(user.lastUpdateTime).toLocaleDateString(
+											"ar-EG",
+										) || "٨/٤/٢٠٢٥"}
 									</p>
 								</div>
 							</div>
 						</div>
 					</div>
+					<div className="flex justify-start p-4">
+						{!isEditing ? (
+							<button
+								onClick={handleEdit}
+								className="rounded-full bg-[#9cdbbc] px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-200"
+							>
+								تعديل
+							</button>
+						) : (
+							<div className="flex gap-2">
+								<button
+									onClick={handleSubmit}
+									disabled={isSaving}
+									className="rounded-full bg-[#9cdbbc] px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-200 disabled:opacity-50"
+								>
+									{isSaving ? "جاري التعديل..." : "حفظ"}
+								</button>
+								<button
+									onClick={handleCancel}
+									disabled={isSaving}
+									className="rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+								>
+									إلغاء
+								</button>
+							</div>
+						)}
+					</div>
 				</div>
 
-				{/* تبويبات الجلسات والسيرة الذاتية */}
-				<Tabs defaultValue="sessions" className="space-y-6">
-					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="sessions">الجلسات</TabsTrigger>
-						<TabsTrigger value="cv">السيرة الذاتية</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="sessions">
-						<div className="space-y-6">
-							{psychologicalSessions.length > 0 && (
-								<div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-									<div className="border-b border-gray-200 px-6 py-5">
-										<h3 className="text-lg font-medium text-gray-900">
-											الجلسات النفسية
-										</h3>
-									</div>
-									<div className="divide-y divide-gray-200">
-										{psychologicalSessions.map((session, index) => (
-											<div key={session.sessionId} className="p-4">
-												<div className="flex items-center justify-between">
-													<div className="flex items-center space-x-4 space-x-reverse">
-														<div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
-															<span className="text-sm font-medium text-red-600">
-																{index + 1}
-															</span>
-														</div>
-														<p className="font-medium">
-															{session.lastQuestion}
-														</p>
-													</div>
-													<div className="flex items-center space-x-2 space-x-reverse">
-														<Button
-															onClick={() =>
-																router.push(
-																	`/psychological/${session.sessionId}`,
-																)
-															}
-															variant="outline"
-															size="sm"
-														>
-															عرض
-														</Button>
-														<Button
-															onClick={() =>
-																handleDeletePsychologicalSession(
-																	session.sessionId,
-																)
-															}
-															variant="destructive"
-															size="sm"
-														>
-															حذف
-														</Button>
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								</div>
-							)}
-
-							{legalSessions.length > 0 && (
-								<div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-									<div className="border-b border-gray-200 px-6 py-5">
-										<h3 className="text-lg font-medium text-gray-900">
-											الجلسات القانونية
-										</h3>
-									</div>
-									<div className="divide-y divide-gray-200">
-										{legalSessions.map((session, index) => (
-											<div key={session.sessionId} className="p-4">
-												<div className="flex items-center justify-between">
-													<div className="flex items-center space-x-4 space-x-reverse">
-														<div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
-															<span className="text-sm font-medium text-red-600">
-																{index + 1}
-															</span>
-														</div>
-														<p className="font-medium">
-															{session.lastQuestion}
-														</p>
-													</div>
-													<div className="flex items-center space-x-2 space-x-reverse">
-														<Button
-															onClick={() =>
-																router.push(`/legal/${session.sessionId}`)
-															}
-															variant="outline"
-															size="sm"
-														>
-															عرض
-														</Button>
-														<Button
-															onClick={() =>
-																handleDeleteLegalSession(session.sessionId)
-															}
-															variant="destructive"
-															size="sm"
-														>
-															حذف
-														</Button>
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								</div>
-							)}
-
-							{psychologicalSessions.length === 0 &&
-								legalSessions.length === 0 && (
-									<div className="overflow-hidden rounded-2xl bg-white p-8 text-center shadow-lg">
-										<p className="text-gray-500">لا توجد جلسات</p>
-									</div>
-								)}
+				{/* قسم الجلسات النفسية */}
+				{psychologicalSessions.length > 0 && (
+					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+						<div className="border-b border-gray-200 px-6 py-5">
+							<h3 className="text-lg font-semibold text-emerald-800">
+								الجلسات النفسية
+							</h3>
 						</div>
-					</TabsContent>
-
-					<TabsContent value="cv">
-						<div className="overflow-hidden rounded-2xl bg-white shadow-lg">
-							<div className="border-b border-gray-200 px-6 py-5">
-								<div className="flex items-center justify-between">
-									<h3 className="text-lg font-medium text-gray-900">
-										السيرة الذاتية
-									</h3>
-									<Button
-										onClick={() => router.push("/cvbuilder")}
-										className="bg-red-600 hover:bg-red-700"
-									>
-										{cvData ? "تعديل السيرة الذاتية" : "إنشاء سيرة ذاتية"}
-									</Button>
-								</div>
-							</div>
-							<div className="p-6">
-								{cvData ? (
-									<div className="space-y-6">
-										<div className="grid gap-6 md:grid-cols-2">
-											<div className="space-y-2">
-												<h3 className="text-lg font-semibold">
-													المعلومات الشخصية
-												</h3>
-												<p>
-													<span className="font-medium">الاسم:</span>{" "}
-													{cvData.name}
-												</p>
-												<p>
-													<span className="font-medium">العمر:</span>{" "}
-													{cvData.age}
-												</p>
-												<p>
-													<span className="font-medium">
-														البريد الإلكتروني:
-													</span>{" "}
-													{cvData.email}
-												</p>
-												<p>
-													<span className="font-medium">رقم الهاتف:</span>{" "}
-													{cvData.phone}
-												</p>
-												<p>
-													<span className="font-medium">العنوان:</span>{" "}
-													{cvData.address}
-												</p>
-											</div>
-											<div className="space-y-2">
-												<h3 className="text-lg font-semibold">الملخص المهني</h3>
-												<p className="text-gray-600">{cvData.summary}</p>
-											</div>
-										</div>
-
-										<div className="grid gap-6 md:grid-cols-2">
-											<div className="space-y-2">
-												<h3 className="text-lg font-semibold">
-													المهارات والخبرات
-												</h3>
-												<div className="whitespace-pre-line text-gray-600">
-													{cvData.skills}
+						<div className="divide-y divide-gray-200">
+							{psychologicalSessions.map((session, index) => (
+								<Link
+									key={index}
+									href={`/psychological/${session.sessionId}`}
+									className="block cursor-pointer p-4 hover:bg-emerald-50"
+								>
+									<div className="flex items-start justify-between">
+										<div className="flex items-start">
+											<div className="flex-shrink-0 pt-0.5">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9cdbbc]">
+													<span className="text-xs text-emerald-800">
+														{index + 1}
+													</span>
 												</div>
 											</div>
-											<div className="space-y-2">
-												<h3 className="text-lg font-semibold">اللغات</h3>
-												<div className="whitespace-pre-line text-gray-600">
-													{cvData.languages}
-												</div>
+											<div className="ml-3 flex-1">
+												<p className="text-sm text-gray-800">
+													{session.lastQuestion}
+												</p>
 											</div>
 										</div>
-									</div>
-								) : (
-									<div className="py-8 text-center">
-										<p className="mb-4 text-gray-500">
-											لم يتم إنشاء سيرة ذاتية بعد
-										</p>
-										<Button
-											onClick={() => router.push("/cvbuilder")}
-											className="bg-red-600 hover:bg-red-700"
+										<button
+											onClick={(e) => {
+												e.preventDefault();
+												handleDeletePsychologicalSession(session.sessionId);
+											}}
+											className="text-sm font-medium text-red-600 hover:text-red-800"
+											title="حذف الجلسة"
 										>
-											إنشاء سيرة ذاتية
-										</Button>
+											حذف
+										</button>
 									</div>
-								)}
+								</Link>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* قسم الجلسات القانونية */}
+				{legalSessions.length > 0 && (
+					<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+						<div className="border-b border-gray-200 px-6 py-5">
+							<h3 className="text-lg font-semibold text-emerald-800">
+								السجل القانوني
+							</h3>
+						</div>
+						<div className="divide-y divide-gray-200">
+							{legalSessions.map((session, index) => (
+								<Link
+									key={index}
+									href={`/legal/${session.sessionId}`}
+									className="block cursor-pointer p-4 hover:bg-emerald-50"
+								>
+									<div className="flex items-start justify-between">
+										<div className="flex items-start">
+											<div className="flex-shrink-0 pt-0.5">
+												<div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9cdbbc]">
+													<span className="text-xs text-emerald-800">
+														{index + 1}
+													</span>
+												</div>
+											</div>
+											<div className="ml-3 flex-1">
+												<p className="text-sm text-gray-800">
+													{session.lastQuestion}
+												</p>
+											</div>
+										</div>
+										<button
+											onClick={(e) => {
+												e.preventDefault();
+												handleDeleteLegalSession(session.sessionId);
+											}}
+											className="text-sm font-medium text-red-600 hover:text-red-800"
+											title="حذف الجلسة"
+										>
+											حذف
+										</button>
+									</div>
+								</Link>
+							))}
+						</div>
+					</div>
+				)}
+
+				{/* تقدم تعلم الحروف */}
+				<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+					<div className="border-b border-gray-200 px-6 py-5">
+						<h3 className="text-lg font-semibold text-emerald-800">
+							تقدم تعلم الحروف
+						</h3>
+					</div>
+					<div className="p-6">
+						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
+							{alphaProgress.map((progress) => (
+								<div
+									key={progress.alphaBit.id}
+									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
+								>
+									<span className="mb-1 text-xl font-bold text-emerald-800">
+										{progress.alphaBit.bit}
+									</span>
+									<div className="h-2.5 w-full rounded-full bg-emerald-100">
+										<div
+											className="h-2.5 rounded-full bg-emerald-600"
+											style={{ width: `${progress.accuracy}%` }}
+										></div>
+									</div>
+									<span className="mt-1 text-xs text-emerald-700">
+										{progress.accuracy}% ({progress.attempts} محاولة)
+									</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+
+				{/* تقدم تعلم الأرقام */}
+				<div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-lg">
+					<div className="border-b border-gray-200 px-6 py-5">
+						<h3 className="text-lg font-semibold text-emerald-800">
+							تقدم تعلم الأرقام
+						</h3>
+					</div>
+					<div className="p-6">
+						<div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-6">
+							{digitProgress.map((progress) => (
+								<div
+									key={progress.digit.id}
+									className="flex flex-col items-center rounded-lg border border-emerald-100 p-3 hover:bg-emerald-50"
+								>
+									<span className="mb-1 text-xl font-bold text-emerald-800">
+										{progress.digit.digit}
+									</span>
+									<div className="h-2.5 w-full rounded-full bg-emerald-100">
+										<div
+											className="h-2.5 rounded-full bg-emerald-600"
+											style={{ width: `${progress.accuracy}%` }}
+										></div>
+									</div>
+									<span className="mt-1 text-xs text-emerald-700">
+										{progress.accuracy}% ({progress.attempts} محاولة)
+									</span>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+
+				{/* آخر التمارين */}
+				<div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+					<div className="border-b border-gray-200 px-6 py-5">
+						<h3 className="text-lg font-semibold text-emerald-800">
+							آخر التمارين
+						</h3>
+					</div>
+					<div className="divide-y divide-gray-200">
+						<div className="p-4 hover:bg-emerald-50">
+							<div className="flex items-center justify-between">
+								<div>
+									<h4 className="font-medium text-emerald-800">
+										تمرين كتابة حرف &quot;أ&quot;
+									</h4>
+									<p className="text-sm text-gray-500">دقة 85% - منذ ساعتين</p>
+								</div>
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+									كتابة
+								</span>
 							</div>
 						</div>
-					</TabsContent>
-				</Tabs>
+						<div className="p-4 hover:bg-emerald-50">
+							<div className="flex items-center justify-between">
+								<div>
+									<h4 className="font-medium text-emerald-800">
+										تمرين نطق حرف &quot;ب&quot;
+									</h4>
+									<p className="text-sm text-gray-500">دقة 72% - منذ يوم</p>
+								</div>
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+									صوت
+								</span>
+							</div>
+						</div>
+						<div className="p-4 hover:bg-emerald-50">
+							<div className="flex items-center justify-between">
+								<div>
+									<h4 className="font-medium text-emerald-800">
+										تمرين كتابة رقم &quot;5&quot;
+									</h4>
+									<p className="text-sm text-gray-500">دقة 91% - منذ 3 أيام</p>
+								</div>
+								<span className="inline-flex items-center rounded-full bg-[#9cdbbc] px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+									كتابة
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
