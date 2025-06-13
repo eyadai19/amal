@@ -26,6 +26,7 @@ export default function PsychologicalSupport({
 	savePsychologicalConversationEntryAction,
 	fetchAllPsychologicalSessionsAction,
 	deletePsychologicalSessionAction,
+	generateSupportResponseAction,
 }: {
 	logoutAction: () => Promise<void>;
 	savePsychologicalConversationEntryAction: (
@@ -40,6 +41,7 @@ export default function PsychologicalSupport({
 	deletePsychologicalSessionAction: (
 		sessionId: string,
 	) => Promise<{ success: boolean } | { field: string; message: string }>;
+	generateSupportResponseAction: (input: string) => Promise<string>;
 }) {
 	const [sessionId, setSessionId] = useState<string>(nanoid());
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -66,19 +68,13 @@ export default function PsychologicalSupport({
 	const getPsychologicalResponse = async (
 		userMessage: string,
 	): Promise<string> => {
-		const userFeeling = userMessage.toLowerCase().includes("حزين")
-			? "حزين"
-			: "جيد";
-		const responses = {
-			حزين: "أشعر بما تمر به. هل ترغب في التحدث عن ذلك؟",
-			جيد: "أنت بخير، ولكن هل هناك شيء ترغب في مشاركته؟",
-			default: "أنا هنا للاستماع إليك. كيف يمكنني مساعدتك؟",
-		};
-
-		await new Promise((resolve) =>
-			setTimeout(resolve, 1000 + Math.random() * 2000),
-		);
-		return responses[userFeeling] || responses.default;
+		try {
+			const response = await generateSupportResponseAction(userMessage);
+			return response;
+		} catch (error) {
+			console.error("Error generating response:", error);
+			return "عذراً، حدث خطأ في توليد الرد. هل يمكنك المحاولة مرة أخرى؟";
+		}
 	};
 
 	const handleSendMessage = async () => {

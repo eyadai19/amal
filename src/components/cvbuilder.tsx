@@ -50,6 +50,7 @@ export default function CVForm({
 	logoutAction,
 	saveCvAction,
 	hasCvAction,
+	convertToCvFormatAction,
 }: {
 	getUserCvInfoAction: () => Promise<
 		UserCvInfo | { field: string; message: string }
@@ -61,6 +62,7 @@ export default function CVForm({
 	hasCvAction: () => Promise<{
 		hasCv: boolean;
 	}>;
+	convertToCvFormatAction: (informalText: string) => Promise<string>;
 }) {
 	const [userInfo, setUserInfo] = useState<UserInfo>({});
 	const [experienceInput, setExperienceInput] = useState("");
@@ -114,14 +116,20 @@ export default function CVForm({
 		fetchUserInfo();
 	}, [getUserCvInfoAction, hasCvAction, form, router]);
 
-	const handleAddExperience = () => {
+	const handleAddExperience = async () => {
 		if (experienceInput.trim() !== "") {
-			const currentSkills = form.getValues("skills");
-			const newSkills = currentSkills
-				? `${currentSkills}\n${experienceInput}`
-				: experienceInput;
-			form.setValue("skills", newSkills);
-			setExperienceInput("");
+			try {
+				const formalText = await convertToCvFormatAction(experienceInput);
+				const currentSkills = form.getValues("skills");
+				const newSkills = currentSkills
+					? `${currentSkills}\n${formalText}`
+					: formalText;
+				form.setValue("skills", newSkills);
+				setExperienceInput("");
+			} catch (error) {
+				console.error("Error converting text:", error);
+				alert("حدث خطأ أثناء تحويل النص. يرجى المحاولة مرة أخرى.");
+			}
 		}
 	};
 
@@ -404,8 +412,8 @@ export default function CVForm({
 																			بعد التحويل:
 																		</p>
 																		<p className="mt-2">
-																			مهارات في تنظيم الوقت وتنظيم المهام
-																			اليومية
+																			طورت مهارات متقدمة في إدارة الوقت وتنظيم
+																			المهام والالتزام بالجدول الزمني المحدد.
 																		</p>
 																	</div>
 																</div>

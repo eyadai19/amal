@@ -1,8 +1,18 @@
 "use client";
 import { Career, CareerQuestion } from "@/lib/ServerAction/careerExp";
-import { Loader2, X } from "lucide-react";
+import { Loader2, Volume2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import AmalNavbar from "./amalNavbar";
+
+// Add ResponsiveVoice type definition
+declare global {
+	interface Window {
+		responsiveVoice: {
+			speak: (text: string, voice: string) => void;
+			cancel: () => void;
+		};
+	}
+}
 
 type CareerResult = {
 	bestCareer: {
@@ -66,6 +76,7 @@ export default function CareerPage({
 	const [yesAnswers, setYesAnswers] = useState<CareerQuestion[]>([]);
 	const [isAddingToCV, setIsAddingToCV] = useState(false);
 	const [hasCv, setHasCv] = useState(false);
+	const [speakingText, setSpeakingText] = useState<string | null>(null);
 
 	useEffect(() => {
 		const checkCv = async () => {
@@ -247,6 +258,42 @@ export default function CareerPage({
 		setResult(null);
 	};
 
+	const loadResponsiveVoice = () => {
+		return new Promise<void>((resolve) => {
+			if (typeof window !== "undefined" && !window.responsiveVoice) {
+				const script = document.createElement("script");
+				script.src =
+					"https://code.responsivevoice.org/responsivevoice.js?key=bUVdFdpm";
+				script.onload = () => resolve();
+				document.body.appendChild(script);
+			} else {
+				resolve();
+			}
+		});
+	};
+
+	const toggleSpeech = async (text: string) => {
+		await loadResponsiveVoice();
+
+		if (window.responsiveVoice) {
+			if (speakingText === text) {
+				window.responsiveVoice.cancel();
+				setSpeakingText(null);
+			} else {
+				window.responsiveVoice.speak(text, "Arabic Female");
+				setSpeakingText(text);
+			}
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			if (window.responsiveVoice) {
+				window.responsiveVoice.cancel();
+			}
+		};
+	}, []);
+
 	return (
 		<div className="min-h-screen bg-[#fbdcdc82]">
 			<AmalNavbar
@@ -256,21 +303,62 @@ export default function CareerPage({
 			/>
 			<div className="mx-auto max-w-7xl px-4 pt-24 pb-16 sm:px-6 lg:px-8">
 				<div className="text-center">
-					<h1 className="mb-4 text-4xl font-bold text-gray-800">
-						دليلك المهني
-					</h1>
-					<p className="mb-12 text-xl text-gray-600">
-						اكتشف مسارك المهني وتطور في حياتك العملية مع دليلنا الشامل
-					</p>
+					<div className="flex items-center justify-center gap-2">
+						<h1 className="mb-4 text-4xl font-bold text-gray-800">
+							دليلك المهني
+						</h1>
+						<button
+							onClick={() => toggleSpeech("دليلك المهني")}
+							className={`rounded-full p-2 ${
+								speakingText === "دليلك المهني"
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<Volume2 size={20} />
+						</button>
+					</div>
+					<div className="flex items-center justify-center gap-2">
+						<p className="mb-12 text-xl text-gray-600">
+							اكتشف مسارك المهني وتطور في حياتك العملية مع دليلنا الشامل
+						</p>
+						<button
+							onClick={() =>
+								toggleSpeech(
+									"اكتشف مسارك المهني وتطور في حياتك العملية مع دليلنا الشامل",
+								)
+							}
+							className={`rounded-full p-2 ${
+								speakingText ===
+								"اكتشف مسارك المهني وتطور في حياتك العملية مع دليلنا الشامل"
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<Volume2 size={20} />
+						</button>
+					</div>
 				</div>
 
 				<div className="mb-16 rounded-2xl bg-white p-8 shadow-xl">
 					{currentStep === "sections" && (
 						<>
 							<div className="mb-8 flex justify-end">
-								<h2 className="text-3xl font-bold text-gray-800">
-									اختر القسم المناسب لك
-								</h2>
+								<div className="flex items-center gap-2">
+									<h2 className="text-3xl font-bold text-gray-800">
+										اختر القسم المناسب لك
+									</h2>
+									<button
+										onClick={() => toggleSpeech("اختر القسم المناسب لك")}
+										className={`rounded-full p-2 ${
+											speakingText === "اختر القسم المناسب لك"
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<Volume2 size={20} />
+									</button>
+								</div>
 							</div>
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								{sections.map((section) => (
@@ -305,15 +393,41 @@ export default function CareerPage({
 										{currentQuestion + 1}/{questions.length}
 									</span>
 								</div>
-								<h2 className="text-3xl font-bold text-gray-800">
-									اختبار المهارات المهنية
-								</h2>
+								<div className="flex items-center gap-2">
+									<h2 className="text-3xl font-bold text-gray-800">
+										اختبار المهارات المهنية
+									</h2>
+									<button
+										onClick={() => toggleSpeech("اختبار المهارات المهنية")}
+										className={`rounded-full p-2 ${
+											speakingText === "اختبار المهارات المهنية"
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<Volume2 size={20} />
+									</button>
+								</div>
 							</div>
 							<div className="mb-8">
 								<div className="mb-6 flex justify-end">
-									<p className="text-2xl font-semibold text-gray-800">
-										{questions[currentQuestion].text}
-									</p>
+									<div className="flex items-center gap-2">
+										<p className="text-2xl font-semibold text-gray-800">
+											{questions[currentQuestion].text}
+										</p>
+										<button
+											onClick={() =>
+												toggleSpeech(questions[currentQuestion].text)
+											}
+											className={`rounded-full p-2 ${
+												speakingText === questions[currentQuestion].text
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<Volume2 size={20} />
+										</button>
+									</div>
 								</div>
 								<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<button
@@ -336,20 +450,58 @@ export default function CareerPage({
 					{currentStep === "result" && result && (
 						<>
 							<div className="mb-4 flex justify-end">
-								<h2 className="text-3xl font-bold text-gray-800">
-									توصيات مسارك المهني
-								</h2>
+								<div className="flex items-center gap-2">
+									<h2 className="text-3xl font-bold text-gray-800">
+										توصيات مسارك المهني
+									</h2>
+									<button
+										onClick={() => toggleSpeech("توصيات مسارك المهني")}
+										className={`rounded-full p-2 ${
+											speakingText === "توصيات مسارك المهني"
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<Volume2 size={20} />
+									</button>
+								</div>
 							</div>
 							<div className="mb-8 flex justify-end">
-								<p className="text-lg text-gray-600">
-									بناءً على إجاباتك، المهنة الأنسب لك هي:
-								</p>
+								<div className="flex items-center gap-2">
+									<p className="text-lg text-gray-600">
+										بناءً على إجاباتك، المهنة الأنسب لك هي:
+									</p>
+									<button
+										onClick={() =>
+											toggleSpeech("بناءً على إجاباتك، المهنة الأنسب لك هي")
+										}
+										className={`rounded-full p-2 ${
+											speakingText === "بناءً على إجاباتك، المهنة الأنسب لك هي"
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<Volume2 size={20} />
+									</button>
+								</div>
 							</div>
 							<div className="mb-8 flex justify-center">
 								<div className="rounded-lg bg-[#ffd4d482] p-6 text-center">
-									<h3 className="text-2xl font-bold text-gray-800">
-										{result.bestCareer.name}
-									</h3>
+									<div className="flex items-center justify-center gap-2">
+										<h3 className="text-2xl font-bold text-gray-800">
+											{result.bestCareer.name}
+										</h3>
+										<button
+											onClick={() => toggleSpeech(result.bestCareer.name)}
+											className={`rounded-full p-2 ${
+												speakingText === result.bestCareer.name
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<Volume2 size={20} />
+										</button>
+									</div>
 								</div>
 							</div>
 							<div className="mt-8 flex flex-col items-end space-y-4 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-4">
@@ -381,20 +533,63 @@ export default function CareerPage({
 				</div>
 				{/* قسم السيرة الذاتية بالذكاء الاصطناعي */}
 				<div className="mb-16 text-center">
-					<h2 className="mb-8 text-3xl font-bold text-gray-800">
-						أنشئ سيرتك الذاتية بمساعدة الذكاء الاصطناعي
-					</h2>
+					<div className="flex items-center justify-center gap-2">
+						<h2 className="mb-8 text-3xl font-bold text-gray-800">
+							أنشئ سيرتك الذاتية بمساعدة الذكاء الاصطناعي
+						</h2>
+						<button
+							onClick={() =>
+								toggleSpeech("أنشئ سيرتك الذاتية بمساعدة الذكاء الاصطناعي")
+							}
+							className={`rounded-full p-2 ${
+								speakingText === "أنشئ سيرتك الذاتية بمساعدة الذكاء الاصطناعي"
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<Volume2 size={20} />
+						</button>
+					</div>
 					<div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
 						<div className="mb-6 flex justify-center">
 							<span className="text-5xl">🤖</span>
 						</div>
-						<h3 className="mb-4 text-2xl font-semibold text-gray-800">
-							سيرة ذاتية احترافية في دقائق
-						</h3>
-						<p className="mb-8 text-lg text-gray-600">
-							استخدم قوة الذكاء الاصطناعي لإنشاء سيرة ذاتية احترافية تبرز
-							مهاراتك وخبراتك بشكل مثالي
-						</p>
+						<div className="flex items-center justify-center gap-2">
+							<h3 className="mb-4 text-2xl font-semibold text-gray-800">
+								سيرة ذاتية احترافية في دقائق
+							</h3>
+							<button
+								onClick={() => toggleSpeech("سيرة ذاتية احترافية في دقائق")}
+								className={`rounded-full p-2 ${
+									speakingText === "سيرة ذاتية احترافية في دقائق"
+										? "bg-gray-200 text-gray-800"
+										: "text-gray-600 hover:bg-gray-100"
+								}`}
+							>
+								<Volume2 size={20} />
+							</button>
+						</div>
+						<div className="flex items-center justify-center gap-2">
+							<p className="mb-8 text-lg text-gray-600">
+								استخدم قوة الذكاء الاصطناعي لإنشاء سيرة ذاتية احترافية تبرز
+								مهاراتك وخبراتك بشكل مثالي
+							</p>
+							<button
+								onClick={() =>
+									toggleSpeech(
+										"استخدم قوة الذكاء الاصطناعي لإنشاء سيرة ذاتية احترافية تبرز مهاراتك وخبراتك بشكل مثالي",
+									)
+								}
+								className={`rounded-full p-2 ${
+									speakingText ===
+									"استخدم قوة الذكاء الاصطناعي لإنشاء سيرة ذاتية احترافية تبرز مهاراتك وخبراتك بشكل مثالي"
+										? "bg-gray-200 text-gray-800"
+										: "text-gray-600 hover:bg-gray-100"
+								}`}
+							>
+								<Volume2 size={20} />
+							</button>
+						</div>
 						<button
 							onClick={() => {
 								window.location.href = "/cvbuilder";
@@ -421,6 +616,16 @@ export default function CareerPage({
 									{step.title}
 								</h3>
 								<p className="mt-2 text-gray-600">{step.description}</p>
+								<button
+									onClick={() => toggleSpeech(step.description)}
+									className={`mt-4 rounded-full p-2 ${
+										speakingText === step.description
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<Volume2 size={20} />
+								</button>
 							</div>
 						))}
 					</div>
@@ -441,6 +646,16 @@ export default function CareerPage({
 									{tip.title}
 								</h3>
 								<p className="mt-2 text-gray-600">{tip.description}</p>
+								<button
+									onClick={() => toggleSpeech(tip.description)}
+									className={`mt-4 rounded-full p-2 ${
+										speakingText === tip.description
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<Volume2 size={20} />
+								</button>
 							</div>
 						))}
 					</div>

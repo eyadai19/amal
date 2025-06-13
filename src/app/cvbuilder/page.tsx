@@ -6,6 +6,7 @@ import { TB_user_cv } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { hasCvAction } from "../cv-preview/page";
+import { convertToCvFormatAction } from "@/lib/ServerAction/chatbot";
 
 export default function CVBuilderPage() {
 	return (
@@ -15,6 +16,7 @@ export default function CVBuilderPage() {
 				saveCvAction={saveCvAction}
 				logoutAction={logoutAction}
 				hasCvAction={hasCvAction}
+				convertToCvFormatAction={convertToCvFormatAction}
 			/>
 		</div>
 	);

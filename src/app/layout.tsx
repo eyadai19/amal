@@ -24,11 +24,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="ar">
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				{children}
+				<script src="https://code.responsivevoice.org/responsivevoice.js?key=bUVdFdpm"></script>
 			</body>
 		</html>
 	);

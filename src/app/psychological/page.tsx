@@ -1,6 +1,7 @@
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_psychological_history } from "@/lib/schema";
+import { generateSupportResponseAction } from "@/lib/ServerAction/chatbot";
 import { and, eq, max } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import PsychologicalSupport from "../../components/PsychologicalPage";
@@ -9,6 +10,7 @@ export default function PsychologicalPage() {
 	return (
 		<div>
 			<PsychologicalSupport
+				generateSupportResponseAction={generateSupportResponseAction}
 				savePsychologicalConversationEntryAction={
 					savePsychologicalConversationEntryAction
 				}
