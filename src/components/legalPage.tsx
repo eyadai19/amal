@@ -827,7 +827,7 @@ export default function LegalSupport({
 								type="text"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder="ابحث في الأسئلة..."
+								placeholder="...ابحث في الأسئلة"
 								className={`w-full rounded-full py-2 pr-12 pl-4 text-right transition-all outline-none ${
 									hasFinalAnswer
 										? "cursor-not-allowed bg-gray-200 text-gray-400"
@@ -840,9 +840,9 @@ export default function LegalSupport({
 								onClick={handleSearch}
 								className={`absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-2 ${
 									hasFinalAnswer
-										? "cursor-not-allowed bg-gray-400"
-										: "bg-[#14514BFF] hover:bg-[#14514BFF]"
-								} text-white`}
+										? "cursor-not-allowed text-gray-400"
+										: "text-[#14514BFF] hover:text-[#14514BFF]"
+								}`}
 							>
 								<FaSearch size={14} />
 							</button>

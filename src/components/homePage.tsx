@@ -121,7 +121,7 @@ export default function HomePage({
 
 			{/* Hero Section */}
 			<section id="home" className="relative overflow-hidden">
-				<div className="absolute inset-0 bg-[url('/image/patterns/arabesque.png')] bg-cover opacity-10" />
+				<div className="absolute inset-0 bg-[url('/image/patterns/arabesque.png')] bg-cover opacity-6" />
 				<div className="container mx-auto flex min-h-[80vh] flex-col items-center justify-center px-4 py-12 sm:px-6 md:flex-row md:py-24">
 					<motion.div
 						className="relative z-10 mb-8 w-full text-center md:mb-0 md:w-1/2 md:pr-8 md:text-right"

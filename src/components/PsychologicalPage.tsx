@@ -197,7 +197,7 @@ export default function PsychologicalSupport({
 		<div className="flex h-screen flex-col bg-gray-100 pt-24">
 			<AmalNavbar
 				logoutAction={logoutAction}
-				backgroundColor="#582C5E"
+				backgroundColor="#4D2353FF"
 				activeSection={"psychological"}
 			/>
 			<SessionSidebar
@@ -215,91 +215,105 @@ export default function PsychologicalSupport({
 						key={message.id}
 						className={`flex ${message.sender === "user" ? "justify-start" : "justify-end"}`}
 					>
-						<div
-							className={`max-w-xs rounded-xl p-4 shadow-lg transition-transform duration-300 ${
-								message.sender === "user"
-									? "bg-white text-[#582C5E]"
-									: "bg-[#582C5E] text-white"
-							} font-serif`}
-						>
-							<p className="text-lg">{message.text}</p>
-							<div className="mt-2 flex items-center justify-between">
-								<span className="text-xs opacity-80">
-									{message.timestamp.toLocaleTimeString("ar-EG", {
-										hour: "2-digit",
-										minute: "2-digit",
-									})}
-								</span>
-								<button
-									onClick={() => toggleAudioPlayback(message.id)}
-									className={`rounded-full p-1 ${
-										activeAudioId === message.id && isPlaying
-											? message.sender === "user"
-												? "bg-[#582C5E] text-white"
-												: "bg-white text-[#582C5E]"
-											: message.sender === "user"
-												? "bg-[#582C5E] text-white"
-												: "bg-white text-[#582C5E]"
-									}`}
-								>
-									{activeAudioId === message.id && isPlaying ? (
-										<FaPause size={12} />
-									) : (
-										<FaPlay size={12} />
-									)}
-								</button>
-							</div>
+						<div className="w-full max-w-[90%] lg:max-w-[70%]">
+							{message.sender === "user" ? (
+								<div className="flex justify-start">
+									<div className="relative max-w-[80%] transform rounded-xl rounded-bl-none bg-[#582C5E] p-3 shadow-sm transition-all duration-300 hover:scale-105">
+										<p className="font-medium text-white">
+											{message.text}
+											<button
+												onClick={() => toggleAudioPlayback(message.id)}
+												className={`pl-3 ${
+													activeAudioId === message.id && isPlaying
+														? "text-red-500"
+														: "text-white"
+												} transition-colors duration-300`}
+											>
+												{activeAudioId === message.id && isPlaying ? (
+													<FaPause size={14} />
+												) : (
+													<FaPlay size={14} />
+												)}
+											</button>
+										</p>
+									</div>
+								</div>
+							) : (
+								<div className="mb-4 space-y-3 text-right">
+									<div className="inline-block max-w-fit transform rounded-xl bg-white p-4 shadow-lg transition-all duration-500 hover:scale-105">
+										<div className="flex flex-col items-start gap-1">
+											<p className="text-lg font-medium text-[#582C5E]">
+												{message.text}
+											</p>
+											<button
+												onClick={() => toggleAudioPlayback(message.id)}
+												className={`self-end pt-2 transition-colors duration-300 ${
+													activeAudioId === message.id && isPlaying
+														? "text-red-500"
+														: "text-[#582C5E]"
+												}`}
+											>
+												{activeAudioId === message.id && isPlaying ? (
+													<FaPause size={12} />
+												) : (
+													<FaPlay size={12} />
+												)}
+											</button>
+										</div>
+									</div>
+								</div>
+							)}
 						</div>
 					</div>
 				))}
 				{isBotTyping && (
 					<div className="flex justify-end">
-						<div className="max-w-xs rounded-lg bg-[#F1F0F0] p-5 text-[#582C5E] shadow-lg">
-							<p>...</p>
+						<div className="animate-pulse rounded-xl bg-white p-3">
+							<div className="flex items-center gap-2 text-gray-500">
+								<div className="h-2 w-2 animate-bounce rounded-full bg-gray-400" />
+								<div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 delay-100" />
+								<div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 delay-200" />
+							</div>
 						</div>
 					</div>
 				)}
 			</div>
 
-			<div className="border-t border-gray-300 bg-white p-6 shadow-md">
+			<div className="border-t border-gray-300 bg-white p-4">
 				<div className="flex flex-col items-center gap-3 sm:flex-row">
-					<div className="w-full flex-1 rounded-lg bg-[#F1F0F0] p-3 shadow-lg transition-all sm:w-auto">
-						<div className="flex items-center">
-							<button
-								onClick={toggleRecording}
-								className={`mr-3 rounded-full p-2 ${
-									isRecording
-										? "bg-[#582C5E] text-white"
-										: "bg-white text-[#582C5E]"
-								}`}
-							>
-								{isRecording ? (
-									<FaStop size={16} />
-								) : (
-									<FaMicrophone size={16} />
-								)}
-							</button>
-							<textarea
-								value={inputText}
-								onChange={(e) => setInputText(e.target.value)}
-								onKeyPress={handleKeyPress}
-								placeholder="اكتب رسالتك هنا أو استخدم التسجيل الصوتي..."
-								className="flex-1 resize-none rounded-lg bg-transparent p-3 font-serif text-lg text-[#582C5E] placeholder-[#E2C8D3] shadow-md transition-all outline-none focus:ring-2 focus:ring-[#582C5E]"
-								rows={1}
-							/>
+					<div className="relative w-full flex-1">
+						<textarea
+							value={inputText}
+							onChange={(e) => setInputText(e.target.value)}
+							onKeyPress={handleKeyPress}
+							placeholder="...اكتب رسالتك هنا أو استخدم التسجيل الصوتي"
+							className="w-full rounded-full py-2 pr-12 pl-4 text-right transition-all outline-none bg-gray-100 text-gray-700 focus:ring-2 focus:ring-[#582C5E] resize-none"
+							rows={1}
+						/>
+						<div className="absolute top-1/2 right-4 -translate-y-1/2">
 							<button
 								onClick={handleSendMessage}
 								disabled={!inputText.trim()}
-								className={`ml-3 rounded-full p-2 ${
+								className={`rounded-full p-2 ${
 									inputText.trim()
-										? "bg-[#582C5E] text-white hover:bg-[#4F2345]"
-										: "cursor-not-allowed bg-gray-300 text-gray-500"
+										? "text-[#582C5E] hover:text-[#582C5E]"
+										: "text-gray-400 cursor-not-allowed"
 								}`}
 							>
-								<FaPaperPlane size={16} />
+								<FaPaperPlane size={14} />
 							</button>
 						</div>
 					</div>
+					<button
+						onClick={toggleRecording}
+						className={`rounded-lg p-3 transition-colors ${
+							isRecording
+								? "bg-red-500 text-white"
+								: "bg-[#582C5E] text-white"
+						}`}
+					>
+						<FaMicrophone />
+					</button>
 					<button
 						onClick={handleResetConversation}
 						className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#582C5E] px-4 py-2 text-white shadow-lg transition-all hover:bg-[#4F2345] sm:w-auto"
