@@ -5,15 +5,26 @@ import { numberOcrApi } from "@/utils/api";
 import { ArabicNumeralsKeys } from "@/utils/arabicNumerals";
 import { numbersData } from "@/utils/numbersData";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
 	FaArrowLeft,
 	FaEraser,
 	FaPencilAlt,
 	FaSpinner,
 	FaTimes,
+	FaVolumeUp,
 } from "react-icons/fa";
 import AmalNavbar from "../amalNavbar";
+
+// Add ResponsiveVoice type definition
+declare global {
+	interface Window {
+		responsiveVoice: {
+			speak: (text: string, voice: string) => void;
+			cancel: () => void;
+		};
+	}
+}
 
 export default function NumberPage({
 	params,
@@ -35,8 +46,45 @@ export default function NumberPage({
 	const [prediction, setPrediction] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [confidence, setConfidence] = useState<number | null>(null);
+	const [speakingText, setSpeakingText] = useState<string | null>(null);
 
 	const currentNumber = numbersData[params.number];
+
+	const loadResponsiveVoice = () => {
+		return new Promise<void>((resolve) => {
+			if (typeof window !== "undefined" && !window.responsiveVoice) {
+				const script = document.createElement("script");
+				script.src =
+					"https://code.responsivevoice.org/responsivevoice.js?key=bUVdFdpm";
+				script.onload = () => resolve();
+				document.body.appendChild(script);
+			} else {
+				resolve();
+			}
+		});
+	};
+
+	const toggleSpeech = async (text: string) => {
+		await loadResponsiveVoice();
+
+		if (window.responsiveVoice) {
+			if (speakingText === text) {
+				window.responsiveVoice.cancel();
+				setSpeakingText(null);
+			} else {
+				window.responsiveVoice.speak(text, "Arabic Female");
+				setSpeakingText(text);
+			}
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			if (window.responsiveVoice) {
+				window.responsiveVoice.cancel();
+			}
+		};
+	}, []);
 
 	useEffect(() => {
 		if (showPad && canvasRef.current) {
@@ -193,9 +241,21 @@ export default function NumberPage({
 						<FaArrowLeft className="mr-2" />
 						<span className="text-sm md:text-base">العودة إلى الأرقام</span>
 					</Link>
-					<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
-						رقم {currentNumber.title}
-					</h1>
+					<div className="flex items-center gap-2">
+						<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
+							رقم {currentNumber.title}
+						</h1>
+						<button
+							onClick={() => toggleSpeech(`رقم ${currentNumber.title}`)}
+							className={`rounded-full p-2 ${
+								speakingText === `رقم ${currentNumber.title}`
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<FaVolumeUp size={20} />
+						</button>
+					</div>
 					<div className="hidden md:block md:w-8"></div>
 				</div>
 
@@ -209,9 +269,21 @@ export default function NumberPage({
 									{currentNumber.numeral}
 								</span>
 							</div>
-							<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
-								{currentNumber.description}
-							</p>
+							<div className="flex items-center gap-2">
+								<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
+									{currentNumber.description}
+								</p>
+								<button
+									onClick={() => toggleSpeech(currentNumber.description)}
+									className={`rounded-full p-2 ${
+										speakingText === currentNumber.description
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
 							<Button
 								className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
 								onClick={() => setShowPad(true)}
@@ -224,17 +296,43 @@ export default function NumberPage({
 					{/* Usage Examples */}
 					<div className="space-y-4 lg:col-span-1">
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
-							<h3 className="mb-4 text-right text-xl font-bold text-[#1E3A6E] md:text-2xl">
-								أمثلة استخدام
-							</h3>
+							<div className="flex items-center gap-2">
+								<h3 className="mb-4 text-right text-xl font-bold text-[#1E3A6E] md:text-2xl">
+									أمثلة استخدام
+								</h3>
+								<button
+									onClick={() => toggleSpeech("أمثلة استخدام")}
+									className={`rounded-full p-2 ${
+										speakingText === "أمثلة استخدام"
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
 							<div className="space-y-3">
 								{currentNumber.examples.map((ex, i) => (
 									<div key={i} className="rounded-lg bg-[#F5F9FF] p-3">
-										<p className="text-right text-lg text-[#344A72FF]">
-											<span className="font-bold">{ex.value}</span>
-											<span className="mx-2 text-gray-400">-</span>
-											<span className="text-gray-600">{ex.context}</span>
-										</p>
+										<div className="flex items-center justify-end gap-2">
+											<p className="text-right text-lg text-[#344A72FF]">
+												<span className="font-bold">{ex.value}</span>
+												<span className="mx-2 text-gray-400">-</span>
+												<span className="text-gray-600">{ex.context}</span>
+											</p>
+											<button
+												onClick={() =>
+													toggleSpeech(`${ex.value} - ${ex.context}`)
+												}
+												className={`rounded-full p-2 ${
+													speakingText === `${ex.value} - ${ex.context}`
+														? "bg-gray-200 text-gray-800"
+														: "text-gray-600 hover:bg-gray-100"
+												}`}
+											>
+												<FaVolumeUp size={20} />
+											</button>
+										</div>
 									</div>
 								))}
 							</div>
@@ -242,24 +340,78 @@ export default function NumberPage({
 
 						{/* Mathematical Representation */}
 						<div className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
-							<h3 className="mb-4 text-right text-xl font-bold text-[#1E3A6E] md:text-2xl">
-								تمثيل رياضي
-							</h3>
+							<div className="flex items-center gap-2">
+								<h3 className="mb-4 text-right text-xl font-bold text-[#1E3A6E] md:text-2xl">
+									تمثيل رياضي
+								</h3>
+								<button
+									onClick={() => toggleSpeech("تمثيل رياضي")}
+									className={`rounded-full p-2 ${
+										speakingText === "تمثيل رياضي"
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
 							<div className="flex flex-wrap justify-center gap-4">
 								<div className="flex items-center justify-center rounded-lg bg-[#F5F9FF] p-4">
-									<span className="text-2xl">
-										العربية: {currentNumber.numeral}
-									</span>
+									<div className="flex items-center gap-2">
+										<span className="text-2xl">
+											العربية: {currentNumber.numeral}
+										</span>
+										<button
+											onClick={() =>
+												toggleSpeech(`العربية: ${currentNumber.numeral}`)
+											}
+											className={`rounded-full p-2 ${
+												speakingText === `العربية: ${currentNumber.numeral}`
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 								</div>
 								<div className="flex items-center justify-center rounded-lg bg-[#F5F9FF] p-4">
-									<span className="text-2xl">
-										الإنجليزية: {currentNumber.english}
-									</span>
+									<div className="flex items-center gap-2">
+										<span className="text-2xl">
+											الإنجليزية: {currentNumber.english}
+										</span>
+										<button
+											onClick={() =>
+												toggleSpeech(`الإنجليزية: ${currentNumber.english}`)
+											}
+											className={`rounded-full p-2 ${
+												speakingText === `الإنجليزية: ${currentNumber.english}`
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 								</div>
 								<div className="flex items-center justify-center rounded-lg bg-[#F5F9FF] p-4">
-									<span className="text-2xl">
-										القيمة: {currentNumber.value}
-									</span>
+									<div className="flex items-center gap-2">
+										<span className="text-2xl">
+											القيمة: {currentNumber.value}
+										</span>
+										<button
+											onClick={() =>
+												toggleSpeech(`القيمة: ${currentNumber.value}`)
+											}
+											className={`rounded-full p-2 ${
+												speakingText === `القيمة: ${currentNumber.value}`
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -267,9 +419,21 @@ export default function NumberPage({
 				</div>
 				{/* Practice Section */}
 				<div className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
-					<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
-						تمرين الكتابة
-					</h2>
+					<div className="flex items-center justify-center gap-2">
+						<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
+							تمرين الكتابة
+						</h2>
+						<button
+							onClick={() => toggleSpeech("تمرين الكتابة")}
+							className={`rounded-full p-2 ${
+								speakingText === "تمرين الكتابة"
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<FaVolumeUp size={20} />
+						</button>
+					</div>
 					<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 						{[1, 2, 3].map((size) => (
 							<div key={size} className="flex flex-col items-center">

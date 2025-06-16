@@ -1,8 +1,18 @@
 "use client";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaArrowRight, FaVolumeUp } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
+
+// Add ResponsiveVoice type definition
+declare global {
+	interface Window {
+		responsiveVoice: {
+			speak: (text: string, voice: string) => void;
+			cancel: () => void;
+		};
+	}
+}
 
 export default function HomePage({
 	logoutAction,
@@ -10,11 +20,43 @@ export default function HomePage({
 	logoutAction: () => Promise<void>;
 }) {
 	const [activeHover, setActiveHover] = useState<number | null>(null);
+	const [speakingText, setSpeakingText] = useState<string | null>(null);
 
-	const playAudio = (audioPath: string) => {
-		const audio = new Audio(audioPath);
-		audio.play();
+	const loadResponsiveVoice = () => {
+		return new Promise<void>((resolve) => {
+			if (typeof window !== "undefined" && !window.responsiveVoice) {
+				const script = document.createElement("script");
+				script.src =
+					"https://code.responsivevoice.org/responsivevoice.js?key=bUVdFdpm";
+				script.onload = () => resolve();
+				document.body.appendChild(script);
+			} else {
+				resolve();
+			}
+		});
 	};
+
+	const toggleSpeech = async (text: string) => {
+		await loadResponsiveVoice();
+
+		if (window.responsiveVoice) {
+			if (speakingText === text) {
+				window.responsiveVoice.cancel();
+				setSpeakingText(null);
+			} else {
+				window.responsiveVoice.speak(text, "Arabic Female");
+				setSpeakingText(text);
+			}
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			if (window.responsiveVoice) {
+				window.responsiveVoice.cancel();
+			}
+		};
+	}, []);
 
 	const categories = [
 		{
@@ -24,7 +66,6 @@ export default function HomePage({
 			textColor: "text-[#1E3A6E]",
 			hoverColor: "hover:shadow-[#1E3A6E]/40",
 			href: "/literacy",
-			audio: "../audio/home/1.mp3",
 			icon: "📚",
 		},
 		{
@@ -34,7 +75,6 @@ export default function HomePage({
 			textColor: "text-[#B84941]",
 			hoverColor: "hover:shadow-[#B84941]/40",
 			href: "/career",
-			audio: "../audio/home/2.mp3",
 			icon: "💼",
 		},
 		{
@@ -44,7 +84,6 @@ export default function HomePage({
 			textColor: "text-[#582C5E]",
 			hoverColor: "hover:shadow-[#582C5E]/40",
 			href: "/psychological",
-			audio: "../audio/home/3.mp3",
 			icon: "🧠",
 		},
 		{
@@ -54,7 +93,6 @@ export default function HomePage({
 			textColor: "text-[#14514BFF]",
 			hoverColor: "hover:shadow-[#14514BFF]/40",
 			href: "/legal",
-			audio: "../audio/home/4.mp3",
 			icon: "⚖️",
 		},
 	];
@@ -168,7 +206,11 @@ export default function HomePage({
 								<div className="relative h-full">
 									<FaVolumeUp
 										className={`absolute -top-2 -right-2 z-20 cursor-pointer rounded-full bg-white p-1.5 text-xl shadow-md sm:-top-3 sm:-right-3 sm:p-2 sm:text-2xl ${category.textColor}`}
-										onClick={() => playAudio(category.audio)}
+										onClick={() =>
+											toggleSpeech(
+												`${category.title} - ${category.description}`,
+											)
+										}
 									/>
 
 									<motion.a
@@ -228,35 +270,69 @@ export default function HomePage({
 							</h2>
 							<FaVolumeUp
 								className="mr-3 cursor-pointer text-xl text-[#4A8B5C] sm:text-2xl"
-								onClick={() => playAudio("../audio/home/16.mp3")}
+								onClick={() => toggleSpeech("من نحن")}
 							/>
 						</div>
 
 						<div className="mt-8 grid grid-cols-1 gap-8 md:mt-12 md:grid-cols-2 md:gap-12">
 							<div className="relative">
 								<div className="absolute top-0 -left-4 h-full w-1.5 rounded-full bg-gradient-to-b from-[#4A8B5C] to-[#234330] sm:-left-6 sm:w-2"></div>
-								<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
-									<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
-										رؤيتنا
-									</span>
-									نؤمن في <strong className="text-[#4A8B5C]">أمل</strong> بأن
-									لكل فرد الحق في فرصة ثانية لبناء مستقبل أفضل. نعمل على تسخير
-									التكنولوجيا الحديثة لخلق بيئة داعمة تمكن المفرج عنهم من تحقيق
-									الاندماج المجتمعي الكامل والاستقرار النفسي والمادي.
-								</p>
+								<div className="flex items-center justify-end gap-2">
+									<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
+										<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
+											رؤيتنا
+										</span>
+										نؤمن في <strong className="text-[#4A8B5C]">أمل</strong> بأن
+										لكل فرد الحق في فرصة ثانية لبناء مستقبل أفضل. نعمل على تسخير
+										التكنولوجيا الحديثة لخلق بيئة داعمة تمكن المفرج عنهم من
+										تحقيق الاندماج المجتمعي الكامل والاستقرار النفسي والمادي.
+									</p>
+									<button
+										onClick={() =>
+											toggleSpeech(
+												"رؤيتنا: نؤمن في أمل بأن لكل فرد الحق في فرصة ثانية لبناء مستقبل أفضل. نعمل على تسخير التكنولوجيا الحديثة لخلق بيئة داعمة تمكن المفرج عنهم من تحقيق الاندماج المجتمعي الكامل والاستقرار النفسي والمادي.",
+											)
+										}
+										className={`rounded-full p-2 ${
+											speakingText ===
+											"رؤيتنا: نؤمن في أمل بأن لكل فرد الحق في فرصة ثانية لبناء مستقبل أفضل. نعمل على تسخير التكنولوجيا الحديثة لخلق بيئة داعمة تمكن المفرج عنهم من تحقيق الاندماج المجتمعي الكامل والاستقرار النفسي والمادي."
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<FaVolumeUp size={20} />
+									</button>
+								</div>
 							</div>
 
 							<div className="relative">
 								<div className="absolute top-0 -left-4 h-full w-1.5 rounded-full bg-gradient-to-b from-[#4A8B5C] to-[#234330] sm:-left-6 sm:w-2"></div>
-								<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
-									<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
-										مهمتنا
-									</span>
-									نقدم منصة رقمية شاملة تعتمد على الذكاء الاصطناعي لتقديم حلول
-									مبتكرة في مجالات التعليم، التوجيه المهني، الدعم النفسي،
-									والمساعدة القانونية. نهدف إلى تمكين المستخدمين من خلال أدوات
-									ذكية تسهل عملية إعادة الاندماج.
-								</p>
+								<div className="flex items-center justify-end gap-2">
+									<p className="text-right text-base leading-relaxed text-gray-700 sm:text-lg md:text-xl">
+										<span className="mb-3 block text-xl font-bold text-[#234330] sm:text-2xl">
+											مهمتنا
+										</span>
+										نقدم منصة رقمية شاملة تعتمد على الذكاء الاصطناعي لتقديم حلول
+										مبتكرة في مجالات التعليم، التوجيه المهني، الدعم النفسي،
+										والمساعدة القانونية. نهدف إلى تمكين المستخدمين من خلال أدوات
+										ذكية تسهل عملية إعادة الاندماج.
+									</p>
+									<button
+										onClick={() =>
+											toggleSpeech(
+												"مهمتنا: نقدم منصة رقمية شاملة تعتمد على الذكاء الاصطناعي لتقديم حلول مبتكرة في مجالات التعليم، التوجيه المهني، الدعم النفسي، والمساعدة القانونية. نهدف إلى تمكين المستخدمين من خلال أدوات ذكية تسهل عملية إعادة الاندماج.",
+											)
+										}
+										className={`rounded-full p-2 ${
+											speakingText ===
+											"مهمتنا: نقدم منصة رقمية شاملة تعتمد على الذكاء الاصطناعي لتقديم حلول مبتكرة في مجالات التعليم، التوجيه المهني، الدعم النفسي، والمساعدة القانونية. نهدف إلى تمكين المستخدمين من خلال أدوات ذكية تسهل عملية إعادة الاندماج."
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<FaVolumeUp size={20} />
+									</button>
+								</div>
 							</div>
 						</div>
 
@@ -294,7 +370,7 @@ export default function HomePage({
 							</h2>
 							<FaVolumeUp
 								className="mr-3 cursor-pointer text-xl text-[#4A8B5C] sm:text-2xl"
-								onClick={() => playAudio("../audio/home/18.mp3")}
+								onClick={() => toggleSpeech("خدماتنا")}
 							/>
 						</div>
 
@@ -308,10 +384,25 @@ export default function HomePage({
 									viewport={{ once: true }}
 									className="rounded-xl bg-white p-5 text-right shadow-lg sm:rounded-2xl sm:p-6 md:p-8"
 								>
-									<div
-										className={`inline-flex h-12 w-12 items-center justify-center rounded-full ${service.color} mb-4 text-xl sm:h-16 sm:w-16 sm:text-2xl`}
-									>
-										{service.icon}
+									<div className="flex items-center justify-between">
+										<div
+											className={`inline-flex h-12 w-12 items-center justify-center rounded-full ${service.color} mb-4 text-xl sm:h-16 sm:w-16 sm:text-2xl`}
+										>
+											{service.icon}
+										</div>
+										<button
+											onClick={() =>
+												toggleSpeech(`${service.title}: ${service.description}`)
+											}
+											className={`rounded-full p-2 ${
+												speakingText ===
+												`${service.title}: ${service.description}`
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
 									</div>
 									<h3 className="mb-3 text-xl font-bold text-[#234330] sm:text-2xl">
 										{service.title}
@@ -341,13 +432,42 @@ export default function HomePage({
 						className="relative rounded-2xl bg-[#2D5A3D] p-6 shadow-xl sm:rounded-3xl sm:p-8 md:p-12"
 					>
 						<div className="flex flex-col items-center">
-							<h2 className="mb-4 text-3xl font-bold sm:text-4xl">
-								تواصل معنا
-							</h2>
-							<p className="mb-8 max-w-2xl text-center text-base sm:text-lg md:mb-12 md:text-xl">
-								نحن هنا لدعمكم والإجابة على جميع استفساراتكم. تواصلوا معنا عبر
-								القنوات التالية:
-							</p>
+							<div className="flex items-center justify-center gap-2">
+								<h2 className="mb-4 text-3xl font-bold sm:text-4xl">
+									تواصل معنا
+								</h2>
+								<button
+									onClick={() => toggleSpeech("تواصل معنا")}
+									className={`rounded-full p-2 ${
+										speakingText === "تواصل معنا"
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
+							<div className="flex items-center justify-center gap-2">
+								<p className="mb-8 max-w-2xl text-center text-base sm:text-lg md:mb-12 md:text-xl">
+									نحن هنا لدعمكم والإجابة على جميع استفساراتكم. تواصلوا معنا عبر
+									القنوات التالية:
+								</p>
+								<button
+									onClick={() =>
+										toggleSpeech(
+											"نحن هنا لدعمكم والإجابة على جميع استفساراتكم. تواصلوا معنا عبر القنوات التالية",
+										)
+									}
+									className={`rounded-full p-2 ${
+										speakingText ===
+										"نحن هنا لدعمكم والإجابة على جميع استفساراتكم. تواصلوا معنا عبر القنوات التالية"
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
 
 							<div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-8">
 								{contactMethods.map((item, index) => (
@@ -357,18 +477,44 @@ export default function HomePage({
 										className="rounded-lg bg-[#3A6E4F] p-4 text-center sm:rounded-xl sm:p-5 md:p-6"
 									>
 										<div className="mb-3 text-2xl sm:text-3xl">{item.icon}</div>
-										<h3 className="mb-2 text-lg font-bold sm:text-xl">
-											{item.title}
-										</h3>
+										<div className="flex items-center justify-center gap-2">
+											<h3 className="mb-2 text-lg font-bold sm:text-xl">
+												{item.title}
+											</h3>
+											<button
+												onClick={() =>
+													toggleSpeech(`${item.title}: ${item.content}`)
+												}
+												className={`rounded-full p-2 ${
+													speakingText === `${item.title}: ${item.content}`
+														? "bg-gray-200 text-gray-800"
+														: "text-gray-600 hover:bg-gray-100"
+												}`}
+											>
+												<FaVolumeUp size={20} />
+											</button>
+										</div>
 										<p className="text-sm sm:text-base">{item.content}</p>
 									</motion.div>
 								))}
 							</div>
 
 							<div className="mt-8 w-full max-w-2xl sm:mt-12">
-								<h3 className="mb-4 text-center text-xl font-bold sm:text-2xl">
-									تابعونا على وسائل التواصل
-								</h3>
+								<div className="flex items-center justify-center gap-2">
+									<h3 className="mb-4 text-center text-xl font-bold sm:text-2xl">
+										تابعونا على وسائل التواصل
+									</h3>
+									<button
+										onClick={() => toggleSpeech("تابعونا على وسائل التواصل")}
+										className={`rounded-full p-2 ${
+											speakingText === "تابعونا على وسائل التواصل"
+												? "bg-gray-200 text-gray-800"
+												: "text-gray-600 hover:bg-gray-100"
+										}`}
+									>
+										<FaVolumeUp size={20} />
+									</button>
+								</div>
 								<div className="flex flex-wrap justify-center gap-3 sm:gap-4">
 									{["Facebook", "Twitter", "Instagram", "LinkedIn"].map(
 										(social, index) => (

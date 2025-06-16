@@ -4,15 +4,26 @@ import { alphaBitOcrApi } from "@/utils/api";
 import { ArabicLettersKeys } from "@/utils/arabicLetters";
 import { lettersData } from "@/utils/letterData";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
 	FaArrowLeft,
 	FaEraser,
 	FaPencilAlt,
 	FaSpinner,
 	FaTimes,
+	FaVolumeUp,
 } from "react-icons/fa";
 import AmalNavbar from "../amalNavbar";
+
+// Add ResponsiveVoice type definition
+declare global {
+	interface Window {
+		responsiveVoice: {
+			speak: (text: string, voice: string) => void;
+			cancel: () => void;
+		};
+	}
+}
 
 export default function LetterPage({
 	params,
@@ -45,8 +56,45 @@ export default function LetterPage({
 	const [recordingAccuracy, setRecordingAccuracy] = useState<number | null>(
 		null,
 	);
+	const [speakingText, setSpeakingText] = useState<string | null>(null);
 
 	const currentLetter = lettersData[params.letter];
+
+	const loadResponsiveVoice = () => {
+		return new Promise<void>((resolve) => {
+			if (typeof window !== "undefined" && !window.responsiveVoice) {
+				const script = document.createElement("script");
+				script.src =
+					"https://code.responsivevoice.org/responsivevoice.js?key=bUVdFdpm";
+				script.onload = () => resolve();
+				document.body.appendChild(script);
+			} else {
+				resolve();
+			}
+		});
+	};
+
+	const toggleSpeech = async (text: string) => {
+		await loadResponsiveVoice();
+
+		if (window.responsiveVoice) {
+			if (speakingText === text) {
+				window.responsiveVoice.cancel();
+				setSpeakingText(null);
+			} else {
+				window.responsiveVoice.speak(text, "Arabic Female");
+				setSpeakingText(text);
+			}
+		}
+	};
+
+	useEffect(() => {
+		return () => {
+			if (window.responsiveVoice) {
+				window.responsiveVoice.cancel();
+			}
+		};
+	}, []);
 
 	useEffect(() => {
 		if (showPad && canvasRef.current) {
@@ -261,9 +309,21 @@ export default function LetterPage({
 						<FaArrowLeft className="mr-2" />
 						<span className="text-sm md:text-base">العودة إلى الحروف</span>
 					</Link>
-					<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
-						حرف {currentLetter.title}
-					</h1>
+					<div className="flex items-center gap-2">
+						<h1 className="text-center text-3xl font-bold text-[#1E3A6E] md:text-5xl">
+							حرف {currentLetter.title}
+						</h1>
+						<button
+							onClick={() => toggleSpeech(`حرف ${currentLetter.title}`)}
+							className={`rounded-full p-2 ${
+								speakingText === `حرف ${currentLetter.title}`
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<FaVolumeUp size={20} />
+						</button>
+					</div>
 					<div className="hidden md:block md:w-8"></div>
 				</div>
 
@@ -279,9 +339,21 @@ export default function LetterPage({
 									className="max-h-full max-w-full object-contain"
 								/>
 							</div>
-							<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
-								{currentLetter.description}
-							</p>
+							<div className="flex items-center gap-2">
+								<p className="mb-4 text-right text-base leading-relaxed text-[#344A72FF] md:text-lg">
+									{currentLetter.description}
+								</p>
+								<button
+									onClick={() => toggleSpeech(currentLetter.description)}
+									className={`rounded-full p-2 ${
+										speakingText === currentLetter.description
+											? "bg-gray-200 text-gray-800"
+											: "text-gray-600 hover:bg-gray-100"
+									}`}
+								>
+									<FaVolumeUp size={20} />
+								</button>
+							</div>
 							<Button
 								className="w-full rounded-full bg-[#1E3A6E] px-6 py-2 text-white transition-all hover:bg-[#3f5680] hover:shadow-md md:px-8 md:py-3 md:text-lg"
 								onClick={() => setShowPad(true)}
@@ -310,19 +382,45 @@ export default function LetterPage({
 									)}
 								</div>
 								<div className="flex-1">
-									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										:في بداية الكلمة
-									</h3>
+									<div className="flex items-center justify-end gap-2">
+										<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
+											:في بداية الكلمة
+										</h3>
+										<button
+											onClick={() => toggleSpeech("في بداية الكلمة")}
+											className={`rounded-full p-2 ${
+												speakingText === "في بداية الكلمة"
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 									<div className="text-right">
 										{currentLetter.forms.start.map((ex, i) => (
 											<div key={i} className="mb-2 last:mb-0">
-												<p className="text-base text-[#344A72FF] md:text-xl">
-													<span className="font-bold text-[#1E3A6E]">
-														{ex.word}
-													</span>
-													<span className="mx-2 text-gray-400">-</span>
-													<span className="text-gray-500">{ex.example}</span>
-												</p>
+												<div className="flex items-center justify-end gap-2">
+													<p className="text-base text-[#344A72FF] md:text-xl">
+														<span className="font-bold text-[#1E3A6E]">
+															{ex.word}
+														</span>
+														<span className="mx-2 text-gray-400">-</span>
+														<span className="text-gray-500">{ex.example}</span>
+													</p>
+													<button
+														onClick={() =>
+															toggleSpeech(`${ex.word} - ${ex.example}`)
+														}
+														className={`rounded-full p-2 ${
+															speakingText === `${ex.word} - ${ex.example}`
+																? "bg-gray-200 text-gray-800"
+																: "text-gray-600 hover:bg-gray-100"
+														}`}
+													>
+														<FaVolumeUp size={20} />
+													</button>
+												</div>
 											</div>
 										))}
 									</div>
@@ -353,19 +451,45 @@ export default function LetterPage({
 									)}
 								</div>
 								<div className="flex-1">
-									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										:في وسط الكلمة
-									</h3>
+									<div className="flex items-center justify-end gap-2">
+										<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
+											:في وسط الكلمة
+										</h3>
+										<button
+											onClick={() => toggleSpeech("في وسط الكلمة")}
+											className={`rounded-full p-2 ${
+												speakingText === "في وسط الكلمة"
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 									<div className="text-right">
 										{currentLetter.forms.middle.map((ex, i) => (
 											<div key={i} className="mb-2 last:mb-0">
-												<p className="text-base text-[#344A72FF] md:text-xl">
-													<span className="font-bold text-[#1E3A6E]">
-														{ex.word}
-													</span>
-													<span className="mx-2 text-gray-400">-</span>
-													<span className="text-gray-500">{ex.example}</span>
-												</p>
+												<div className="flex items-center justify-end gap-2">
+													<p className="text-base text-[#344A72FF] md:text-xl">
+														<span className="font-bold text-[#1E3A6E]">
+															{ex.word}
+														</span>
+														<span className="mx-2 text-gray-400">-</span>
+														<span className="text-gray-500">{ex.example}</span>
+													</p>
+													<button
+														onClick={() =>
+															toggleSpeech(`${ex.word} - ${ex.example}`)
+														}
+														className={`rounded-full p-2 ${
+															speakingText === `${ex.word} - ${ex.example}`
+																? "bg-gray-200 text-gray-800"
+																: "text-gray-600 hover:bg-gray-100"
+														}`}
+													>
+														<FaVolumeUp size={20} />
+													</button>
+												</div>
 											</div>
 										))}
 									</div>
@@ -390,19 +514,45 @@ export default function LetterPage({
 									)}
 								</div>
 								<div className="flex-1">
-									<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
-										:في نهاية الكلمة
-									</h3>
+									<div className="flex items-center justify-end gap-2">
+										<h3 className="mb-2 text-right text-xl font-bold text-[#1E3A6E] md:mb-3 md:text-2xl">
+											:في نهاية الكلمة
+										</h3>
+										<button
+											onClick={() => toggleSpeech("في نهاية الكلمة")}
+											className={`rounded-full p-2 ${
+												speakingText === "في نهاية الكلمة"
+													? "bg-gray-200 text-gray-800"
+													: "text-gray-600 hover:bg-gray-100"
+											}`}
+										>
+											<FaVolumeUp size={20} />
+										</button>
+									</div>
 									<div className="text-right">
 										{currentLetter.forms.end.map((ex, i) => (
 											<div key={i} className="mb-2 last:mb-0">
-												<p className="text-base text-[#344A72FF] md:text-xl">
-													<span className="font-bold text-[#1E3A6E]">
-														{ex.word}
-													</span>
-													<span className="mx-2 text-gray-400">-</span>
-													<span className="text-gray-500">{ex.example}</span>
-												</p>
+												<div className="flex items-center justify-end gap-2">
+													<p className="text-base text-[#344A72FF] md:text-xl">
+														<span className="font-bold text-[#1E3A6E]">
+															{ex.word}
+														</span>
+														<span className="mx-2 text-gray-400">-</span>
+														<span className="text-gray-500">{ex.example}</span>
+													</p>
+													<button
+														onClick={() =>
+															toggleSpeech(`${ex.word} - ${ex.example}`)
+														}
+														className={`rounded-full p-2 ${
+															speakingText === `${ex.word} - ${ex.example}`
+																? "bg-gray-200 text-gray-800"
+																: "text-gray-600 hover:bg-gray-100"
+														}`}
+													>
+														<FaVolumeUp size={20} />
+													</button>
+												</div>
 											</div>
 										))}
 									</div>
@@ -414,9 +564,21 @@ export default function LetterPage({
 
 				{/* Practice Section */}
 				<div className="mb-6 rounded-2xl bg-white p-4 shadow-lg md:mb-8 md:p-6">
-					<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
-						تمرين الكتابة
-					</h2>
+					<div className="flex items-center justify-center gap-2">
+						<h2 className="mb-6 text-center text-2xl font-bold text-[#1E3A6E] md:text-3xl">
+							تمرين الكتابة
+						</h2>
+						<button
+							onClick={() => toggleSpeech("تمرين الكتابة")}
+							className={`rounded-full p-2 ${
+								speakingText === "تمرين الكتابة"
+									? "bg-gray-200 text-gray-800"
+									: "text-gray-600 hover:bg-gray-100"
+							}`}
+						>
+							<FaVolumeUp size={20} />
+						</button>
+					</div>
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 						{[
 							{

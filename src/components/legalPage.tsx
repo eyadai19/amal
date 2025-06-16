@@ -16,11 +16,51 @@ import AmalNavbar from "./amalNavbar";
 import SessionSidebar from "./SessionSidebar";
 
 // Add type definitions for Web Speech API
-declare global {
-	interface Window {
-		SpeechRecognition: typeof SpeechRecognition;
-		webkitSpeechRecognition: typeof SpeechRecognition;
-	}
+interface SpeechRecognitionEvent extends Event {
+	results: SpeechRecognitionResultList;
+	resultIndex: number;
+	interpretation: unknown;
+}
+
+interface SpeechRecognitionResultList {
+	length: number;
+	item(index: number): SpeechRecognitionResult;
+	[index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+	isFinal: boolean;
+	length: number;
+	item(index: number): SpeechRecognitionAlternative;
+	[index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+	transcript: string;
+	confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+	continuous: boolean;
+	interimResults: boolean;
+	lang: string;
+	maxAlternatives: number;
+	onaudioend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onaudiostart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onerror: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onnomatch: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onresult:
+		| ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => unknown)
+		| null;
+	onsoundend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onsoundstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onspeechend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onspeechstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	onstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+	start(): void;
+	stop(): void;
+	abort(): void;
 }
 
 // Speech recognition function
@@ -118,9 +158,6 @@ export default function LegalSupport({
 	const [selectedAnswers, setSelectedAnswers] = useState<Set<string>>(
 		new Set(),
 	);
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [speechInstance, setSpeechInstance] =
-		useState<SpeechSynthesisUtterance | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const [activeQuestions, setActiveQuestions] = useState<Set<string>>(
 		new Set(),
@@ -397,9 +434,9 @@ export default function LegalSupport({
 				sender: "bot",
 				timestamp: new Date(),
 				isSearchResult: true,
-				searchResults: (data.results || data).map((result: any) => ({
+				searchResults: (data.results || data).map((result: SearchResult) => ({
 					...result,
-					id: nanoid(), // إنشاء معرف فريد لكل نتيجة
+					id: nanoid(),
 				})),
 			};
 
