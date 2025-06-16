@@ -1,12 +1,12 @@
 import { CVData } from "@/components/cv-preview";
 import CVBuilder from "@/components/cvbuilder";
+import { convertToCvFormatAction } from "@/components/ui/toggle";
 import { getUser, logoutAction } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TB_user_cv } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { hasCvAction } from "../cv-preview/page";
-import { convertToCvFormatAction } from "@/lib/ServerAction/chatbot";
 
 export default function CVBuilderPage() {
 	return (

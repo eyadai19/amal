@@ -3,7 +3,6 @@ import { TB_session, TB_user } from "@/lib/schema";
 import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { Lucia, User } from "lucia";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import { UserView } from "./types/userSchema";

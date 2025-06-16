@@ -1,6 +1,6 @@
 "use client";
-
 import { legalSearchApi } from "@/utils/api";
+import { stopSpeech, textToSpeech } from "@/utils/tts";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -15,6 +15,14 @@ import {
 import AmalNavbar from "./amalNavbar";
 import SessionSidebar from "./SessionSidebar";
 
+// Add type definitions for Web Speech API
+declare global {
+	interface Window {
+		SpeechRecognition: typeof SpeechRecognition;
+		webkitSpeechRecognition: typeof SpeechRecognition;
+	}
+}
+
 // Speech recognition function
 const startVoiceRecognition = async (): Promise<string> => {
 	return new Promise<string>((resolve, reject) => {
@@ -24,7 +32,7 @@ const startVoiceRecognition = async (): Promise<string> => {
 
 		recognition.start();
 
-		recognition.onresult = (event: any) => {
+		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const transcript = event.results[0][0].transcript;
 			resolve(transcript);
 		};
@@ -35,6 +43,13 @@ const startVoiceRecognition = async (): Promise<string> => {
 	});
 };
 
+type SearchResult = {
+	id: string;
+	question: string;
+	answer: string;
+	similarity_score: number;
+};
+
 type Message = {
 	id: string;
 	text: string;
@@ -43,14 +58,8 @@ type Message = {
 	answers?: string[];
 	isFinalAnswer?: boolean;
 	isException?: boolean;
-	// Add new type for search results
 	isSearchResult?: boolean;
-	searchResults?: {
-		id: string; // أضف هذا
-		question: string;
-		answer: string;
-		similarity_score: number;
-	}[];
+	searchResults?: SearchResult[];
 	selectedQuestion?: string;
 };
 
@@ -251,11 +260,7 @@ export default function LegalSupport({
 		}
 	};
 
-	const processSelectedQuestion = async (
-		question: string,
-		answer: string,
-		resultId: string,
-	) => {
+	const processSelectedQuestion = async (question: string, answer: string) => {
 		setIsBotTyping(true);
 
 		try {
@@ -346,7 +351,7 @@ export default function LegalSupport({
 	const handleResetConversation = () => {
 		const newSessionId = nanoid();
 		setSessionId(newSessionId);
-		window.speechSynthesis.cancel();
+		stopSpeech();
 		setMessages([]);
 		setSelectedAnswers(new Set());
 		setSearchQuery("");
@@ -418,7 +423,7 @@ export default function LegalSupport({
 	const toggleAudioPlayback = async (audioId: string, text: string) => {
 		// إيقاف أي صوت قيد التشغيل حالياً
 		if (activeAudioId && activeAudioId !== audioId) {
-			window.speechSynthesis.cancel();
+			stopSpeech();
 			setAudioStates((prev) => {
 				const newMap = new Map(prev);
 				newMap.set(activeAudioId, false);
@@ -429,22 +434,18 @@ export default function LegalSupport({
 		const isCurrentlyPlaying = audioStates.get(audioId) || false;
 
 		if (isCurrentlyPlaying) {
-			window.speechSynthesis.cancel();
+			stopSpeech();
 			setAudioStates((prev) => new Map(prev).set(audioId, false));
 			setActiveAudioId(null);
 		} else {
 			setAudioStates((prev) => new Map(prev).set(audioId, true));
 			setActiveAudioId(audioId);
 
-			const utterance = new SpeechSynthesisUtterance(text);
-			utterance.lang = "ar-SA";
+			await textToSpeech(text);
 
-			utterance.onend = () => {
-				setAudioStates((prev) => new Map(prev).set(audioId, false));
-				setActiveAudioId(null);
-			};
-
-			window.speechSynthesis.speak(utterance);
+			// تحديث حالة التشغيل عند انتهاء الصوت
+			setAudioStates((prev) => new Map(prev).set(audioId, false));
+			setActiveAudioId(null);
 		}
 	};
 
@@ -673,12 +674,13 @@ export default function LegalSupport({
 														processSelectedQuestion(
 															result.question,
 															result.answer,
-															result.id,
 														);
 													}}
 												>
 													<div className="flex items-center justify-between">
-														<p className={`flex-1 font-medium text-[#14514BFF]`}>
+														<p
+															className={`flex-1 font-medium text-[#14514BFF]`}
+														>
 															{result.question}
 														</p>
 														{isSelected && (

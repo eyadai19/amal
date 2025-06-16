@@ -18,6 +18,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { formalize_cv_Api } from "@/utils/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -67,6 +68,7 @@ export default function CVForm({
 	const [userInfo, setUserInfo] = useState<UserInfo>({});
 	const [experienceInput, setExperienceInput] = useState("");
 	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -81,6 +83,37 @@ export default function CVForm({
 			languages: "",
 		},
 	});
+
+	const g2 = async () => {
+		if (experienceInput.trim() !== "") {
+			setIsLoading(true);
+			try {
+				const response = await fetch(formalize_cv_Api, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Accept: "application/json",
+						"ngrok-skip-browser-warning": "true",
+					},
+					body: JSON.stringify({
+						cv_text: experienceInput,
+					}),
+				});
+				const formalText = await convertToCvFormatAction(experienceInput);
+				const currentSkills = form.getValues("skills");
+				const newSkills = currentSkills
+					? `${currentSkills}\n${formalText}`
+					: formalText;
+				form.setValue("skills", newSkills);
+				setExperienceInput("");
+			} catch (error) {
+				console.error("Error converting text:", error);
+				alert("حدث خطأ أثناء تحويل النص. يرجى المحاولة مرة أخرى.");
+			} finally {
+				setIsLoading(false);
+			}
+		}
+	};
 
 	useEffect(() => {
 		const fetchUserInfo = async () => {
@@ -119,11 +152,35 @@ export default function CVForm({
 	const handleAddExperience = async () => {
 		if (experienceInput.trim() !== "") {
 			try {
-				const formalText = await convertToCvFormatAction(experienceInput);
+				// استدعاء API لتحويل النص إلى صيغة CV رسمية
+				const response = await fetch(formalize_cv_Api, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Accept: "application/json",
+						"ngrok-skip-browser-warning": "true",
+					},
+					body: JSON.stringify({
+						cv_text: experienceInput,
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+
+				if (!data.formal_text) {
+					throw new Error("Invalid response format from server");
+				}
+
+				const formalText = data.formal_text;
 				const currentSkills = form.getValues("skills");
 				const newSkills = currentSkills
 					? `${currentSkills}\n${formalText}`
 					: formalText;
+
 				form.setValue("skills", newSkills);
 				setExperienceInput("");
 			} catch (error) {
@@ -376,11 +433,14 @@ export default function CVForm({
 															dir="rtl"
 														/>
 														<Button
-															onClick={handleAddExperience}
+															onClick={g2}
 															type="button"
-															className="h-[42px] rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md"
+															disabled={isLoading}
+															className="h-[42px] rounded-lg bg-red-600 px-6 py-2 text-base font-semibold text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
 														>
-															تحويل النص الى صيغة رسمية
+															{isLoading
+																? "جاري التحويل..."
+																: "تحويل النص الى صيغة رسمية"}
 														</Button>
 														<Dialog>
 															<DialogTrigger asChild>

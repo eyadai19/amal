@@ -14,5 +14,3 @@ const db = drizzle(client, {
 });
 
 export { db };
-
-//Eyad@sql@ahmad@zyc-2024-1     sadjashd321fnaj2

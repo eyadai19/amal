@@ -4,15 +4,10 @@ import { startVoiceRecognition } from "@/utils/stt";
 import { textToSpeech } from "@/utils/tts";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
-import {
-	FaMicrophone,
-	FaPaperPlane,
-	FaPause,
-	FaPlay,
-	FaStop,
-} from "react-icons/fa";
+import { FaMicrophone, FaPaperPlane, FaPause, FaPlay } from "react-icons/fa";
 import AmalNavbar from "./amalNavbar";
 import SessionSidebar from "./SessionSidebar";
+import { analyze_and_respond_Api } from "@/utils/api";
 
 type Message = {
 	id: string;
@@ -69,11 +64,30 @@ export default function PsychologicalSupport({
 		userMessage: string,
 	): Promise<string> => {
 		try {
-			const response = await generateSupportResponseAction(userMessage);
-			return response;
+			const response = await fetch(analyze_and_respond_Api, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+				body: JSON.stringify({
+					text: userMessage,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			const data = await response.json();
+			return (
+				data.response ||
+				data.message ||
+				"شكراً لمشاركتك. كيف يمكنني مساعدتك أكثر؟"
+			);
 		} catch (error) {
-			console.error("Error generating response:", error);
-			return "عذراً، حدث خطأ في توليد الرد. هل يمكنك المحاولة مرة أخرى؟";
+			console.error("Error calling psychological API:", error);
+			return "عذراً، حدث خطأ في الاتصال بالخدمة. يرجى المحاولة مرة أخرى لاحقاً.";
 		}
 	};
 
@@ -92,7 +106,7 @@ export default function PsychologicalSupport({
 
 		// توليد رد البوت
 		setIsBotTyping(true);
-		const botResponseText = await getPsychologicalResponse(inputText);
+		const botResponseText = await g2(inputText);
 		setIsBotTyping(false);
 
 		// إضافة رد البوت للشات
@@ -116,6 +130,27 @@ export default function PsychologicalSupport({
 		}
 	};
 
+	const g2 = async (userMessage: string): Promise<string> => {
+		try {
+			const resp = await fetch(analyze_and_respond_Api, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+				body: JSON.stringify({
+					text: userMessage,
+				}),
+			});
+			const response = await generateSupportResponseAction(userMessage);
+			return response;
+			
+		} catch (error) {
+			console.error("Error generating response:", error);
+			return "عذراً، حدث خطأ في توليد الرد. هل يمكنك المحاولة مرة أخرى؟";
+		}
+	};
+	
 	const saveConversationPair = async (
 		botMessage: string,
 		userMessage: string,
@@ -287,7 +322,7 @@ export default function PsychologicalSupport({
 							onChange={(e) => setInputText(e.target.value)}
 							onKeyPress={handleKeyPress}
 							placeholder="...اكتب رسالتك هنا أو استخدم التسجيل الصوتي"
-							className="w-full rounded-full py-2 pr-12 pl-4 text-right transition-all outline-none bg-gray-100 text-gray-700 focus:ring-2 focus:ring-[#582C5E] resize-none"
+							className="w-full resize-none rounded-full bg-gray-100 py-2 pr-12 pl-4 text-right text-gray-700 transition-all outline-none focus:ring-2 focus:ring-[#582C5E]"
 							rows={1}
 						/>
 						<div className="absolute top-1/2 right-4 -translate-y-1/2">
@@ -297,7 +332,7 @@ export default function PsychologicalSupport({
 								className={`rounded-full p-2 ${
 									inputText.trim()
 										? "text-[#582C5E] hover:text-[#582C5E]"
-										: "text-gray-400 cursor-not-allowed"
+										: "cursor-not-allowed text-gray-400"
 								}`}
 							>
 								<FaPaperPlane size={14} />
@@ -307,9 +342,7 @@ export default function PsychologicalSupport({
 					<button
 						onClick={toggleRecording}
 						className={`rounded-lg p-3 transition-colors ${
-							isRecording
-								? "bg-red-500 text-white"
-								: "bg-[#582C5E] text-white"
+							isRecording ? "bg-red-500 text-white" : "bg-[#582C5E] text-white"
 						}`}
 					>
 						<FaMicrophone />
